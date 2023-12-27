@@ -1,5 +1,5 @@
 #---- Base python ----
-FROM python:3.9-slim-bullseye as base
+FROM python:3.12-slim-bullseye as base
 
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
