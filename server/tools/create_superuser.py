@@ -1,22 +1,37 @@
 import os
-from django.contrib.auth import get_user_model
+import sys
+import django
 
-User = get_user_model()
+# Set the Django settings module to your project's settings module.
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.settings")
 
-DJANGO_SUPERUSER_USERNAME = os.environ.get('DJANGO_SUPERUSER_USERNAME')
-DJANGO_SUPERUSER_EMAIL = os.environ.get('DJANGO_SUPERUSER_EMAIL')
-DJANGO_SUPERUSER_PASSWORD = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
+# Initialize Django
+django.setup()
 
-if User.objects.filter(username=DJANGO_SUPERUSER_USERNAME).exists():
-    print("Superuser is already initialized!")
-else:
-    print("Initializing superuser...")
+from django.contrib.auth.models import User
+
+def create_superuser():
     try:
-        superuser = User.objects.create_superuser(
-            username=DJANGO_SUPERUSER_USERNAME,
-            email=DJANGO_SUPERUSER_EMAIL,
-            password=DJANGO_SUPERUSER_PASSWORD)
-        superuser.save()
-        print("Superuser initialized!")
+        # Get superuser credentials from environment variables
+        username = os.environ.get('DJANGO_SUPERUSER_USERNAME')
+        email = os.environ.get('DJANGO_SUPERUSER_EMAIL')
+        password = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
+
+        print(username, email, password)
+        if not username or not email or not password:
+            print("Please set all required environment variables: DJANGO_SUPERUSER_USERNAME, DJANGO_SUPERUSER_EMAIL, and DJANGO_SUPERUSER_PASSWORD")
+            return
+
+        # Check if a superuser with the given username already exists
+        if not User.objects.filter(username=username).exists():
+            # Create a new superuser
+            User.objects.create_superuser(username, email, password)
+            print('Superuser created successfully.')
+        else:
+            print('Superuser already exists.')
+
     except Exception as e:
-        print(e)
+        print('An error occurred:', str(e))
+
+if __name__ == '__main__':
+    create_superuser()
