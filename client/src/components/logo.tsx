@@ -17,8 +17,8 @@ const Logo = ({ className, ...props }: React.HTMLAttributes<HTMLElement>) => {
         xmlns='http://www.w3.org/2000/svg'
         className='text-primary'
       >
-        <rect x='9' width='8' height='26' />
-        <rect y='9' width='26' height='8' />
+        <rect x='9' width='8' height='26' rx='3' />
+        <rect y='9' width='26' height='8' rx='3' />
       </svg>
 
       <span className='ml-2 text-inherit'>Health Mate</span>
