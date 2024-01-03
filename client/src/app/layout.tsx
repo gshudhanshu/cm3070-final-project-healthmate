@@ -4,6 +4,7 @@ import './globals.css'
 
 import { MainNav } from '@/components/navbar'
 import { ThemeProvider } from '@/components/theme-provider'
+import { Footer } from '@/components/footer'
 
 // const poppins = Poppins({ subsets: ['latin'] })
 
@@ -33,11 +34,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div>
-            <MainNav />
-          </div>
+          <MainNav />
+          <div>{children}</div>
+          <Footer />
         </ThemeProvider>
-        {/* {children} */}
       </body>
     </html>
   )

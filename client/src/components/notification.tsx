@@ -16,13 +16,8 @@ export function Notification() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant='ghost' size='icon'>
-          {/* <Avatar className='h-8 w-8'>
-            
-            <AvatarImage src='/avatars/01.png' alt='@shadcn' />
-            <AvatarFallback>SC</AvatarFallback>
-          </Avatar> */}
-          <BellIcon className='h-[1.2rem] w-[1.2rem]  transition-all dark:rotate-0 dark:scale-100 text-gray-600' />
+        <Button variant='ghost' size='icon' className='dark:hover:bg-slate-700'>
+          <BellIcon className='h-[1.2rem] w-[1.2rem]  transition-all dark:rotate-0 dark:scale-100 dark:text-slate-200' />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className='w-56' align='end' forceMount>
