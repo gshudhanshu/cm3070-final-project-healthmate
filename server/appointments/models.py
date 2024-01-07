@@ -1,5 +1,5 @@
 from django.db import models
-from users.models import CustomUser
+from user.models import CustomUser
 
 # Create your models here.
 class Appointment(models.Model):
