@@ -25,7 +25,7 @@ export default function Numbers() {
   return (
     <section className="container mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-20 flex w-full flex-col text-center">
-        <h1 className="mb-4 text-2xl font-bold text-slate-800 sm:text-3xl">
+        <h1 className="mb-4 text-2xl font-bold text-slate-800 sm:text-3xl dark:text-slate-100">
           Empowering Your Health Journey
         </h1>
         <p className="mx-auto text-base leading-relaxed lg:w-2/3">

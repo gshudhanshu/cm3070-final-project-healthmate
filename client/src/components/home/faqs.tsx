@@ -5,17 +5,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-import {
-  HomeIcon,
-  ShieldCheckIcon,
-  UserGroupIcon,
-  DevicePhoneMobileIcon,
-  GlobeAltIcon,
-  AcademicCapIcon,
-  ChatBubbleOvalLeftEllipsisIcon,
-  CurrencyDollarIcon,
-} from "@heroicons/react/24/outline";
-
 const faqs = [
   {
     idx: 1,
@@ -83,7 +72,7 @@ export default function Faqs() {
   return (
     <section className="container mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-20 flex w-full flex-col text-center">
-        <h1 className="mb-4 text-2xl font-bold text-slate-800 sm:text-3xl">
+        <h1 className="mb-4 text-2xl font-bold text-slate-800 sm:text-3xl dark:text-slate-100">
           Frequently Asked Questions
         </h1>
         <p className="mx-auto text-base leading-relaxed lg:w-2/3">
@@ -91,19 +80,19 @@ export default function Faqs() {
           telemedicine services.
         </p>
       </div>
-      <div>
+      <div className="grid grid-cols-1 gap-x-10 md:grid-cols-2">
         {faqs.map((faq) => (
           <Accordion
             key={faq.idx}
             type="single"
             collapsible
-            className="m-auto w-full max-w-2xl"
+            className="m-auto w-full"
           >
-            <AccordionItem className="text-center" value="item-1">
-              <AccordionTrigger className="flex justify-center gap-2 text-center">
+            <AccordionItem className="text-left" value="item-1">
+              <AccordionTrigger className="flex gap-2 text-left">
                 {faq.question}
               </AccordionTrigger>
-              <AccordionContent className="text-center">
+              <AccordionContent className="text-left">
                 {faq.answer}
               </AccordionContent>
             </AccordionItem>

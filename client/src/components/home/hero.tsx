@@ -2,8 +2,8 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 export default function Hero() {
   return (
-    <section className="text-slate-600 dark:text-slate-400 ">
-      <div className="container mx-auto flex flex-col items-center gap-0 px-4 md:gap-12 lg:flex-row">
+    <section className="container mx-auto px-4 text-slate-600 sm:px-6 lg:px-8 dark:text-slate-400 ">
+      <div className="flex flex-col items-center gap-0 md:gap-12 lg:flex-row">
         <div className="mb-16 flex flex-col items-center text-center md:mb-0 lg:w-1/2 lg:items-start lg:text-left">
           <h1 className="mb-4 text-4xl font-bold  leading-[1.2] text-slate-700 sm:text-5xl sm:leading-[1.2] dark:text-slate-100">
             Connecting Care to Communities
