@@ -186,7 +186,7 @@ REST_FRAMEWORK = {
 
 # Djoser Settings
 DJOSER = {
-    'LOGIN_FIELD': 'email',
+    'LOGIN_FIELD': 'username',
     'USER_CREATE_PASSWORD_RETYPE':True,
     'ACTIVATION_URL':'/activate/{uid}/{token}',
     'SEND_ACTIVATION_EMAIL':True,
@@ -198,14 +198,14 @@ DJOSER = {
     'TOKEN_MODEL': None,
     'SERIALIZERS':{
         'user_create': 'user.serializers.UserCreateSerializer',
-        'user': 'account.serializers.UserCreateSerializer',
-        'user_delete': 'djoser.serializers.UserDeleteSerializer',
+        'user': 'user.serializers.UserSerializer',
+        'user_delete': 'djoser.serializers.UserSerializer',
     },
     'EMAIL': {
-        'activation': 'account.email.ActivationEmail',
-        'confirmation': 'account.email.ConfirmationEmail',
-        'password_reset': 'account.email.PasswordResetEmail',
-        'password_changed_confirmation': 'account.email.PasswordChangedConfirmationEmail',
+        'activation': 'djoser.email.ActivationEmail',
+        'confirmation': 'djoser.email.ConfirmationEmail',
+        'password_reset': 'djoser.email.PasswordResetEmail',
+        'password_changed_confirmation': 'djoser.email.PasswordChangedConfirmationEmail',
     },
 }
 
@@ -218,6 +218,7 @@ EMAIL_PORT = os.environ.get('EMAIL_PORT')
 EMAIL_HOST_USER = os.environ.get('EMAIL_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PASSWORD')
 EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_FROM')
 
 
 SWAGGER_SETTINGS = {
