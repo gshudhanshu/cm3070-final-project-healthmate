@@ -16,6 +16,8 @@ from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Frontend URL
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000/')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -183,23 +185,29 @@ REST_FRAMEWORK = {
     ),
 }
 
+# Email Backend Settings for Development
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+DOMAIN = os.environ.get('DOMAIN')
+SITE_NAME = os.environ.get('SITE_NAME')
 
 # Djoser Settings
 DJOSER = {
     'LOGIN_FIELD': 'username',
     'USER_CREATE_PASSWORD_RETYPE':True,
-    'ACTIVATION_URL':'/activate/{uid}/{token}',
+    'ACTIVATION_URL': 'auth/activate/{uid}/{token}',
     'SEND_ACTIVATION_EMAIL':True,
     'SEND_CONFIRMATION_EMAIL':True,
     'PASSWORD_CHANGED_EMAIL_CONFIRMATION':True,
-    'PASSWORD_RESET_CONFIRM_URL': 'password-reset/{uid}/{token}',
+    'PASSWORD_RESET_CONFIRM_URL': 'auth/password-reset/{uid}/{token}',
     'SET_PASSWORD_RETYPE': True,
     'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND': True,
     'TOKEN_MODEL': None,
     'SERIALIZERS':{
         'user_create': 'user.serializers.UserCreateSerializer',
         'user': 'user.serializers.UserSerializer',
-        'user_delete': 'djoser.serializers.UserSerializer',
+        'user_delete': 'djoser.serializers.UserDeleteSerializer'
     },
     'EMAIL': {
         'activation': 'djoser.email.ActivationEmail',
@@ -208,8 +216,6 @@ DJOSER = {
         'password_changed_confirmation': 'djoser.email.PasswordChangedConfirmationEmail',
     },
 }
-
-
 
 # Email Configuration
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"

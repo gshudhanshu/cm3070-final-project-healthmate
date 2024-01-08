@@ -43,6 +43,6 @@ urlpatterns += [
     # Admin endpoint
     path('admin/', admin.site.urls),
     # Auth endpoints
-    re_path(r'^auth/', include('djoser.urls')),  
-    re_path(r'^auth/', include('djoser.urls.jwt')),
+    re_path(r'^api/auth/', include('djoser.urls')),
+    re_path(r'^api/auth/', include('djoser.urls.jwt')),
 ]

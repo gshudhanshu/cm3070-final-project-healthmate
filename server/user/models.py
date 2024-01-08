@@ -41,10 +41,8 @@ class CustomUser(AbstractUser):
     username = models.CharField(max_length=50, unique=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    dob = models.DateField()
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=50)
-    profile_pic = models.ImageField(upload_to='profile_pic/', null=True, blank=True)
     created_at = models.DateField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
     is_active = models.BooleanField(default=True)
@@ -53,7 +51,7 @@ class CustomUser(AbstractUser):
     objects = CustomUserManager()
     
     USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email', 'first_name', 'last_name', 'dob', 'type']
+    REQUIRED_FIELDS = ['email', 'first_name', 'last_name', 'type']
     
     def __str__(self):
         return self.username
