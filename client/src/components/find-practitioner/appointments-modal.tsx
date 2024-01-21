@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -21,42 +21,85 @@ interface Slots {
 }
 
 // Mock data for available slots
-const availableSlots: Slots = {
-  "2024-01-21": [
-    "10:00 AM",
-    "11:00 AM",
-    "12:00 PM",
-    "1:00 PM",
-    "2:00 PM",
-    "3:00 PM",
-    "4:00 PM",
-    "5:00 PM",
-    "6:00 PM",
-  ],
-  // ... other dates
+const availableSlots = [
+  "10:00 AM",
+  "11:00 AM",
+  "12:00 PM",
+  "1:00 PM",
+  "2:00 PM",
+  "3:00 PM",
+  "4:00 PM",
+  "5:00 PM",
+  "6:00 PM",
+];
+
+// Helper function to add days to a date
+const addDays = (date: Date, days: number): Date => {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
 };
 
-// Helper to check if a date is in the past
+// Helper function to check if the date is within the next 7 days from today
+const isWithinNextWeek = (date: Date): boolean => {
+  const today = new Date();
+  const weekFromToday = addDays(today, 7);
+  return date >= today && date <= weekFromToday;
+};
+
 const isDateInPast = (date: Date): boolean => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   return date < today;
 };
 
+// Helper function to format date as YYYY-MM-DD
+const formatDate = (date: Date): string => {
+  return date.toISOString().split("T")[0];
+};
+
+interface SlotsResponse {
+  slots: string[];
+}
+
 const AppointmentModal = ({}) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const [slots, setSlots] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Function to navigate to the next or previous day
-  const navigateDate = (direction: number) => {
-    setSelectedDate(
-      new Date(selectedDate.setDate(selectedDate.getDate() + direction)),
-    );
+  const selectSlot = (slot: string) => {
+    setSelectedSlot(slot);
   };
 
-  // Function to get the slots for the selected date
-  const getSlotsForSelectedDate = (): string[] => {
-    const dateKey = selectedDate.toISOString().split("T")[0];
-    return availableSlots[dateKey] || [];
+  useEffect(() => {
+    const fetchSlots = async () => {
+      setIsLoading(true);
+      try {
+        // Replace '/api/slots' with your actual API endpoint
+        // let response = await fetch(
+        //   `/api/slots?date=${formatDate(selectedDate)}`,
+        // );
+        // const data: SlotsResponse = await response.json();
+        // setSlots(data.slots);
+        setSlots(availableSlots);
+      } catch (error) {
+        console.error("Failed to fetch slots:", error);
+        // Handle errors as appropriate for your application
+      }
+      setIsLoading(false);
+    };
+
+    if (isWithinNextWeek(selectedDate)) {
+      fetchSlots();
+    }
+  }, [selectedDate]);
+
+  const navigateDate = (days: number) => {
+    const newDate = addDays(selectedDate, days);
+    if (isWithinNextWeek(newDate)) {
+      setSelectedDate(newDate);
+    }
   };
 
   return (
@@ -82,35 +125,43 @@ const AppointmentModal = ({}) => {
         <div className="px-5">
           {/* Date Navigation */}
           <div className="my-5 flex items-center justify-between">
-            <button onClick={() => navigateDate(-1)}>
+            <Button
+              onClick={() => navigateDate(-1)}
+              disabled={!isWithinNextWeek(addDays(selectedDate, -1))}
+            >
               <ChevronLeftIcon className="h-6 w-6" />
-            </button>
-            <span className="text-lg font-medium">
+            </Button>
+            <span className="text-lg font-medium text-slate-600">
               {selectedDate.toLocaleDateString("en-US", {
                 weekday: "long",
                 month: "long",
                 day: "numeric",
               })}
             </span>
-            <button onClick={() => navigateDate(1)}>
+            <Button
+              onClick={() => navigateDate(1)}
+              disabled={!isWithinNextWeek(addDays(selectedDate, 1))}
+            >
               <ChevronRightIcon className="h-6 w-6" />
-            </button>
+            </Button>
           </div>
 
           {/* Time Slots */}
-          <div className="grid grid-cols-3 gap-2">
-            {getSlotsForSelectedDate().map((time, index) => (
-              <Button
-                key={index}
-                variant="secondary"
-                className={`${
-                  isDateInPast(selectedDate) ? "bg-primary" : "bg-slate-200"
-                } px-4 py-2`}
-                disabled={isDateInPast(selectedDate)}
-              >
-                {time}
-              </Button>
-            ))}
+          <div className="mt-4 grid grid-cols-3 gap-4 ">
+            {isLoading ? (
+              <p>Loading...</p>
+            ) : (
+              slots.map((slot, index) => (
+                <Button
+                  key={index}
+                  variant={selectedSlot === slot ? "default" : "secondary"}
+                  onClick={() => selectSlot(slot)}
+                  disabled={isDateInPast(selectedDate)}
+                >
+                  {slot}
+                </Button>
+              ))
+            )}
           </div>
         </div>
         <div className="grid grid-cols-2 items-center gap-2 p-5 text-center">
