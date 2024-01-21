@@ -54,6 +54,10 @@ INSTALLED_APPS = [
     # Apps
     "user",
     "appointment",
+    "user_profile",
+    "medical_record",
+    "conversation",
+    "notification",
 ]
 
 MIDDLEWARE = [

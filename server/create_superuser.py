@@ -13,7 +13,8 @@ if os.path.isfile(dotenv_path):
 # Initialize Django
 django.setup()
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model # If used custom user model
+User = get_user_model() # If used custom user model
 
 def create_superuser():
     try:

@@ -14,7 +14,7 @@ class CustomUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, username, email, password=None, **extra_fields):
+    def create_superuser(self, email, username, password=None, **extra_fields):
         """
         Create and save a SuperUser with the given username, email, and password.
         """
@@ -26,7 +26,7 @@ class CustomUserManager(BaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
 
-        return self.create_user(username, email, password, **extra_fields)
+        return self.create_user(email, username, password, **extra_fields)
 
 
 # Create your models here.
@@ -37,7 +37,6 @@ class CustomUser(AbstractUser):
         "A": "Admin",
     }
     type = models.CharField(max_length=1, choices=user_type.items(), default="P")
-    # name = models.CharField(max_length=50)
     username = models.CharField(max_length=50, unique=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
