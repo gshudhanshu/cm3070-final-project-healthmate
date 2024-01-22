@@ -40,6 +40,11 @@ urlpatterns = [
 ]
 
 urlpatterns += [
+    path('api/user_profile/', include('user_profile.urls')),
+    path('api/appointments/', include('appointments.urls')),
+    path('api/conversations/', include('conversations.urls')),
+    path('api/medical_records/', include('medical_records.urls')),
+    path('api/notifications/', include('notifications.urls')),
     # Admin endpoint
     path('admin/', admin.site.urls),
     # Auth endpoints
