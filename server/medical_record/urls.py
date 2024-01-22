@@ -4,7 +4,7 @@ from .views import (MedicalRecordViewSet, DisorderViewSet, MedicineViewSet,
                     DiagnosisViewSet, AppointmentHistoryViewSet)
 
 router = DefaultRouter()
-router.register(r'medical_records', MedicalRecordViewSet)
+router.register(r'medical_record', MedicalRecordViewSet)
 router.register(r'disorders', DisorderViewSet)
 router.register(r'medicines', MedicineViewSet)
 router.register(r'diagnoses', DiagnosisViewSet)

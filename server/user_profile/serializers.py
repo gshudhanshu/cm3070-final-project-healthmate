@@ -4,20 +4,21 @@ from .models import Doctor, Patient
 
 User = get_user_model()
 
-class UserSerializer(serializers.ModelSerializer):
+class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email']  # Add other fields you want to include
+        fields = ['id', 'username', 'email']
+        ref_name = 'UserProfile'
 
 class DoctorSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
+    user = UserProfileSerializer(read_only=True)
     
     class Meta:
         model = Doctor
         fields = ['user', 'phone', 'hospital_address', 'specialties', 'qualifications', 'experience', 'profile_pic', 'cost', 'currency']
 
 class PatientSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
+    user = UserProfileSerializer(read_only=True)
     
     class Meta:
         model = Patient

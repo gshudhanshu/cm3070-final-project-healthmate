@@ -2,6 +2,8 @@ from rest_framework import viewsets
 from .models import Notification
 from .serializers import NotificationSerializer
 from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.models import AnonymousUser
+
 
 class NotificationViewSet(viewsets.ModelViewSet):
     """
@@ -16,5 +18,8 @@ class NotificationViewSet(viewsets.ModelViewSet):
         Optionally restricts the returned notifications to those for the current user,
         by filtering against a `username` query parameter in the URL.
         """
-        queryset = Notification.objects.filter(recipient=self.request.user)
-        return queryset
+        user = self.request.user
+        if isinstance(user, AnonymousUser):
+            # Handle the anonymous user case
+            return Notification.objects.none()  # or handle as appropriate
+        return Notification.objects.filter(recipient=user)
