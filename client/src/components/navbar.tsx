@@ -16,6 +16,8 @@ import { UserNav } from "@/components/user-nav";
 import { Notification } from "@/components/notification";
 import axios from "axios";
 
+import { useAuthStore } from "@/store/useAuthStore";
+
 // Define navigation items
 const navItems = [
   { href: "/", label: "Home" },
@@ -29,31 +31,13 @@ export function MainNav({
   className,
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
-  const { user, setUser } = userStore();
+  const { user } = useAuthStore();
   const { theme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
-
-  useEffect(() => {
-    const token = localStorage.getItem("access-token");
-    if (token) {
-      axios
-        .get(`${process.env.API_URL}/auth/users/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((res) => {
-          setUser(res.data);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    }
-  }, []);
 
   return (
     // <nav className='relative bg-white shadow dark:bg-slate-800'>

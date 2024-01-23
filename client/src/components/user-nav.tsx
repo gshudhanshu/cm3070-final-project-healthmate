@@ -11,10 +11,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { userStore } from "@/store/user";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export function UserNav() {
-  const { user, logout } = userStore();
+  const { user, logout } = useAuthStore();
 
   return (
     <DropdownMenu>
