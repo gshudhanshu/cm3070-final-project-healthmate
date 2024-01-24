@@ -189,8 +189,6 @@ REST_FRAMEWORK = {
     ),
 }
 
-# Email Backend Settings for Development
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
 DOMAIN = os.environ.get('DOMAIN')
@@ -221,14 +219,18 @@ DJOSER = {
     },
 }
 
+# Email Backend Settings for Development
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
 # Email Configuration
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = os.environ.get('EMAIL_HOST')
-EMAIL_PORT = os.environ.get('EMAIL_PORT')
-EMAIL_HOST_USER = os.environ.get('EMAIL_USER')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PASSWORD')
-EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_FROM')
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_HOST = os.environ.get('EMAIL_HOST')
+# EMAIL_PORT = os.environ.get('EMAIL_PORT')
+# EMAIL_HOST_USER = os.environ.get('EMAIL_USER')
+# EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PASSWORD')
+# EMAIL_USE_TLS = True
+# DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_FROM')
 
 
 SWAGGER_SETTINGS = {

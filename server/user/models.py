@@ -32,11 +32,11 @@ class CustomUserManager(BaseUserManager):
 # Create your models here.
 class CustomUser(AbstractUser):
     user_type = {
-        "P": "Patient",
-        "D": "Doctor",
-        "A": "Admin",
+        "patient": "Patient",
+        "doctor": "Doctor",
+        "admin": "Admin",
     }
-    type = models.CharField(max_length=1, choices=user_type.items(), default="P")
+    type = models.CharField(max_length=7, choices=user_type.items(), default="patient")
     username = models.CharField(max_length=50, unique=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)

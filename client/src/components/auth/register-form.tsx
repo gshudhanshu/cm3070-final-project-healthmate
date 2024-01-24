@@ -26,13 +26,24 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import PlusBox from "@/components/plus-box";
 import { useState } from "react";
 
-const formSchema = z.object({
-  username: z.string().min(1, "Username is required").max(100),
-  password: z
-    .string()
-    .min(1, "Password is required")
-    .min(8, "Password must have than 8 characters"),
-});
+const formSchema = z
+  .object({
+    username: z.string().min(1, "Username is required").max(100),
+    first_name: z.string().min(1, "First Name is required").max(100),
+    last_name: z.string().min(1, "Last Name is required").max(100),
+    email: z.string().min(1, "Email is required").email("Invalid email"),
+    password: z
+      .string()
+      .min(1, "Password is required")
+      .min(8, "Password must have than 8 characters"),
+    re_password: z.string().min(1, "Password confirmation is required"),
+    account_type: z.enum(["Patient", "Doctor"]),
+  })
+  .refine((data) => data.password === data.re_password, {
+    path: ["re_password"],
+    message: "Password do not match",
+  });
+
 type FormSchema = z.infer<typeof formSchema>;
 type FormFieldNames = keyof FormSchema;
 
@@ -49,16 +60,45 @@ const formFieldsConfig: Array<{
     placeholder: "username",
     type: "text",
   },
-
+  {
+    name: "first_name",
+    label: "First Name",
+    placeholder: "first name",
+    type: "text",
+  },
+  {
+    name: "last_name",
+    label: "Last Name",
+    placeholder: "last name",
+    type: "text",
+  },
+  {
+    name: "email",
+    label: "Email",
+    placeholder: "mail@example.com",
+    type: "email",
+  },
   {
     name: "password",
     label: "Password",
     placeholder: "Enter your password",
     type: "password",
   },
+  {
+    name: "re_password",
+    label: "Re-Enter your password",
+    placeholder: "Re-Enter your password",
+    type: "password",
+  },
+  {
+    name: "account_type",
+    label: "Account Type",
+    type: "radio",
+    types: ["Patient", "Doctor"],
+  },
 ];
 
-export default function LoginForm({
+export default function RegisterForm({
   className,
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
@@ -67,24 +107,54 @@ export default function LoginForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: "",
+      first_name: "",
+      last_name: "",
+      email: "",
       password: "",
+      re_password: "",
+      account_type: "Patient",
     },
   });
 
-  const [serverErrorMessage, setServerErrorMessage] = useState("");
-
-  const { login } = useAuthStore();
+  const [serverErrorMessages, setServerErrorMessages] = useState<Record<
+    string,
+    string[]
+  > | null>(null);
+  const [registrationStatusMessage, setRegistrationStatusMessage] =
+    useState("");
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await login(values.username, values.password);
-      router.push("/dashboard");
+      const headers = {
+        "Content-Type": "application/json",
+      };
+      const response = await axios.post(
+        `${process.env.API_URL}/auth/users/`,
+        values,
+        { headers },
+      );
+
+      if (response.status === 201) {
+        console.log("User created successfully");
+        setRegistrationStatusMessage(
+          "Registration successful! Please check your email to activate your account.",
+        );
+        setTimeout(() => {
+          router.push("/auth/login");
+        }, 5000);
+      }
+      console.log(response);
     } catch (error: any) {
       console.log(error);
-      // Extract and display error message from server response
-      const message =
-        error.response?.data?.detail || "An unknown error occurred";
-      setServerErrorMessage(message);
+      if (error.response && error.response.data) {
+        // Parse error response from Djoser
+        setServerErrorMessages(error.response.data);
+      } else {
+        // Handle other types of errors (network error, etc.)
+        setServerErrorMessages({
+          non_field_errors: ["An unknown error occurred."],
+        });
+      }
     }
   };
 
@@ -93,12 +163,19 @@ export default function LoginForm({
       <div className="flex justify-center">
         <PlusBox />
       </div>
-      <h1 className="text-center text-2xl font-bold">Login to Your Aaccount</h1>
-      {/* Display server error messages if they exist */}
+      <h1 className="text-center text-2xl font-bold">Join Our Community</h1>
       <div>
-        {serverErrorMessage && (
-          <div className="text-center text-destructive">
-            Error: {serverErrorMessage}
+        {/* Display server error messages if they exist */}
+        {serverErrorMessages &&
+          Object.entries(serverErrorMessages).map(([field, errors]) => (
+            <div key={field} className="text-center text-destructive">
+              {field}: {errors.join(", ")}
+            </div>
+          ))}
+        {/* Display registration status message if it exists */}
+        {registrationStatusMessage && (
+          <div className="text-center text-primary">
+            {registrationStatusMessage}
           </div>
         )}
       </div>
