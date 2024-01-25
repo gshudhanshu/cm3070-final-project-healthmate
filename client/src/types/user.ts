@@ -21,15 +21,16 @@ export interface DoctorProfile {
   ];
   qualifications: [
     {
-      id: string;
       name: string;
       university: string;
+      start_year: number;
+      finish_year: number;
     },
   ];
   languages: [
     {
-      id: string;
       name: string;
+      level: string;
     },
   ];
 }

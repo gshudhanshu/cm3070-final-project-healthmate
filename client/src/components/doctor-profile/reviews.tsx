@@ -9,7 +9,6 @@ export default function Reviews({ doctor }: { doctor: any }) {
       rating: 5,
       comment: "Lorem ipsum dolor sit amet...",
     },
-    // More reviews...
   ];
 
   return (

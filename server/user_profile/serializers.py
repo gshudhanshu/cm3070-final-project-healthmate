@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Doctor, Patient, Language, LanguageProficiency, Speciality, Qualification
+from .models import Doctor, Patient, Language, LanguageProficiency, Speciality, Qualification, DoctorQualification
 
 User = get_user_model()
 
@@ -12,11 +12,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
         
         
 class LanguageProficiencySerializer(serializers.ModelSerializer):
-    language_name = serializers.ReadOnlyField(source='language.name')
+    name = serializers.ReadOnlyField(source='language.name')
     
     class Meta:
         model = LanguageProficiency
-        fields = ['language_name', 'level']
+        fields = ['name', 'level']
   
         
 class SpecialitySerializer(serializers.ModelSerializer):
@@ -27,14 +27,23 @@ class SpecialitySerializer(serializers.ModelSerializer):
 class QualificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Qualification
-        fields = '__all__'
+        fields = '__all__' 
+        
+class DoctorQualificationSerializer(serializers.ModelSerializer):
+    name = serializers.ReadOnlyField(source='qualification.name')
+    university = serializers.ReadOnlyField(source='qualification.university')
+
+    class Meta:
+        model = DoctorQualification
+        fields = ['name', 'university','start_year', 'finish_year']
+        
 
 class DoctorSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer(read_only=True)
     specialties = SpecialitySerializer(many=True, read_only=True)
-    language_proficiencies = LanguageProficiencySerializer(source='languageproficiency_set', many=True, read_only=True)
+    languages = LanguageProficiencySerializer(source='languageproficiency_set', many=True, read_only=True)
+    qualifications = DoctorQualificationSerializer(many=True, read_only=True)
 
-    qualifications = QualificationSerializer(many=True, read_only=True)
     
     class Meta:
         model = Doctor

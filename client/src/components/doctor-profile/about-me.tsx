@@ -33,11 +33,25 @@ export default function AboutMe({
         <dt className="font-medium ">Languages</dt>
         {doctor.languages.map((language, index) => (
           <dd
-            key={language.id}
+            key={language.name}
             className="mt-1 flex items-center gap-1 text-sm sm:col-span-2 sm:mt-0"
           >
-            <CheckIcon className="w-5" /> {language.name}
+            <CheckIcon className="w-5" /> {language.name} ({language.level})
           </dd>
+        ))}
+      </div>
+      <div className="flex flex-col gap-1">
+        <dt className="font-medium ">Qualifications</dt>
+        {doctor.qualifications.map((qualification, index) => (
+          <div className="" key={qualification.name}>
+            <dd className="mt-1 flex items-center gap-1 text-sm sm:col-span-2 sm:mt-0">
+              <CheckIcon className="w-5" /> {qualification.name} (
+              {qualification.start_year} - {qualification.finish_year})
+            </dd>
+            <dd>
+              <p className="text-sm">{qualification.university}</p>
+            </dd>
+          </div>
         ))}
       </div>
     </section>
