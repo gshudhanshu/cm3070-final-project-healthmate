@@ -1,24 +1,9 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import axios from "axios";
+import { DoctorProfile } from "../types/user";
 
-interface DoctorProfile {
-  user: {
-    id: number;
-    username: string;
-    email: string;
-  };
-  phone: string | null;
-  hospital_address: string | null;
-  experience: string | null;
-  profile_pic: string | null;
-  cost: string | null;
-  currency: string | null;
-  description: string | null;
-  specialties: string[];
-  qualifications: string[];
-  languages: string[];
-}
+const API_URL = process.env.API_URL;
 
 interface DoctorProfileState {
   doctorProfile: DoctorProfile | null;
@@ -35,7 +20,9 @@ export const useDoctorProfileStore = create(
     fetchDoctorProfile: async (doctorUsername) => {
       set({ isLoading: true });
       try {
-        const response = await axios.get(`/api/doctors/${doctorUsername}`);
+        const response = await axios.get(
+          `${API_URL}/user_profile/doctors/${doctorUsername}/`,
+        );
         set({ doctorProfile: response.data, isLoading: false });
       } catch (error: any) {
         set({ error, isLoading: false });

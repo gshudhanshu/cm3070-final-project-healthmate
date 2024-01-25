@@ -20,6 +20,7 @@ class CustomUserManager(BaseUserManager):
         """
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('account_type', 'admin')
 
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser must have is_staff=True.')
@@ -36,7 +37,7 @@ class CustomUser(AbstractUser):
         "doctor": "Doctor",
         "admin": "Admin",
     }
-    type = models.CharField(max_length=7, choices=user_type.items(), default="patient")
+    account_type = models.CharField(max_length=7, choices=user_type.items(), default="patient")
     username = models.CharField(max_length=50, unique=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
@@ -50,7 +51,7 @@ class CustomUser(AbstractUser):
     objects = CustomUserManager()
     
     USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email', 'first_name', 'last_name', 'type']
+    REQUIRED_FIELDS = ['email', 'first_name', 'last_name', 'account_type']
     
     def __str__(self):
         return self.username

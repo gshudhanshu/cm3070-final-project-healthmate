@@ -37,7 +37,7 @@ const formSchema = z
       .min(1, "Password is required")
       .min(8, "Password must have than 8 characters"),
     re_password: z.string().min(1, "Password confirmation is required"),
-    account_type: z.enum(["Patient", "Doctor"]),
+    account_type: z.enum(["patient", "doctor"]),
   })
   .refine((data) => data.password === data.re_password, {
     path: ["re_password"],
@@ -94,7 +94,7 @@ const formFieldsConfig: Array<{
     name: "account_type",
     label: "Account Type",
     type: "radio",
-    types: ["Patient", "Doctor"],
+    types: ["patient", "doctor"],
   },
 ];
 
@@ -112,7 +112,7 @@ export default function RegisterForm({
       email: "",
       password: "",
       re_password: "",
-      account_type: "Patient",
+      account_type: "patient",
     },
   });
 
@@ -169,7 +169,7 @@ export default function RegisterForm({
         {serverErrorMessages &&
           Object.entries(serverErrorMessages).map(([field, errors]) => (
             <div key={field} className="text-center text-destructive">
-              {field}: {errors.join(", ")}
+              {field}: {Array.isArray(errors) ? errors.join(", ") : errors}
             </div>
           ))}
         {/* Display registration status message if it exists */}

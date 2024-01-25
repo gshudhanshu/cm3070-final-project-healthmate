@@ -2,20 +2,12 @@ from django.db import models
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
-class Specialty(models.Model):
+class Speciality(models.Model):
     name = models.CharField(max_length=100)
 
     def __str__(self):
         return self.name
 
-class Qualification(models.Model):
-    name = models.CharField(max_length=100)
-    university = models.CharField(max_length=200)
-    start_year = models.IntegerField()
-    finish_year = models.IntegerField()
-
-    def __str__(self):
-        return f"{self.name} from {self.university} ({self.start_year} - {self.finish_year})"
 
 class Language(models.Model):
     name = models.CharField(max_length=100)
@@ -37,12 +29,20 @@ class LanguageProficiency(models.Model):
     def __str__(self):
         return f"{self.language.name} ({self.get_level_display()})"
 
+class Qualification(models.Model):
+    name = models.CharField(max_length=100)
+    university = models.CharField(max_length=200)
+
+    def __str__(self):
+        return f"{self.name} from {self.university}"
+    
+
 class Doctor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name='doctor_profile')
     phone = models.CharField(max_length=20, null=True, blank=True)
     hospital_address = models.CharField(max_length=200, null=True, blank=True)
-    specialties = models.ManyToManyField(Specialty, related_name='doctors',  blank=True)
-    qualifications = models.ManyToManyField(Qualification, related_name='doctors', blank=True)
+    specialties = models.ManyToManyField(Speciality, related_name='doctors', blank=True)
+    qualifications = models.ManyToManyField(Qualification, through='DoctorQualification', related_name='doctors', blank=True)
     experience = models.PositiveIntegerField(null=True, blank=True)
     profile_pic = models.ImageField(upload_to='profile_pic/Doctor/', null=True, blank=True)
     languages = models.ManyToManyField(Language, through=LanguageProficiency, related_name='doctors', blank=True)
@@ -57,6 +57,17 @@ class Doctor(models.Model):
 
     def __str__(self):
         return self.user.username
+    
+    
+class DoctorQualification(models.Model):
+    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='doctor_qualifications')
+    qualification = models.ForeignKey(Qualification, on_delete=models.CASCADE)
+    start_year = models.IntegerField()
+    finish_year = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.qualification} - {self.start_year} to {self.finish_year}"
+    
 
 class Patient(models.Model):
     MARITAL_STATUS_CHOICES = [

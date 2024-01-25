@@ -97,7 +97,7 @@ const filters = [
   },
 
   {
-    name: "Specialty",
+    name: "Speciality",
     type: "checkbox",
     options: [
       {

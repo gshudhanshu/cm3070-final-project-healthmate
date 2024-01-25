@@ -1,9 +1,9 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Specialty, Qualification, Language, LanguageProficiency, Doctor, Patient, Review
+from .models import Speciality, Qualification, Language, LanguageProficiency, Doctor, DoctorQualification, Patient, Review
 
-admin.site.register(Specialty)
+admin.site.register(Speciality)
 admin.site.register(Qualification)
 admin.site.register(Language)
 admin.site.register(LanguageProficiency)
@@ -11,13 +11,18 @@ admin.site.register(LanguageProficiency)
 class LanguageProficiencyInline(admin.TabularInline):
     model = LanguageProficiency
     extra = 1
+    
+class DoctorQualificationInline(admin.TabularInline):
+    model = DoctorQualification
+    extra = 1
+    
 
 @admin.register(Doctor)
 class DoctorAdmin(admin.ModelAdmin):
     list_display = ('user', 'average_rating_admin', 'phone', 'hospital_address', 'experience', 'cost', 'currency')
     search_fields = ('user__username', 'specialties__name', 'qualifications__name')
     list_filter = ('specialties', 'qualifications', 'languages')
-    inlines = [LanguageProficiencyInline]
+    inlines = [LanguageProficiencyInline, DoctorQualificationInline]
     
     def average_rating_admin(self, obj):
         return obj.average_rating()

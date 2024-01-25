@@ -20,7 +20,7 @@ class DoctorViewSet(viewsets.ModelViewSet):
         """
         queryset = Doctor.objects.all()
         user = self.request.user
-        if user.is_authenticated and hasattr(user, 'doctor_profile'):
+        if user.is_authenticated and self.lookup_field == user.username and hasattr(user, 'doctor_profile'):
             queryset = queryset.filter(user=user)
         return queryset
 

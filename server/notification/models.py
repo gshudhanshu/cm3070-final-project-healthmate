@@ -15,7 +15,7 @@ class Notification(models.Model):
 
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_notifications', null=True, blank=True)
-    type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES)
+    notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES)
     text = models.TextField()  # The message you want to display in the notification
     is_read = models.BooleanField(default=False)  # If the notification has been read
     created_at = models.DateTimeField(auto_now_add=True)
