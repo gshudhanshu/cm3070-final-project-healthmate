@@ -33,4 +33,12 @@ export interface DoctorProfile {
       level: string;
     },
   ];
+  reviews: [
+    {
+      patient_name: number;
+      rating: number;
+      comment: string;
+      date_created: string;
+    },
+  ];
 }

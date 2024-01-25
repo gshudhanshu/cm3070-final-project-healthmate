@@ -2,6 +2,18 @@ from django.db import models
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
+
+class Address(models.Model):
+    street = models.CharField(max_length=255)
+    city = models.CharField(max_length=100)
+    state = models.CharField(max_length=100)
+    postal_code = models.CharField(max_length=20)
+    country = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"{self.street}, {self.city}, {self.state}, {self.postal_code}, {self.country}"
+
+
 class Speciality(models.Model):
     name = models.CharField(max_length=100)
 
@@ -23,7 +35,7 @@ class LanguageProficiency(models.Model):
         ('basic', 'Basic'),
     ]
     level = models.CharField(max_length=20, choices=PROFICIENCY_LEVELS)
-    language = models.ForeignKey(Language, on_delete=models.CASCADE)
+    language = models.ForeignKey(Language, on_delete=models.CASCADE, related_name='proficiencies')
     doctor = models.ForeignKey('Doctor', on_delete=models.CASCADE)
 
     def __str__(self):
@@ -40,12 +52,12 @@ class Qualification(models.Model):
 class Doctor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name='doctor_profile')
     phone = models.CharField(max_length=20, null=True, blank=True)
-    hospital_address = models.CharField(max_length=200, null=True, blank=True)
+    hospital_address = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True, blank=True, related_name='doctors')
     specialties = models.ManyToManyField(Speciality, related_name='doctors', blank=True)
     qualifications = models.ManyToManyField(Qualification, through='DoctorQualification', related_name='doctors', blank=True)
     experience = models.PositiveIntegerField(null=True, blank=True)
     profile_pic = models.ImageField(upload_to='profile_pic/Doctor/', null=True, blank=True)
-    languages = models.ManyToManyField(Language, through=LanguageProficiency, related_name='doctors', blank=True)
+    languages = models.ManyToManyField(Language, through=LanguageProficiency, related_name='language_proficiencies', blank=True)
     cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     currency = models.CharField(max_length=3, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
@@ -61,7 +73,7 @@ class Doctor(models.Model):
     
 class DoctorQualification(models.Model):
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='doctor_qualifications')
-    qualification = models.ForeignKey(Qualification, on_delete=models.CASCADE)
+    qualification = models.ForeignKey(Qualification, on_delete=models.CASCADE, related_name='doctor_entries')
     start_year = models.IntegerField()
     finish_year = models.IntegerField()
 
@@ -90,7 +102,7 @@ class Patient(models.Model):
     weight = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     blood_group = models.CharField(max_length=10, null=True, blank=True)
     language = models.ManyToManyField(Language, related_name='patients', blank=True)
-    address = models.CharField(max_length=200, null=True, blank=True)
+    address = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True, blank=True, related_name='patients')
     profile_pic = models.ImageField(upload_to='profile_pic/Patient/', null=True, blank=True)
 
     def __str__(self):

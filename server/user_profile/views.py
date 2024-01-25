@@ -1,8 +1,12 @@
 from rest_framework import viewsets
-from .models import Doctor, Patient
-from .serializers import DoctorSerializer, PatientSerializer
-from .permissions import IsOwnerOrReadOnly, IsDoctorOrReadOnly
+from .models import Doctor, Patient, Review
+from .serializers import DoctorSerializer, PatientSerializer, ReviewSerializer
+from .permissions import IsOwnerOrReadOnly, IsDoctorOrReadOnly, IsReadOnlyOrIsNew
 from rest_framework import permissions
+
+from rest_framework.generics import ListAPIView
+from rest_framework.pagination import PageNumberPagination
+
 
 class DoctorViewSet(viewsets.ModelViewSet):
     """
@@ -24,7 +28,21 @@ class DoctorViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(user=user)
         return queryset
 
+class ReviewPagination(PageNumberPagination):
+    page_size = 5
 
+class DoctorReviewsAPIView(ListAPIView):
+    serializer_class = ReviewSerializer
+    pagination_class = ReviewPagination
+    permission_classes = [IsReadOnlyOrIsNew]
+
+    def get_queryset(self):
+        username = self.kwargs['username']
+        try:
+            doctor = Doctor.objects.get(user__username=username)
+            return Review.objects.filter(doctor=doctor).order_by('-date_created')
+        except Doctor.DoesNotExist:
+            return Review.objects.none()  # Return an empty queryset
 
 
 class PatientViewSet(viewsets.ModelViewSet):

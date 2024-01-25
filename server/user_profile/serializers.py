@@ -1,8 +1,13 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Doctor, Patient, Language, LanguageProficiency, Speciality, Qualification, DoctorQualification
+from .models import Doctor, Patient, Language, LanguageProficiency, Review, Speciality, Qualification, DoctorQualification, Address
 
 User = get_user_model()
+
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Address
+        fields = '__all__'
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -24,10 +29,10 @@ class SpecialitySerializer(serializers.ModelSerializer):
         model = Speciality
         fields = '__all__'
         
-class QualificationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Qualification
-        fields = '__all__' 
+# class QualificationSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Qualification
+#         fields = '__all__' 
         
 class DoctorQualificationSerializer(serializers.ModelSerializer):
     name = serializers.ReadOnlyField(source='qualification.name')
@@ -37,17 +42,23 @@ class DoctorQualificationSerializer(serializers.ModelSerializer):
         model = DoctorQualification
         fields = ['name', 'university','start_year', 'finish_year']
         
+        
+
 
 class DoctorSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer(read_only=True)
     specialties = SpecialitySerializer(many=True, read_only=True)
     languages = LanguageProficiencySerializer(source='languageproficiency_set', many=True, read_only=True)
-    qualifications = DoctorQualificationSerializer(many=True, read_only=True)
-
+    qualifications = DoctorQualificationSerializer(source='doctor_qualifications', many=True, read_only=True)
+    reviews = serializers.SerializerMethodField()
+    hospital_address = AddressSerializer(read_only=True)
     
     class Meta:
         model = Doctor
         fields = '__all__'
+        
+    def get_reviews(self, obj):
+        return ReviewSerializer(obj.reviews.all()[:5], many=True).data
         
 
 class PatientSerializer(serializers.ModelSerializer):
@@ -56,3 +67,11 @@ class PatientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
         fields = ['user', 'phone', 'dob', 'marital_status', 'gender', 'height', 'weight', 'blood_group', 'address', 'profile_pic']
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    patient_name = serializers.ReadOnlyField(source='patient.user.get_full_name')
+
+    class Meta:
+        model = Review
+        fields = ['id', 'patient_name', 'rating', 'comment', 'date_created']

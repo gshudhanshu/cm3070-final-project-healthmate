@@ -32,16 +32,20 @@ export default function Page({
   return doctorProfile ? (
     <div className="container mx-auto my-10 flex flex-col gap-10">
       <ProfileHeader doctor={doctorProfile} />
-      <section className="description">
-        <p className="">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam
-          autem sint provident suscipit doloremque fugit tempore cumque sunt
-          quae, reiciendis libero natus vitae eum iste maxime laborum mollitia
-          molestiae unde.
-        </p>
-      </section>
-      <AboutMe doctor={doctorProfile} />
-      <ReviewsSection doctor={doctorProfile} />
+      <div className="flex flex-col gap-10 sm:flex-row">
+        <AboutMe doctor={doctorProfile} className="w-full max-w-60 flex-grow" />
+        <div className="flex flex-col gap-6">
+          <section className="description">
+            <p className="">
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam
+              autem sint provident suscipit doloremque fugit tempore cumque sunt
+              quae, reiciendis libero natus vitae eum iste maxime laborum
+              mollitia molestiae unde.
+            </p>
+          </section>
+          <ReviewsSection doctor={doctorProfile} />
+        </div>
+      </div>
     </div>
   ) : (
     <ErrorComponent message="Profile not found" />
