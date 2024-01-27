@@ -56,7 +56,7 @@ class Doctor(models.Model):
     specialties = models.ManyToManyField(Speciality, related_name='doctors', blank=True)
     qualifications = models.ManyToManyField(Qualification, through='DoctorQualification', related_name='doctors', blank=True)
     experience = models.PositiveIntegerField(null=True, blank=True)
-    profile_pic = models.ImageField(upload_to='profile_pic/Doctor/', null=True, blank=True)
+    profile_pic = models.ImageField(upload_to='media/profile_pic/doctor/', null=True, blank=True)
     languages = models.ManyToManyField(Language, through=LanguageProficiency, related_name='language_proficiencies', blank=True)
     cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     currency = models.CharField(max_length=3, null=True, blank=True)
@@ -103,7 +103,7 @@ class Patient(models.Model):
     blood_group = models.CharField(max_length=10, null=True, blank=True)
     language = models.ManyToManyField(Language, related_name='patients', blank=True)
     address = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True, blank=True, related_name='patients')
-    profile_pic = models.ImageField(upload_to='profile_pic/Patient/', null=True, blank=True)
+    profile_pic = models.ImageField(upload_to='media/profile_pic/patient/', null=True, blank=True)
 
     def __str__(self):
         return self.user.username

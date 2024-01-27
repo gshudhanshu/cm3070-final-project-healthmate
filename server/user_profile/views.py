@@ -29,7 +29,7 @@ class DoctorViewSet(viewsets.ModelViewSet):
         return queryset
 
 class ReviewPagination(PageNumberPagination):
-    page_size = 5
+    page_size = 1
 
 class DoctorReviewsAPIView(ListAPIView):
     serializer_class = ReviewSerializer

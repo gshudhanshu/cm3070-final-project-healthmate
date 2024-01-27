@@ -7,7 +7,13 @@ export interface DoctorProfile {
     last_name: string;
   };
   phone: string | null;
-  hospital_address: string | null;
+  hospital_address: {
+    street: string;
+    city: string;
+    state: string;
+    postal_code: string;
+    country: string;
+  };
   experience: string | null;
   profile_pic: string | null;
   cost: string | null;

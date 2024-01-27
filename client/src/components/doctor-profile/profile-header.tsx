@@ -21,7 +21,7 @@ export default function ProfileHeader({
     >
       <div className="flex w-full flex-col gap-6 sm:flex-row sm:items-center">
         <Image
-          src={"https://placehold.co/200x200/png"}
+          src={doctor.profile_pic || "https://placehold.co/200x200/png"}
           width={200}
           height={200}
           alt=""
@@ -33,7 +33,9 @@ export default function ProfileHeader({
           </h3>
           <p className="flex items-center gap-2 text-sm">
             <BuildingOffice2Icon className="w-6" />
-            {doctor.hospital_address}
+            {doctor.hospital_address.city}, {doctor.hospital_address.state},{" "}
+            {doctor.hospital_address.country}{" "}
+            {doctor.hospital_address.postal_code}
           </p>
         </div>
       </div>

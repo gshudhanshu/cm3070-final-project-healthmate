@@ -15,7 +15,7 @@ interface DoctorProfileState {
 export const useDoctorProfileStore = create(
   devtools<DoctorProfileState>((set) => ({
     doctorProfile: null,
-    isLoading: false,
+    isLoading: true,
     error: null,
     fetchDoctorProfile: async (doctorUsername) => {
       set({ isLoading: true });

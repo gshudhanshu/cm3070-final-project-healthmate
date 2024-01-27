@@ -9,4 +9,5 @@ router.register(r'patients', PatientViewSet, basename='patient')
 urlpatterns = [
     path('', include(router.urls)),
     path('doctors/<str:username>/reviews/', DoctorReviewsAPIView.as_view(), name='doctor-reviews'),
+    
 ]

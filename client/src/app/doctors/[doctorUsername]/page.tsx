@@ -24,7 +24,7 @@ export default function Page({
     if (doctorUsername) {
       fetchDoctorProfile(doctorUsername);
     }
-  }, [doctorUsername, fetchDoctorProfile]);
+  }, []);
 
   if (isLoading) return <LoadingComponent />;
   if (error) return <ErrorComponent message={error.message} />;
@@ -36,12 +36,9 @@ export default function Page({
         <AboutMe doctor={doctorProfile} className="w-full max-w-60 flex-grow" />
         <div className="flex flex-col gap-6">
           <section className="description">
-            <p className="">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam
-              autem sint provident suscipit doloremque fugit tempore cumque sunt
-              quae, reiciendis libero natus vitae eum iste maxime laborum
-              mollitia molestiae unde.
-            </p>
+            <div className="whitespace-pre-line">
+              {doctorProfile.description || "No description provided"}
+            </div>
           </section>
           <ReviewsSection doctor={doctorProfile} />
         </div>
