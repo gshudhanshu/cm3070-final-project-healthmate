@@ -29,6 +29,30 @@ const navItems = [
   { href: "/resources", label: "Resources" },
 ];
 
+const AuthActions = () => {
+  return (
+    <>
+      <Notification />
+      <UserNav />
+      <ModeToggle />
+    </>
+  );
+};
+
+const GuestActions = () => {
+  return (
+    <>
+      <Link href="/auth/login">
+        <Button variant="default">Login</Button>
+      </Link>
+      <Link href="/auth/register">
+        <Button variant="default">Sign Up</Button>
+      </Link>
+      <ModeToggle />
+    </>
+  );
+};
+
 export function MainNav({
   className,
   ...props
@@ -64,18 +88,11 @@ export function MainNav({
                 {user !== null ? (
                   <>
                     <Notification />
-                    <ModeToggle />
+                    {/* <ModeToggle /> */}
                     <UserNav />
                   </>
                 ) : (
-                  <>
-                    <Link href="/auth/login">
-                      <Button variant="default">Login</Button>
-                    </Link>
-                    <Link href="/auth/register">
-                      <Button variant="default">Sign Up</Button>
-                    </Link>
-                  </>
+                  <GuestActions />
                 )}
               </div>
               <span className="hidden sm:flex">
@@ -107,39 +124,27 @@ export function MainNav({
           >
             {/* nav */}
             <div className="flex flex-col lg:mx-6 lg:flex-row lg:items-center lg:space-x-3">
-              {navItems.map(
-                (item, index) =>
-                  !item.auth && (
-                    <Link
-                      href={item.href}
-                      key={index}
-                      className="mt-2 transform rounded-md px-3 py-2 text-slate-700 transition-colors duration-300 hover:bg-slate-100 lg:mt-0 dark:text-slate-200 dark:hover:bg-slate-700"
-                    >
-                      {item.label}
-                    </Link>
-                  ),
-              )}
+              {navItems.map((item, index) => {
+                if (item.auth && !user) return null;
+                return (
+                  <Link
+                    href={item.href}
+                    key={index}
+                    className="mt-2 transform rounded-md px-3 py-2 text-slate-700 transition-colors duration-300 hover:bg-slate-100 lg:mt-0 dark:text-slate-200 dark:hover:bg-slate-700"
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
             </div>
             {/* action buttons inside the mobile nav size */}
-            <div className="mx-3 mt-4 flex items-center gap-3 sm:hidden lg:mt-0 lg:flex ">
-              {user !== null ? (
-                <>
-                  <Notification />
-                  <ModeToggle />
-                  <UserNav />
-                </>
-              ) : (
-                <>
-                  <Link href="/auth/login">
-                    <Button variant="default">Login</Button>
-                  </Link>
-                  <Link href="/auth/register">
-                    <Button variant="default">Sign Up</Button>
-                  </Link>
-                  <ModeToggle />
-                </>
-              )}
+            <div className="mx-3 mt-4 flex items-center gap-3 sm:hidden lg:mt-0 ">
+              {user !== null ? <AuthActions /> : <GuestActions />}
             </div>
+          </div>
+          {/* action buttons inside the mobile nav size */}
+          <div className="mx-3 mt-4 hidden items-center gap-3 lg:mt-0 lg:flex ">
+            {user !== null ? <AuthActions /> : <GuestActions />}
           </div>
         </div>
       </div>
