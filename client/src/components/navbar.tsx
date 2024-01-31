@@ -6,16 +6,10 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/logo";
 import { Button } from "@/components/ui/button";
-
 import { ModeToggle } from "@/components/mode-toggle";
-
 import Hamburger from "hamburger-react";
-import { useTheme } from "next-themes";
-
-import { userStore } from "@/store/user";
 import { UserNav } from "@/components/user-nav";
 import { Notification } from "@/components/notification";
-import axios from "axios";
 import { DashboardNav } from "@/components/dashboard-nav";
 
 import { useAuthStore } from "@/store/useAuthStore";
@@ -58,7 +52,6 @@ export function MainNav({
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
   const { user } = useAuthStore();
-  const { theme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -70,7 +63,6 @@ export function MainNav({
   const isDashboardRoute = pathname.startsWith("/dashboard");
 
   return (
-    // <nav className='relative bg-white shadow dark:bg-slate-800'>
     <nav
       className={cn("relative bg-white shadow dark:bg-slate-800", className)}
     >
@@ -95,9 +87,12 @@ export function MainNav({
                   <GuestActions />
                 )}
               </div>
-              <span className="hidden sm:flex">
-                <ModeToggle />
-              </span>
+              {user !== null && (
+                <span className="hidden sm:flex">
+                  <ModeToggle />
+                </span>
+              )}
+
               <Button
                 variant="ghost"
                 onClick={toggleMenu}

@@ -1,5 +1,5 @@
-import React from "react";
+import { useRouter, permanentRedirect } from "next/navigation";
 
 export default function page() {
-  return <div>page</div>;
+  permanentRedirect("/dashboard/messages");
 }
