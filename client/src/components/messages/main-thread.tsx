@@ -7,12 +7,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import { useWindowSize } from "@uidotdev/usehooks";
 
 import dayjs from "dayjs";
 
 const MessageThread = ({ className }: { className?: string }) => {
-  const { selectedContact } = useMessagesStore();
+  const { selectedContact, isSidebarVisible, toggleSidebar } =
+    useMessagesStore();
   const [newMessage, setNewMessage] = useState("");
+
+  const size = useWindowSize();
 
   // Dummy messages
   const messages = [
@@ -38,6 +42,9 @@ const MessageThread = ({ className }: { className?: string }) => {
       message.recipient === selectedContact,
   );
 
+  // Determine if we are in a mobile view
+  const isMobile = size?.width && size.width < 768;
+
   return (
     <div
       className={cn(
@@ -47,29 +54,27 @@ const MessageThread = ({ className }: { className?: string }) => {
     >
       <div>
         <div className="my-7 flex items-center gap-3">
-          <ChevronLeftIcon className="w-6" />
-          <h2 className="text-2xl font-medium">Mark Barton </h2>
+          {isMobile && !isSidebarVisible && (
+            <ChevronLeftIcon
+              className="h-6 w-6 cursor-pointer"
+              onClick={toggleSidebar}
+            />
+          )}
+          <h2 className="text-2xl font-medium">{selectedContact}</h2>
           <span className="text-xs text-slate-600">
-            {dayjs("2023-01-09 16:33:22 EST").format("DD MMM YY, HH:mm A")}
+            {dayjs().format("DD MMM YY, HH:mm A")}
           </span>
         </div>
         <ScrollArea className="h-[50vh]">
-          <div className="mt-4 flex space-y-2">
-            {filteredMessages.length > 0 ? (
-              filteredMessages.map((message) => (
-                <div key={message.id} className="p-2">
-                  <div className="text-sm text-slate-500">{message.sender}</div>
-                  <div className="text-slate-700">{message.content}</div>
-                </div>
-              ))
-            ) : (
-              <p>No messages to display</p>
-            )}
-          </div>
+          {/* ... existing message display code ... */}
         </ScrollArea>
       </div>
       <div className="mt-4 flex flex-col gap-2">
-        <Textarea placeholder="Type a message..." className="" />
+        <Textarea
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+          placeholder="Type a message..."
+        />
         <div className="flex justify-between">
           <Input id="file" type="file" className="w-fit" />
           <Button onClick={sendMessage}>Send</Button>

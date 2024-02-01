@@ -16,85 +16,14 @@ const Sidebar = ({ className }: { className?: string }) => {
     {
       id: 1,
       name: "Mark Barton",
-      lastMessage:
-        "dfg fgghnd dfsg sd gf gh fgd fg tn yrft ydfr gdx gf th byjhdyus r ase fvzdr g xfth yjh",
+      lastMessage: "dfg fgghnd dfsg sd gf gh fgd fg tn yrft ydfr gdx ",
       lasttimestamp: "2023-01-09 16:33:22 EST",
     },
     {
       id: 2,
       name: "Dr. Destin Roberts",
       lastMessage:
-        "dfg fgghnd dfsg sd gf gh fgd fg tn yrft ydfr gdx gf th byjhdyus r ase fvzdr g xfth yjh",
-      lasttimestamp: "2023-01-09 16:33:22 EST",
-    },
-    {
-      id: 2,
-      name: "Dr. Destin Roberts",
-      lastMessage:
-        "dfg fgghnd dfsg sd gf gh fgd fg tn yrft ydfr gdx gf th byjhdyus r ase fvzdr g xfth yjh",
-      lasttimestamp: "2023-01-09 16:33:22 EST",
-    },
-    {
-      id: 2,
-      name: "Dr. Destin Roberts",
-      lastMessage:
-        "dfg fgghnd dfsg sd gf gh fgd fg tn yrft ydfr gdx gf th byjhdyus r ase fvzdr g xfth yjh",
-      lasttimestamp: "2023-01-09 16:33:22 EST",
-    },
-    {
-      id: 2,
-      name: "Dr. Destin Roberts",
-      lastMessage:
-        "dfg fgghnd dfsg sd gf gh fgd fg tn yrft ydfr gdx gf th byjhdyus r ase fvzdr g xfth yjh",
-      lasttimestamp: "2023-01-09 16:33:22 EST",
-    },
-    {
-      id: 2,
-      name: "Dr. Destin Roberts",
-      lastMessage:
-        "dfg fgghnd dfsg sd gf gh fgd fg tn yrft ydfr gdx gf th byjhdyus r ase fvzdr g xfth yjh",
-      lasttimestamp: "2023-01-09 16:33:22 EST",
-    },
-    {
-      id: 2,
-      name: "Dr. Destin Roberts",
-      lastMessage:
-        "dfg fgghnd dfsg sd gf gh fgd fg tn yrft ydfr gdx gf th byjhdyus r ase fvzdr g xfth yjh",
-      lasttimestamp: "2023-01-09 16:33:22 EST",
-    },
-    {
-      id: 2,
-      name: "Dr. Destin Roberts",
-      lastMessage:
-        "dfg fgghnd dfsg sd gf gh fgd fg tn yrft ydfr gdx gf th byjhdyus r ase fvzdr g xfth yjh",
-      lasttimestamp: "2023-01-09 16:33:22 EST",
-    },
-    {
-      id: 2,
-      name: "Dr. Destin Roberts",
-      lastMessage:
-        "dfg fgghnd dfsg sd gf gh fgd fg tn yrft ydfr gdx gf th byjhdyus r ase fvzdr g xfth yjh",
-      lasttimestamp: "2023-01-09 16:33:22 EST",
-    },
-    {
-      id: 2,
-      name: "Dr. Destin Roberts",
-      lastMessage:
-        "dfg fgghnd dfsg sd gf gh fgd fg tn yrft ydfr gdx gf th byjhdyus r ase fvzdr g xfth yjh",
-      lasttimestamp: "2023-01-09 16:33:22 EST",
-    },
-    {
-      id: 2,
-      name: "Dr. Destin Roberts",
-      lastMessage:
-        "dfg fgghnd dfsg sd gf gh fgd fg tn yrft ydfr gdx gf th byjhdyus r ase fvzdr g xfth yjh",
-      lasttimestamp: "2023-01-09 16:33:22 EST",
-    },
-    {
-      id: 2,
-      name: "Dr. Destin Roberts",
-      lastMessage:
-        "dfg fgghnd dfsg sd gf gh fgd fg tn yrft ydfr gdx gf th byjhdyus r ase fvzdr g xfth yjh",
+        "dfg fgghnd dfsg sd gf gh fgd fg tn yrft ydfr gdx  g xfth yjh",
       lasttimestamp: "2023-01-09 16:33:22 EST",
     },
 
@@ -116,7 +45,7 @@ const Sidebar = ({ className }: { className?: string }) => {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
-      <ScrollArea className="h-[60vh] max-h-[60vh] w-full [&>div]:flex">
+      <ScrollArea className="h-[60vh] max-h-[60vh] [&>div>div]:!block">
         {filteredContacts.map((contact) => (
           <div
             key={contact.id}
@@ -127,14 +56,14 @@ const Sidebar = ({ className }: { className?: string }) => {
               <AvatarImage src="https://github.com/shadcn.png" />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
-            <div className="flex w-full min-w-0 flex-grow flex-col">
+            <div className="flex w-full min-w-0 flex-col">
               <div className="flex w-full min-w-0 justify-between">
                 <p className="truncate font-medium">{contact.name}</p>
                 <p className="block text-xs text-slate-500">
                   {dayjs(contact.lasttimestamp).format("ddd, MMM D")}
                 </p>
               </div>
-              <p className="truncate text-sm text-slate-500">
+              <p className="max-w-60 truncate text-sm text-slate-500">
                 {contact.lastMessage}
               </p>
             </div>

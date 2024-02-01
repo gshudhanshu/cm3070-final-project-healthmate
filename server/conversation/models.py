@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -11,6 +12,25 @@ class Conversation(models.Model):
     
     def __str__(self):
         return f"{self.patient}'s conversation with {self.doctor}"
+    
+    def clean(self):
+        """
+        Custom validation to ensure patient is a user with account_type 'patient'
+        and doctor is a user with account_type 'doctor'.
+        """
+        if self.patient and self.patient.account_type != 'patient':
+            raise ValidationError("The patient must be a user with account type 'patient'.")
+        if self.doctor and self.doctor.account_type != 'doctor':
+            raise ValidationError("The doctor must be a user with account type 'doctor'.")
+        
+    def save(self, *args, **kwargs):
+        """
+        Override the save method to include clean.
+        """
+        self.clean()
+        super(Conversation, self).save(*args, **kwargs)
+        
+
 
 class Message(models.Model):
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
