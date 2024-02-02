@@ -3,11 +3,11 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import axios from "axios";
 import { User } from "@/types/user";
-
 import { useAuthStore } from "@/store/useAuthStore";
 
 const API_URL = process.env.API_URL;
 const CONVERSATIONS_URL = `${API_URL}/conversations/`;
+const SOCKET_URL = `ws://127.0.0.1:8000/socket.io/conversation/4/`;
 
 interface Message {
   id: number;
@@ -22,16 +22,25 @@ interface Conversation {
   id: number;
   patient: User | null;
   doctor: User | null;
-  last_message: {
-    id: 4;
-    sender: User | null;
-    text: string;
-    timestamp: string;
-    conversation: number;
-  };
+  last_message: Message;
+}
+
+interface Attachment {
+  name: string;
+  type: string;
+  size: number;
+  content: string; // base64 encoded string
+}
+
+interface MessageData {
+  conversationId: number;
+  sender: number;
+  text: string;
+  attachments: Attachment[];
 }
 
 interface MessagesState {
+  websocket: any;
   messages: Message[];
   conversations: Conversation[];
   selectedConversation: Conversation | null;
@@ -41,11 +50,13 @@ interface MessagesState {
   sendMessage: (
     conversationId: number,
     message: string,
-    attchement?: File,
+    attchements?: Attachment[],
   ) => void;
   selectConversation: (conversations: Conversation) => void;
   toggleSidebar: () => void;
   getOppositeParticipant: (conversation: Conversation) => User | null;
+  connectWebSocket: () => void;
+  disconnectWebSocket: () => void;
 }
 
 export const useMessagesStore = create(
@@ -80,34 +91,6 @@ export const useMessagesStore = create(
       console.log(response.data);
       set({ messages: response.data });
     },
-    sendMessage: async (
-      conversationId: number,
-      message: string,
-      attachment?: File,
-    ) => {
-      try {
-        const { token } = useAuthStore.getState();
-        const formData = new FormData();
-        formData.append("text", message);
-        if (attachment) {
-          formData.append("attachment", attachment);
-        }
-        await axios.post(
-          `${API_URL}/conversations/${conversationId}/messages/`,
-          formData,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "multipart/form-data",
-            },
-          },
-        );
-        // Optionally, you can update the messages state with the new message or refetch the messages
-      } catch (error) {
-        console.error("Error sending message:", error);
-        // Handle error (e.g., set an error state)
-      }
-    },
 
     selectConversation: (conversation) => {
       set({ selectedConversation: conversation });
@@ -128,5 +111,79 @@ export const useMessagesStore = create(
         ? conversation.patient
         : conversation.doctor;
     },
+
+    // ==============
+    // WEB SOCKETS
+    // ==============
+    websocket: null,
+
+    connectWebSocket: () => {
+      const websocket = new WebSocket(
+        `${SOCKET_URL}?token=${useAuthStore.getState().token}`,
+      );
+
+      websocket.onopen = () => {
+        console.log("WebSocket Connected");
+      };
+
+      websocket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === "new_message") {
+          set((state) => ({
+            messages: [...state.messages, data.message],
+          }));
+        }
+      };
+
+      set({ websocket });
+    },
+
+    disconnectWebSocket: () => {
+      get().websocket?.close();
+      console.log("WebSocket Disconnected");
+      set({ websocket: null });
+    },
+
+    sendMessage: async (conversationId, message, attachments = []) => {
+      const { user } = useAuthStore.getState();
+      if (!user || !get().websocket) return;
+
+      const messageData: MessageData = {
+        conversationId,
+        sender: user.id,
+        text: message,
+        attachments: await Promise.all(
+          attachments.map(async (file) => {
+            const base64 = await convertFileToBase64(file);
+            return {
+              name: file.name,
+              type: file.type,
+              size: file.size,
+              content: base64 as string,
+            };
+          }),
+        ),
+      };
+
+      get().websocket.send(
+        JSON.stringify({
+          action: "send_message",
+          ...messageData,
+        }),
+      );
+    },
   })),
 );
+
+// Helper function to convert file to Base64
+const convertFileToBase64 = (file: Attachment | Blob) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    if (file instanceof Blob) {
+      reader.readAsDataURL(file);
+    } else {
+      reject(new Error("Invalid file type"));
+    }
+  });

@@ -1,15 +1,14 @@
 from itertools import chain
 from django.core.exceptions import ValidationError
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from .models import Conversation, Message, Call,Attachment
-from .serializers import ConversationSerializer, MessageSerializer, CallSerializer
+from .serializers import ConversationSerializer, MessageSerializer, CallSerializer, AttachmentSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.db import models
 from rest_framework.exceptions import NotFound
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from django.core.cache import cache
-
-
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 
 class ConversationViewSet(viewsets.ModelViewSet):
@@ -72,7 +71,6 @@ class MessageViewSet(viewsets.ModelViewSet):
         for file in attachments_data.getlist('file'):
             Attachment.objects.create(message=message, file=file)
 
-
     def to_representation(self, instance):
         """
         Custom representation for handling different types of instances (Message or Call)
@@ -95,3 +93,16 @@ class CallViewSet(viewsets.ModelViewSet):
     serializer_class = CallSerializer
     queryset = Call.objects.all()
     permission_classes = [IsAuthenticated]
+
+
+class FileUploadView(APIView):
+    parser_classes = (MultiPartParser, FormParser,)
+
+    def post(self, request, *args, **kwargs):
+        file_serializer = AttachmentSerializer(data=request.data)
+
+        if file_serializer.is_valid():
+            file_serializer.save()
+            return Response(file_serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

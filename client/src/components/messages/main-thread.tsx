@@ -21,14 +21,20 @@ const MessageThread = ({ className }: { className?: string }) => {
     getOppositeParticipant,
     messages,
     fetchMessages,
+    sendMessage,
+    connectWebSocket,
+    disconnectWebSocket,
   } = useMessagesStore();
   const [newMessage, setNewMessage] = useState("");
+  const [files, setFiles] = useState<File[]>([]);
 
   const size = useWindowSize();
 
   useEffect(() => {
     if (selectedConversation) {
       fetchMessages(selectedConversation.id);
+      disconnectWebSocket();
+      connectWebSocket();
     }
   }, [selectedConversation]);
 
@@ -44,10 +50,24 @@ const MessageThread = ({ className }: { className?: string }) => {
   //   // ... more messages
   // ];
 
-  const sendMessage = () => {
-    // Logic to send a new message
-    console.log("Sending message:", newMessage);
+  const handleSendMessage = () => {
+    // Send message
+    if (selectedConversation) {
+      const attachments = files.map((file) => ({
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        content: file.arrayBuffer.toString(),
+      }));
+
+      sendMessage(selectedConversation.id, newMessage, attachments);
+    }
     setNewMessage("");
+    setFiles([]);
+  };
+
+  const handleFileChange = (event: any) => {
+    setFiles([...event.target.files]);
   };
 
   // Determine if we are in a mobile view
@@ -61,10 +81,10 @@ const MessageThread = ({ className }: { className?: string }) => {
       )}
     >
       <div>
-        <div className="my-7 flex items-center gap-3">
+        <div className="flex items-center gap-3 my-7">
           {isMobile && !isSidebarVisible && (
             <ChevronLeftIcon
-              className="h-6 w-6 cursor-pointer"
+              className="w-6 h-6 cursor-pointer"
               onClick={toggleSidebar}
             />
           )}
@@ -91,7 +111,7 @@ const MessageThread = ({ className }: { className?: string }) => {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
-                  <div className="flex w-full justify-between gap-2">
+                  <div className="flex justify-between w-full gap-2">
                     <span className="font-semibold capitalize">
                       {message.sender.first_name +
                         " " +
@@ -108,15 +128,15 @@ const MessageThread = ({ className }: { className?: string }) => {
           </div>
         </ScrollArea>
       </div>
-      <div className="mt-4 flex flex-col gap-2">
+      <div className="flex flex-col gap-2 mt-4">
         <Textarea
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Type a message..."
         />
         <div className="flex justify-between">
-          <Input id="file" type="file" className="w-fit" />
-          <Button onClick={sendMessage}>Send</Button>
+          <Input id="file" type="file" multiple className="w-fit" />
+          <Button onClick={handleSendMessage}>Send</Button>
         </div>
       </div>
     </div>
