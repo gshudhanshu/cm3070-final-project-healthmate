@@ -43,6 +43,7 @@ ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
     "daphne",
+    "channels",
     "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -56,7 +57,6 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     "djoser",
     "drf_yasg",
-    "channels",
     # Apps
     "user",
     "appointment",
