@@ -42,8 +42,6 @@ class DoctorQualificationSerializer(serializers.ModelSerializer):
         model = DoctorQualification
         fields = ['name', 'university','start_year', 'finish_year']
         
-        
-
 
 class DoctorSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer(read_only=True)
@@ -75,3 +73,28 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = ['id', 'patient_name', 'rating', 'comment', 'date_created']
+
+
+class SimpleProfileSerializer(serializers.ModelSerializer):
+    profile_pic = serializers.SerializerMethodField()
+    username = serializers.CharField(source='user.username')
+    first_name = serializers.CharField(source='user.first_name')
+    last_name = serializers.CharField(source='user.last_name')
+    email = serializers.EmailField(source='user.email')
+    account_type = serializers.EmailField(source='user.account_type')
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'profile_pic', 'account_type']
+        ref_name = 'SimpleProfile'
+    
+    def get_profile_pic(self, obj):
+        # Check if the user is a doctor
+        if hasattr(obj, 'doctor_profile'):
+            return obj.doctor_profile.profile_pic.url if obj.doctor_profile.profile_pic else None
+
+        # Check if the user is a patient
+        if hasattr(obj, 'patient_profile'):
+            return obj.patient_profile.profile_pic.url if obj.patient_profile.profile_pic else None
+
+        return None

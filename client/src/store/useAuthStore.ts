@@ -1,13 +1,14 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import axios from "axios";
+import { User } from "@/types/user";
 
 const API_URL = process.env.API_URL;
 const LOGIN_URL = `${API_URL}/auth/jwt/create/`;
 const USER_URL = `${API_URL}/auth/users/me/`;
 
 interface AuthState {
-  user: any | null;
+  user: User | null;
   token: string | null;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;

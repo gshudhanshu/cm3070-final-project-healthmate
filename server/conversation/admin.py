@@ -3,7 +3,7 @@ from django import forms
 
 
 # Register your models here.
-from .models import Conversation, Message, Call
+from .models import Conversation, Message, Call, Attachment
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
@@ -19,8 +19,18 @@ class ConversationAdminForm(forms.ModelForm):
         self.fields['doctor'].queryset = User.objects.filter(account_type='doctor')
 
 
-admin.site.register(Message)
+admin.site.register(Attachment)
 admin.site.register(Call)
+
+class AttachmentInline(admin.TabularInline):
+    model = Attachment
+    extra = 1  
+
+@admin.register(Message)
+class MessageAdmin(admin.ModelAdmin):
+    list_display = ['text', 'sender', 'timestamp', 'conversation']  
+    inlines = [AttachmentInline]
+
 
 @admin.register(Conversation)
 class ConversationAdmin(admin.ModelAdmin):

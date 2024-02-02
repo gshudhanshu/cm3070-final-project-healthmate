@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "@/components/messages/side-bar";
 import MessageThread from "@/components/messages/main-thread";
-import { Conversation, Message } from "@/types/conversation";
 import { useMessagesStore } from "@/store/useMessageStore";
 import { useWindowSize } from "@uidotdev/usehooks";
 
@@ -27,13 +26,6 @@ const MessagesPage: React.FC = () => {
           <MessageThread className="pb-10 pr-6" />
         </>
       )}
-    </div>
-  );
-
-  return (
-    <div className="container flex w-full gap-6 px-0">
-      <Sidebar className="flex-shrink-1 w-full px-6 pb-6 md:max-w-80" />
-      <MessageThread className={"hidden w-full flex-grow pb-10 pr-6 md:flex"} />
     </div>
   );
 };

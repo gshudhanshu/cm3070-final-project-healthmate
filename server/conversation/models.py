@@ -5,8 +5,10 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class Conversation(models.Model):
-    patient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='doctor_conversations')
-    doctor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='patient_conversations')
+    patient = models.ForeignKey(User, on_delete=models.CASCADE,
+                                related_name='doctor_conversations')
+    doctor = models.ForeignKey(User, on_delete=models.CASCADE,
+                               related_name='patient_conversations')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -34,7 +36,8 @@ class Conversation(models.Model):
 
 class Message(models.Model):
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
-    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE,
+                               related_name='sent_messages')
     text = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     

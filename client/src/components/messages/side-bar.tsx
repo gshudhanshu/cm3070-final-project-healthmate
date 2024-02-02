@@ -1,38 +1,40 @@
 // components/Sidebar.tsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useMessagesStore } from "@/store/useMessageStore";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import dayjs from "dayjs";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useRouter } from "next/navigation";
 
 const Sidebar = ({ className }: { className?: string }) => {
-  const { selectContact } = useMessagesStore();
+  const router = useRouter();
+  const { user } = useAuthStore();
+  const {
+    selectConversation,
+    fetchConversations,
+    conversations,
+    getOppositeParticipant,
+  } = useMessagesStore();
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Dummy contacts
-  const contacts = [
-    {
-      id: 1,
-      name: "Mark Barton",
-      lastMessage: "dfg fgghnd dfsg sd gf gh fgd fg tn yrft ydfr gdx ",
-      lasttimestamp: "2023-01-09 16:33:22 EST",
-    },
-    {
-      id: 2,
-      name: "Dr. Destin Roberts",
-      lastMessage:
-        "dfg fgghnd dfsg sd gf gh fgd fg tn yrft ydfr gdx  g xfth yjh",
-      lasttimestamp: "2023-01-09 16:33:22 EST",
-    },
+  useEffect(() => {
+    if (!user) {
+      // router.push("/login");
+      return;
+    }
+    fetchConversations(user.username);
+  }, [user, fetchConversations, router]);
 
-    // ... more contacts
-  ];
-
-  const filteredContacts = contacts.filter((contact) =>
-    contact.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const filteredConversations = conversations.filter((conversation) => {
+    const accountType =
+      user && user.account_type !== "patient" ? "doctor" : "patient";
+    const fullName =
+      `${conversation[accountType]?.first_name} ${conversation[accountType]?.last_name}`.toLowerCase();
+    return fullName.includes(searchTerm.toLowerCase());
+  });
 
   return (
     <aside className={cn("bg-slate-100 p-4", className)}>
@@ -46,25 +48,38 @@ const Sidebar = ({ className }: { className?: string }) => {
         />
       </div>
       <ScrollArea className="h-[60vh] max-h-[60vh] [&>div>div]:!block">
-        {filteredContacts.map((contact) => (
+        {filteredConversations.map((conversation) => (
           <div
-            key={contact.id}
+            key={conversation.id}
             className="flex items-center gap-2 p-2 hover:bg-slate-200"
-            onClick={() => selectContact(contact.name)}
+            onClick={() => selectConversation(conversation)}
           >
             <Avatar className="flex-shrink-0 rounded-lg">
-              <AvatarImage src="https://github.com/shadcn.png" />
-              <AvatarFallback>CN</AvatarFallback>
+              <AvatarImage
+                src={getOppositeParticipant(conversation)?.profile_pic || ""}
+              />
+              <AvatarFallback>
+                {getOppositeParticipant(conversation)?.first_name[0] ??
+                  "" + getOppositeParticipant(conversation)?.last_name[0] ??
+                  ""}
+              </AvatarFallback>
             </Avatar>
-            <div className="flex w-full min-w-0 flex-col">
-              <div className="flex w-full min-w-0 justify-between">
-                <p className="truncate font-medium">{contact.name}</p>
+            <div className="flex flex-col w-full min-w-0">
+              <div className="flex justify-between w-full min-w-0 gap-3">
+                <p className="font-medium truncate">
+                  {getOppositeParticipant(conversation)?.first_name +
+                    " " +
+                    getOppositeParticipant(conversation)?.last_name}
+                </p>
                 <p className="block text-xs text-slate-500">
-                  {dayjs(contact.lasttimestamp).format("ddd, MMM D")}
+                  {conversation.last_message &&
+                    dayjs(conversation.last_message.timestamp).format(
+                      "ddd, MMM D",
+                    )}
                 </p>
               </div>
-              <p className="max-w-60 truncate text-sm text-slate-500">
-                {contact.lastMessage}
+              <p className="text-sm truncate max-w-80 text-slate-500">
+                {conversation.last_message?.text}
               </p>
             </div>
           </div>

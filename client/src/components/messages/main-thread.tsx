@@ -1,5 +1,5 @@
 // components/MessageThread.tsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useMessagesStore } from "@/store/useMessageStore";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -8,39 +8,47 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { useWindowSize } from "@uidotdev/usehooks";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 import dayjs from "dayjs";
+import { get } from "http";
 
 const MessageThread = ({ className }: { className?: string }) => {
-  const { selectedContact, isSidebarVisible, toggleSidebar } =
-    useMessagesStore();
+  const {
+    selectedConversation,
+    isSidebarVisible,
+    toggleSidebar,
+    getOppositeParticipant,
+    messages,
+    fetchMessages,
+  } = useMessagesStore();
   const [newMessage, setNewMessage] = useState("");
 
   const size = useWindowSize();
 
+  useEffect(() => {
+    if (selectedConversation) {
+      fetchMessages(selectedConversation.id);
+    }
+  }, [selectedConversation]);
+
   // Dummy messages
-  const messages = [
-    {
-      id: 1,
-      sender: "Mark Barton",
-      recipient: "User",
-      content: "Hello there!",
-      timestamp: new Date(),
-    },
-    // ... more messages
-  ];
+  // const messages = [
+  //   {
+  //     id: 1,
+  //     sender: "Mark Barton",
+  //     recipient: "User",
+  //     content: "Hello there!",
+  //     timestamp: new Date(),
+  //   },
+  //   // ... more messages
+  // ];
 
   const sendMessage = () => {
     // Logic to send a new message
     console.log("Sending message:", newMessage);
     setNewMessage("");
   };
-
-  const filteredMessages = messages.filter(
-    (message) =>
-      message.sender === selectedContact ||
-      message.recipient === selectedContact,
-  );
 
   // Determine if we are in a mobile view
   const isMobile = size?.width && size.width < 768;
@@ -60,13 +68,44 @@ const MessageThread = ({ className }: { className?: string }) => {
               onClick={toggleSidebar}
             />
           )}
-          <h2 className="text-2xl font-medium">{selectedContact}</h2>
+          <h2 className="text-2xl font-medium">
+            {!selectedConversation && "Select a conversation"}
+            {selectedConversation &&
+              getOppositeParticipant(selectedConversation)?.first_name +
+                " " +
+                getOppositeParticipant(selectedConversation)?.last_name}
+          </h2>
           <span className="text-xs text-slate-600">
             {dayjs().format("DD MMM YY, HH:mm A")}
           </span>
         </div>
         <ScrollArea className="h-[50vh]">
-          {/* ... existing message display code ... */}
+          {/* Render messages here, align all messages on left side, timestamp on right side, and an avatar before message and name */}
+          <div className="flex flex-col gap-4 p-4">
+            {messages.map((message) => (
+              <div key={message.id} className="flex items-start gap-3">
+                <Avatar>
+                  <AvatarImage src={message.sender.profile_pic ?? ""} />
+                  <AvatarFallback>
+                    {message.sender.first_name[0] + message.sender.last_name[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <div className="flex w-full justify-between gap-2">
+                    <span className="font-semibold capitalize">
+                      {message.sender.first_name +
+                        " " +
+                        message.sender.last_name}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {dayjs(message.timestamp).format("HH:mm A")}
+                    </span>
+                  </div>
+                  <p className="mt-1">{message.text}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </ScrollArea>
       </div>
       <div className="mt-4 flex flex-col gap-2">
