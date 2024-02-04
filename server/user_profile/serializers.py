@@ -89,12 +89,6 @@ class SimpleProfileSerializer(serializers.ModelSerializer):
         ref_name = 'SimpleProfile'
     
     def get_profile_pic(self, obj):
-        # Check if the user is a doctor
-        if hasattr(obj, 'doctor_profile'):
-            return obj.doctor_profile.profile_pic.url if obj.doctor_profile.profile_pic else None
+        return obj.profile_pic.url if obj.profile_pic else None
 
-        # Check if the user is a patient
-        if hasattr(obj, 'patient_profile'):
-            return obj.patient_profile.profile_pic.url if obj.patient_profile.profile_pic else None
 
-        return None

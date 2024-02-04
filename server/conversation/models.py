@@ -45,7 +45,7 @@ class Message(models.Model):
         return f"Message from {self.sender} at {self.timestamp}"
 
 class Attachment(models.Model):
-    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='attachments')
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='attachments', null=True, blank=True)
     file = models.FileField(upload_to='attachments/')
     
     def __str__(self):

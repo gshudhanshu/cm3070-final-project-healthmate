@@ -18,6 +18,11 @@ interface Message {
   conversation: number;
 }
 
+interface AttachmentResponse {
+  id: string;
+  url: string;
+}
+
 interface Conversation {
   id: number;
   patient: User | null;
@@ -25,18 +30,11 @@ interface Conversation {
   last_message: Message;
 }
 
-interface Attachment {
-  name: string;
-  type: string;
-  size: number;
-  content: string; // base64 encoded string
-}
-
 interface MessageData {
   conversationId: number;
   sender: number;
   text: string;
-  attachments: Attachment[];
+  attachments: AttachmentResponse[];
 }
 
 interface MessagesState {
@@ -50,7 +48,7 @@ interface MessagesState {
   sendMessage: (
     conversationId: number,
     message: string,
-    attchements?: Attachment[],
+    attachments: File[],
   ) => void;
   selectConversation: (conversations: Conversation) => void;
   toggleSidebar: () => void;
@@ -150,46 +148,56 @@ export const useMessagesStore = create(
       set({ websocket: null });
     },
 
-    sendMessage: async (conversationId, message, attachments = []) => {
+    sendMessage: async (conversationId, message, attachments: File[] = []) => {
       const { user } = useAuthStore.getState();
       if (!user || !get().websocket) return;
 
-      const messageData: MessageData = {
-        conversationId,
-        sender: user.id,
-        text: message,
-        attachments: await Promise.all(
-          attachments.map(async (file) => {
-            const base64 = await convertFileToBase64(file);
-            return {
-              name: file.name,
-              type: file.type,
-              size: file.size,
-              content: base64 as string,
-            };
-          }),
-        ),
-      };
-
-      get().websocket.send(
-        JSON.stringify({
-          action: "send_message",
-          ...messageData,
-        }),
+      // Upload attachments and collect their URLs or IDs
+      const attachmentPromises: Promise<AttachmentResponse>[] = attachments.map(
+        async (file) => {
+          const formData = new FormData();
+          formData.append("file", file);
+          try {
+            const response = await axios.post<AttachmentResponse>(
+              `${API_URL}/conversations/attachments/`,
+              formData,
+              {
+                headers: {
+                  Authorization: `Bearer ${useAuthStore.getState().token}`,
+                  "Content-Type": "multipart/form-data",
+                },
+              },
+            );
+            return response.data; // The response should contain the URL or ID of the uploaded file
+          } catch (error) {
+            console.error("Error uploading attachment:", error);
+            throw error; // You might want to handle this differently
+          }
+        },
       );
+
+      try {
+        const uploadedAttachments = await Promise.all(attachmentPromises);
+        console.log("Uploaded Attachments:", uploadedAttachments);
+
+        // Construct and send the WebSocket message
+        const messageData: MessageData = {
+          conversationId,
+          sender: user.id,
+          text: message,
+          attachments: uploadedAttachments,
+        };
+
+        get().websocket.send(
+          JSON.stringify({
+            action: "send_message",
+            ...messageData,
+          }),
+        );
+      } catch (error) {
+        console.error("Error sending message:", error);
+        // Handle error
+      }
     },
   })),
 );
-
-// Helper function to convert file to Base64
-const convertFileToBase64 = (file: Attachment | Blob) =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    if (file instanceof Blob) {
-      reader.readAsDataURL(file);
-    } else {
-      reject(new Error("Invalid file type"));
-    }
-  });

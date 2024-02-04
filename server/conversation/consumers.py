@@ -15,14 +15,11 @@ User = get_user_model()
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        # Extract token from query string
-        query_string = self.scope['query_string'].decode('utf-8')
-        token = self.get_token_from_query_string(query_string)
-
-        # Verify token and get user
+        # Extract and verify token, then set user and room details
+        token = self.get_token_from_query_string(self.scope['query_string'].decode('utf-8'))
         user = await self.get_user_from_token(token)
-        if user is None:
-            await self.close(code=4001)  # Custom close code for authentication error
+        if not user:
+            await self.close(code=4001)  # Authentication error
             return
 
         self.user = user
@@ -30,79 +27,44 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.room_group_name = f'chat_{self.conversation_id}'
 
         # Join room group
-        await self.channel_layer.group_add(
-            self.room_group_name,
-            self.channel_name
-        )
-
+        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
 
     async def disconnect(self, close_code):
-        # Leave room group
-        await self.channel_layer.group_discard(
-            self.room_group_name,
-            self.channel_name
-        )
+        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     async def receive(self, text_data):
         data = json.loads(text_data)
-        print(f"Received text data: {text_data}")
-
-        # Extract data
         text = data.get('text', '')
         sender_id = data.get('sender', None)
         attachments = data.get('attachments', [])
 
-        # Save message and attachments to the database
         message, sender_data = await self.save_message(sender_id, text)
-        
         if message:
-            # Process and save attachments
-            for attachment in attachments:
-                await self.save_attachment(message, attachment)
-
-            # Fetch attachments URLs asynchronously
+            await self.link_attachments_to_message(message, attachments)
             attachment_urls = await self.get_attachment_urls(message)
 
-            # Prepare the message data for broadcast
             message_data = {
-                'id': message.id,
-                'text': message.text,
-                'sender': sender_data,
-                'timestamp': str(message.timestamp),
-                'attachments': attachment_urls,
-                'conversation': self.conversation_id,
-                'type': 'message'
+                'id': message.id, 'text': message.text, 'sender': sender_data,
+                'timestamp': str(message.timestamp), 'attachments': attachment_urls,
+                'conversation': self.conversation_id, 'type': 'message'
             }
-
-            # Send message to room group
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    'type': 'chat_message',
-                    'message': message_data
-                }
-            )
+            await self.channel_layer.group_send(self.room_group_name, {'type': 'chat_message', 'message': message_data})
         else:
             print("Message not saved.")
 
     # Helper method to serialize the sender
     def serialize_user(self, user):
-        # Adjust the fields as per your User model
-        if(user.account_type == 'patient'):
-            profile_pic = Patient.objects.get(user=user).profile_pic.url
-        elif(user.account_type == 'doctor'):
-            profile_pic = Doctor.objects.get(user=user).profile_pic.url
-        else :
-            profile_pic = None
+        profile_pic_url = None
+        if user.account_type == 'patient':
+            profile_pic_url = Patient.objects.get(user=user).profile_pic.url if Patient.objects.get(user=user).profile_pic else None
+        elif user.account_type == 'doctor':
+            profile_pic_url = Doctor.objects.get(user=user).profile_pic.url if Doctor.objects.get(user=user).profile_pic else None
+
         return {
-            'id': user.id,
-            'username': user.username,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'email': user.email,
-            'account_type': user.account_type,
-            'profile_pic': profile_pic
+            'id': user.id, 'username': user.username, 'first_name': user.first_name,
+            'last_name': user.last_name, 'email': user.email, 'account_type': user.account_type,
+            'profile_pic': profile_pic_url
         }
         
     @database_sync_to_async
@@ -134,12 +96,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
     # Receive message from room group
     async def chat_message(self, event):
         message = event['message']
+        await self.send(text_data=json.dumps({'message': message, 'type': 'new_message'}))
 
-        # Send message to WebSocket
-        await self.send(text_data=json.dumps({
-            'message': message,
-            'type': 'new_message'
-        }))
 
 
     # Helper method to extract token from query string
@@ -166,3 +124,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return user
         except (InvalidToken, TokenError):
             return None
+        
+
+    @database_sync_to_async
+    def link_attachments_to_message(self, message, attachments):
+        for attachment_to_upload in attachments:
+            print(attachment_to_upload)
+            try:
+                attachment = Attachment.objects.get(id=attachment_to_upload['id'])
+                attachment.message = message
+                attachment.save()
+            except Attachment.DoesNotExist:
+                pass

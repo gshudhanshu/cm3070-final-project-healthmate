@@ -9,6 +9,8 @@ class AttachmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attachment
         fields = '__all__'
+        extra_kwargs = {'message': {'required': False, 'allow_null': True}}
+
 
 class ConversationSerializer(serializers.ModelSerializer):
     patient = serializers.SerializerMethodField()

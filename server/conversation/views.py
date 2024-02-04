@@ -96,11 +96,10 @@ class CallViewSet(viewsets.ModelViewSet):
 
 
 class FileUploadView(APIView):
-    parser_classes = (MultiPartParser, FormParser,)
+    parser_classes = (MultiPartParser, FormParser)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, format=None):
         file_serializer = AttachmentSerializer(data=request.data)
-
         if file_serializer.is_valid():
             file_serializer.save()
             return Response(file_serializer.data, status=status.HTTP_201_CREATED)

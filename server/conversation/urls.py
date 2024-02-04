@@ -8,7 +8,7 @@ router.register(r'calls', CallViewSet, basename='call')
 router.register(r'', ConversationViewSet, basename='conversation')
 
 urlpatterns = [
-    path('', include(router.urls)),
     path('<int:conversation_id>/messages/', MessageViewSet.as_view({'get': 'list', 'post': 'create'}), name='conversation-messages'),
-    path('upload_attachment/', FileUploadView.as_view, name='upload_attachment'),
+    path('attachments/', FileUploadView.as_view(), name='conversation-attachment'),
+    path('', include(router.urls)),
 ]

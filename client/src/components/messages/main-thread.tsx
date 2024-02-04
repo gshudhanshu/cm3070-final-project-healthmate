@@ -52,6 +52,7 @@ const MessageThread = ({ className }: { className?: string }) => {
 
   const handleSendMessage = () => {
     if (selectedConversation) {
+      console.log("files:", files);
       sendMessage(selectedConversation.id, newMessage, files);
       setNewMessage("");
       setFiles([]);
@@ -134,7 +135,13 @@ const MessageThread = ({ className }: { className?: string }) => {
           placeholder="Type a message..."
         />
         <div className="flex justify-between">
-          <Input id="file" type="file" multiple className="w-fit" />
+          <Input
+            id="file"
+            type="file"
+            multiple
+            className="w-fit"
+            onChange={handleFileChange}
+          />
           <Button onClick={handleSendMessage}>Send</Button>
         </div>
       </div>

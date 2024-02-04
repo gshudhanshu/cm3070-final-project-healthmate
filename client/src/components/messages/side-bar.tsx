@@ -56,7 +56,11 @@ const Sidebar = ({ className }: { className?: string }) => {
           >
             <Avatar className="flex-shrink-0 rounded-lg">
               <AvatarImage
-                src={getOppositeParticipant(conversation)?.profile_pic || ""}
+                src={
+                  `${
+                    process.env.NEXT_PUBLIC_BACKEND_URL
+                  }${getOppositeParticipant(conversation)?.profile_pic}` || ""
+                }
               />
               <AvatarFallback>
                 {getOppositeParticipant(conversation)?.first_name[0] ??
