@@ -33,8 +33,8 @@ const MessageThread = ({ className }: { className?: string }) => {
   useEffect(() => {
     if (selectedConversation) {
       fetchMessages(selectedConversation.id);
-      disconnectWebSocket();
       connectWebSocket();
+      return () => disconnectWebSocket();
     }
   }, [selectedConversation]);
 
@@ -51,23 +51,17 @@ const MessageThread = ({ className }: { className?: string }) => {
   // ];
 
   const handleSendMessage = () => {
-    // Send message
     if (selectedConversation) {
-      const attachments = files.map((file) => ({
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        content: file.arrayBuffer.toString(),
-      }));
-
-      sendMessage(selectedConversation.id, newMessage, attachments);
+      sendMessage(selectedConversation.id, newMessage, files);
+      setNewMessage("");
+      setFiles([]);
     }
-    setNewMessage("");
-    setFiles([]);
   };
 
-  const handleFileChange = (event: any) => {
-    setFiles([...event.target.files]);
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      setFiles(Array.from(event.target.files));
+    }
   };
 
   // Determine if we are in a mobile view
@@ -105,7 +99,12 @@ const MessageThread = ({ className }: { className?: string }) => {
             {messages.map((message) => (
               <div key={message.id} className="flex items-start gap-3">
                 <Avatar>
-                  <AvatarImage src={message.sender.profile_pic ?? ""} />
+                  <AvatarImage
+                    src={
+                      `${process.env.NEXT_PUBLIC_BACKEND_URL}${message.sender.profile_pic}` ??
+                      ""
+                    }
+                  />
                   <AvatarFallback>
                     {message.sender.first_name[0] + message.sender.last_name[0]}
                   </AvatarFallback>

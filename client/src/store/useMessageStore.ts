@@ -7,7 +7,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 
 const API_URL = process.env.API_URL;
 const CONVERSATIONS_URL = `${API_URL}/conversations/`;
-const SOCKET_URL = `ws://127.0.0.1:8000/socket.io/conversation/4/`;
+const SOCKET_URL = `ws://127.0.0.1:8000/socket.io/`;
 
 interface Message {
   id: number;
@@ -88,7 +88,7 @@ export const useMessagesStore = create(
           },
         },
       );
-      console.log(response.data);
+      // console.log(response.data);
       set({ messages: response.data });
     },
 
@@ -118,8 +118,11 @@ export const useMessagesStore = create(
     websocket: null,
 
     connectWebSocket: () => {
+      let conversationId = get().selectedConversation?.id;
       const websocket = new WebSocket(
-        `${SOCKET_URL}?token=${useAuthStore.getState().token}`,
+        `${SOCKET_URL}conversation/${conversationId}/?token=${
+          useAuthStore.getState().token
+        }`,
       );
 
       websocket.onopen = () => {
@@ -127,12 +130,15 @@ export const useMessagesStore = create(
       };
 
       websocket.onmessage = (event) => {
+        console.log(event);
         const data = JSON.parse(event.data);
+        console.log("WebSocket Message:", data);
         if (data.type === "new_message") {
           set((state) => ({
             messages: [...state.messages, data.message],
           }));
         }
+        console.log(get().messages);
       };
 
       set({ websocket });

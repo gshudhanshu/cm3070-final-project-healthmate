@@ -8,8 +8,10 @@ from djoser.conf import settings as djoser_settings
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from user_profile.models import Doctor, Patient
 
 User = get_user_model()
+
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -35,7 +37,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
 
-
     async def disconnect(self, close_code):
         # Leave room group
         await self.channel_layer.group_discard(
@@ -43,7 +44,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
-    # Receive message from WebSocket
     async def receive(self, text_data):
         data = json.loads(text_data)
         print(f"Received text data: {text_data}")
@@ -54,38 +54,60 @@ class ChatConsumer(AsyncWebsocketConsumer):
         attachments = data.get('attachments', [])
 
         # Save message and attachments to the database
-        message = await self.save_message(sender_id, text)
+        message, sender_data = await self.save_message(sender_id, text)
+        
+        if message:
+            # Process and save attachments
+            for attachment in attachments:
+                await self.save_attachment(message, attachment)
 
-        # Process and save attachments
-        for attachment in attachments:
-            await self.save_attachment(message, attachment)
+            # Fetch attachments URLs asynchronously
+            attachment_urls = await self.get_attachment_urls(message)
 
-        # Fetch attachments URLs asynchronously
-        attachment_urls = await self.get_attachment_urls(message)
-
-        # Prepare the message data for broadcast
-        message_data = {
-            'id': message.id,
-            'text': message.text,
-            'sender': message.sender_id,
-            'timestamp': str(message.timestamp),
-            'attachments': attachment_urls
-        }
-
-        # Send message to room group
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                'type': 'chat_message',
-                'message': message_data
+            # Prepare the message data for broadcast
+            message_data = {
+                'id': message.id,
+                'text': message.text,
+                'sender': sender_data,
+                'timestamp': str(message.timestamp),
+                'attachments': attachment_urls,
+                'conversation': self.conversation_id,
+                'type': 'message'
             }
-        )
 
+            # Send message to room group
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'chat_message',
+                    'message': message_data
+                }
+            )
+        else:
+            print("Message not saved.")
+
+    # Helper method to serialize the sender
+    def serialize_user(self, user):
+        # Adjust the fields as per your User model
+        if(user.account_type == 'patient'):
+            profile_pic = Patient.objects.get(user=user).profile_pic.url
+        elif(user.account_type == 'doctor'):
+            profile_pic = Doctor.objects.get(user=user).profile_pic.url
+        else :
+            profile_pic = None
+        return {
+            'id': user.id,
+            'username': user.username,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email,
+            'account_type': user.account_type,
+            'profile_pic': profile_pic
+        }
         
     @database_sync_to_async
     def get_attachment_urls(self, message):
         return [attachment.file.url for attachment in message.attachments.all()]
-
 
     # Helper method to save message
     @database_sync_to_async
@@ -93,8 +115,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if sender_id:
             sender = User.objects.get(id=sender_id)
             conversation = Conversation.objects.get(id=self.conversation_id)
-            return Message.objects.create(sender=sender, conversation=conversation, text=text)
-        return None
+            message = Message.objects.create(sender=sender, conversation=conversation, text=text)
+            sender_data = self.serialize_user(sender)
+            return message, sender_data
+        return None, None
+
 
     # Helper method to save attachments
     @database_sync_to_async
@@ -105,13 +130,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 file=attachment['content']  # Assuming 'content' is the file data
             )
 
+
     # Receive message from room group
     async def chat_message(self, event):
         message = event['message']
 
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
-            'message': message
+            'message': message,
+            'type': 'new_message'
         }))
 
 
@@ -123,6 +150,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 token = param.split('=')[1]
                 break
         return token
+
 
     # Helper method to authenticate user from token
     @database_sync_to_async
@@ -138,4 +166,3 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return user
         except (InvalidToken, TokenError):
             return None
-
