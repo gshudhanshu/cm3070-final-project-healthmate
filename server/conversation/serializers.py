@@ -6,10 +6,32 @@ from user.serializers import UserSerializer
 from user_profile.serializers import DoctorSerializer, PatientSerializer, SimpleProfileSerializer
 
 class AttachmentSerializer(serializers.ModelSerializer):
+    file_name = serializers.SerializerMethodField()
+    file_size = serializers.SerializerMethodField()
+    file_extension = serializers.SerializerMethodField()
     class Meta:
         model = Attachment
         fields = '__all__'
         extra_kwargs = {'message': {'required': False, 'allow_null': True}}
+        
+    def get_file_name(self, obj):
+        return obj.file.name.split('/')[-1] if obj.file else None
+
+    def get_file_size(self, obj):
+        if not obj.file:
+            return None
+        size = obj.file.size
+        if size < 1024:
+            return f"{size} B"
+        elif size < 1048576:
+            return f"{size / 1024:.2f} KB"
+        else:
+            return f"{size / 1048576:.2f} MB"
+        
+
+    def get_file_extension(self, obj):
+        return obj.file.name.split('.')[-1] if obj.file and '.' in obj.file.name else None
+    
 
 
 class ConversationSerializer(serializers.ModelSerializer):

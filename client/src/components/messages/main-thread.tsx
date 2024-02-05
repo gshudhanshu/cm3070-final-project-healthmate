@@ -1,12 +1,12 @@
 // components/MessageThread.tsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useMessagesStore } from "@/store/useMessageStore";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import { ChevronLeftIcon, DocumentIcon } from "@heroicons/react/24/outline";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
@@ -30,7 +30,12 @@ const MessageThread = ({ className }: { className?: string }) => {
 
   const size = useWindowSize();
 
+  // Ref for the bottom of the message list and file input
+  const endOfMessagesRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
+    // Fetch messages and connect WebSocket when a conversation is selected
     if (selectedConversation) {
       fetchMessages(selectedConversation.id);
       connectWebSocket();
@@ -38,24 +43,20 @@ const MessageThread = ({ className }: { className?: string }) => {
     }
   }, [selectedConversation]);
 
-  // Dummy messages
-  // const messages = [
-  //   {
-  //     id: 1,
-  //     sender: "Mark Barton",
-  //     recipient: "User",
-  //     content: "Hello there!",
-  //     timestamp: new Date(),
-  //   },
-  //   // ... more messages
-  // ];
+  useEffect(() => {
+    // Scroll to the bottom every time messages change
+    endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const handleSendMessage = () => {
     if (selectedConversation) {
-      console.log("files:", files);
       sendMessage(selectedConversation.id, newMessage, files);
       setNewMessage("");
       setFiles([]);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
@@ -98,31 +99,57 @@ const MessageThread = ({ className }: { className?: string }) => {
           {/* Render messages here, align all messages on left side, timestamp on right side, and an avatar before message and name */}
           <div className="flex flex-col gap-4 p-4">
             {messages.map((message) => (
-              <div key={message.id} className="flex items-start gap-3">
-                <Avatar>
-                  <AvatarImage
-                    src={
-                      `${process.env.NEXT_PUBLIC_BACKEND_URL}${message.sender.profile_pic}` ??
-                      ""
-                    }
-                  />
-                  <AvatarFallback>
-                    {message.sender.first_name[0] + message.sender.last_name[0]}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col">
-                  <div className="flex justify-between w-full gap-2">
-                    <span className="font-semibold capitalize">
-                      {message.sender.first_name +
-                        " " +
-                        message.sender.last_name}
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      {dayjs(message.timestamp).format("HH:mm A")}
-                    </span>
+              <div key={message.id}>
+                <div className="flex items-start gap-3">
+                  <Avatar>
+                    <AvatarImage
+                      src={
+                        `${process.env.NEXT_PUBLIC_BACKEND_URL}${message.sender.profile_pic}` ??
+                        ""
+                      }
+                    />
+                    <AvatarFallback>
+                      {message.sender.first_name[0] +
+                        message.sender.last_name[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col">
+                    <div className="flex justify-between w-full gap-2">
+                      <span className="font-semibold capitalize">
+                        {message.sender.first_name +
+                          " " +
+                          message.sender.last_name}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        {dayjs(message.timestamp).format("HH:mm A")}
+                      </span>
+                    </div>
+                    <p className="mt-1">{message.text}</p>
                   </div>
-                  <p className="mt-1">{message.text}</p>
                 </div>
+                {message.attachments.map((attachment, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-2 p-2 bg-gray-100 rounded-md"
+                  >
+                    <a
+                      key={index}
+                      href={attachment.file}
+                      download={attachment.file_name}
+                      target="_blank"
+                      className="flex items-center gap-2 p-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 hover:text-gray-900"
+                    >
+                      <DocumentIcon className="w-5 h-5 text-gray-500" />
+                      <span className="text-sm text-gray-700">
+                        {attachment.file_name}
+                      </span>
+                      <span className="text-sm text-gray-700">
+                        {attachment.file_size}
+                      </span>
+                    </a>
+                  </div>
+                ))}
+                <div ref={endOfMessagesRef} />
               </div>
             ))}
           </div>
@@ -140,6 +167,7 @@ const MessageThread = ({ className }: { className?: string }) => {
             type="file"
             multiple
             className="w-fit"
+            ref={fileInputRef}
             onChange={handleFileChange}
           />
           <Button onClick={handleSendMessage}>Send</Button>

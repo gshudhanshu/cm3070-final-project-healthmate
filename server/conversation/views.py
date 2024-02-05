@@ -52,10 +52,8 @@ class MessageViewSet(viewsets.ModelViewSet):
             chain(messages, calls), 
             key=lambda instance: instance.timestamp
         )
-
         return combined
     
-
     def perform_create(self, serializer):
         user = self.request.user
         conversation_id = self.kwargs.get('conversation_id')

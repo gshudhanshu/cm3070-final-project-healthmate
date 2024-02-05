@@ -1,13 +1,14 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
+
 from .models import Conversation, Message, Attachment
 from django.contrib.auth import get_user_model
 from .models import Conversation, Message, Attachment
 from djoser.conf import settings as djoser_settings
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.authentication import JWTAuthentication
-
+from .serializers import AttachmentSerializer, SimpleProfileSerializer
 from user_profile.models import Doctor, Patient
 
 User = get_user_model()
@@ -42,11 +43,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message, sender_data = await self.save_message(sender_id, text)
         if message:
             await self.link_attachments_to_message(message, attachments)
-            attachment_urls = await self.get_attachment_urls(message)
+            attachments = await self.get_attachments(message)
 
             message_data = {
                 'id': message.id, 'text': message.text, 'sender': sender_data,
-                'timestamp': str(message.timestamp), 'attachments': attachment_urls,
+                'timestamp': str(message.timestamp), 'attachments': attachments,
                 'conversation': self.conversation_id, 'type': 'message'
             }
             await self.channel_layer.group_send(self.room_group_name, {'type': 'chat_message', 'message': message_data})
@@ -62,15 +63,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
             profile_pic_url = Doctor.objects.get(user=user).profile_pic.url if Doctor.objects.get(user=user).profile_pic else None
 
         return {
-            'id': user.id, 'username': user.username, 'first_name': user.first_name,
-            'last_name': user.last_name, 'email': user.email, 'account_type': user.account_type,
+            'id': user.id, 'username': user.username,
+            'first_name': user.first_name, 'last_name': user.last_name,
+            'email': user.email, 'account_type': user.account_type,
             'profile_pic': profile_pic_url
         }
         
     @database_sync_to_async
-    def get_attachment_urls(self, message):
-        return [attachment.file.url for attachment in message.attachments.all()]
-
+    def get_attachments(self, message):
+        attachments = Attachment.objects.filter(message=message)
+        return AttachmentSerializer(attachments, many=True).data
+        
+        
     # Helper method to save message
     @database_sync_to_async
     def save_message(self, sender_id, text):
@@ -78,7 +82,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             sender = User.objects.get(id=sender_id)
             conversation = Conversation.objects.get(id=self.conversation_id)
             message = Message.objects.create(sender=sender, conversation=conversation, text=text)
-            sender_data = self.serialize_user(sender)
+            sender_data = self.serialize_user(sender) 
+            # sender_data = SimpleProfileSerializer(sender).data
             return message, sender_data
         return None, None
 
@@ -136,3 +141,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 attachment.save()
             except Attachment.DoesNotExist:
                 pass
+
+
+    # WEB RTC

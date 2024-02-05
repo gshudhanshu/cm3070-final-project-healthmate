@@ -16,11 +16,16 @@ interface Message {
   text: string;
   timestamp: string;
   conversation: number;
+  attachments: AttachmentResponse[];
 }
 
 interface AttachmentResponse {
   id: string;
+  file_name: string;
+  file_size: string;
+  file_extension: string;
   url: string;
+  file: string;
 }
 
 interface Conversation {
@@ -128,15 +133,12 @@ export const useMessagesStore = create(
       };
 
       websocket.onmessage = (event) => {
-        console.log(event);
         const data = JSON.parse(event.data);
-        console.log("WebSocket Message:", data);
         if (data.type === "new_message") {
           set((state) => ({
             messages: [...state.messages, data.message],
           }));
         }
-        console.log(get().messages);
       };
 
       set({ websocket });
@@ -178,7 +180,6 @@ export const useMessagesStore = create(
 
       try {
         const uploadedAttachments = await Promise.all(attachmentPromises);
-        console.log("Uploaded Attachments:", uploadedAttachments);
 
         // Construct and send the WebSocket message
         const messageData: MessageData = {
