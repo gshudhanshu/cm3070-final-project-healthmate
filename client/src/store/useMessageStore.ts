@@ -24,7 +24,7 @@ interface AttachmentResponse {
   file_name: string;
   file_size: string;
   file_extension: string;
-  url: string;
+  file_url: string;
   file: string;
 }
 
@@ -180,7 +180,6 @@ export const useMessagesStore = create(
 
       try {
         const uploadedAttachments = await Promise.all(attachmentPromises);
-
         // Construct and send the WebSocket message
         const messageData: MessageData = {
           conversationId,
@@ -191,7 +190,7 @@ export const useMessagesStore = create(
 
         get().websocket.send(
           JSON.stringify({
-            action: "send_message",
+            action: "chat_message",
             ...messageData,
           }),
         );

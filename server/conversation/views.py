@@ -76,6 +76,7 @@ class MessageViewSet(viewsets.ModelViewSet):
         """
         if isinstance(instance, Message):
             representation = MessageSerializer(instance).data
+            
             representation['type'] = 'message'
             return representation
         elif isinstance(instance, Call):

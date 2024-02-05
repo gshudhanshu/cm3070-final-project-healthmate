@@ -9,9 +9,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronLeftIcon, DocumentIcon } from "@heroicons/react/24/outline";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useCallStore } from "@/store/useCallStore";
 
 import dayjs from "dayjs";
-import { get } from "http";
 
 const MessageThread = ({ className }: { className?: string }) => {
   const {
@@ -29,10 +29,11 @@ const MessageThread = ({ className }: { className?: string }) => {
   const [files, setFiles] = useState<File[]>([]);
 
   const size = useWindowSize();
-
   // Ref for the bottom of the message list and file input
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { startCall, endCall, stream } = useCallStore();
 
   useEffect(() => {
     // Fetch messages and connect WebSocket when a conversation is selected
@@ -66,6 +67,50 @@ const MessageThread = ({ className }: { className?: string }) => {
     }
   };
 
+  const initiateCall = () => {
+    if (selectedConversation) {
+      navigator.mediaDevices
+        .getUserMedia({ video: true, audio: true })
+        .then((stream) => {
+          const callState = useCallStore.getState();
+          // Open a new window for the call
+          const callWindow = window.open(
+            `/dashboard/messages/call?participant=${getOppositeParticipant(
+              selectedConversation,
+            )?.username}&type=video`,
+            "callWindow",
+            "width=800,height=600",
+          );
+
+          if (callWindow) {
+            callWindow.onload = () => {
+              const callState = {
+                stream,
+                endCall: useCallStore.getState().endCall,
+                // add other necessary data or functions from useCallStore
+              };
+              callWindow.callState = callState;
+            };
+            startCall(stream);
+          }
+        })
+        .catch((err) => {
+          console.error("Error getting media stream:", err);
+          if (err.name === "NotAllowedError") {
+            alert(
+              "You need to grant camera and microphone permissions to start the call",
+            );
+          } else if (err.name === "NotFoundError") {
+            alert(
+              "No media devices found. Please connect a camera and microphone.",
+            );
+          } else {
+            alert("Error starting the call: " + err.message);
+          }
+        });
+    }
+  };
+
   // Determine if we are in a mobile view
   const isMobile = size?.width && size.width < 768;
 
@@ -94,6 +139,7 @@ const MessageThread = ({ className }: { className?: string }) => {
           <span className="text-xs text-slate-600">
             {dayjs().format("DD MMM YY, HH:mm A")}
           </span>
+          {selectedConversation && <Button onClick={initiateCall}>Call</Button>}
         </div>
         <ScrollArea className="h-[50vh]">
           {/* Render messages here, align all messages on left side, timestamp on right side, and an avatar before message and name */}
@@ -134,7 +180,7 @@ const MessageThread = ({ className }: { className?: string }) => {
                   >
                     <a
                       key={index}
-                      href={attachment.file}
+                      href={`${attachment.file_url}`}
                       download={attachment.file_name}
                       target="_blank"
                       className="flex items-center gap-2 p-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 hover:text-gray-900"

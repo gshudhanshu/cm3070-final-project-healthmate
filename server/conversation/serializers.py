@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import Conversation, Message, Call, Attachment
 from user_profile.models import Doctor, Patient
+from django.conf import settings
+
 
 from user.serializers import UserSerializer
 from user_profile.serializers import DoctorSerializer, PatientSerializer, SimpleProfileSerializer
@@ -9,6 +11,7 @@ class AttachmentSerializer(serializers.ModelSerializer):
     file_name = serializers.SerializerMethodField()
     file_size = serializers.SerializerMethodField()
     file_extension = serializers.SerializerMethodField()
+    file_url = serializers.SerializerMethodField()
     class Meta:
         model = Attachment
         fields = '__all__'
@@ -28,9 +31,17 @@ class AttachmentSerializer(serializers.ModelSerializer):
         else:
             return f"{size / 1048576:.2f} MB"
         
-
+        
     def get_file_extension(self, obj):
         return obj.file.name.split('.')[-1] if obj.file and '.' in obj.file.name else None
+    
+    def get_file_url(self, obj):
+        if obj.file:
+            # Construct the absolute URL
+            return f"{settings.BASE_URL}{obj.file.url}"
+        return None
+    
+    
     
 
 
@@ -60,7 +71,6 @@ class MessageSerializer(serializers.ModelSerializer):
     sender = serializers.SerializerMethodField()
     type = serializers.SerializerMethodField(method_name='get_type')
     attachments = AttachmentSerializer(many=True, read_only=True,)
-
 
     class Meta:
         model = Message

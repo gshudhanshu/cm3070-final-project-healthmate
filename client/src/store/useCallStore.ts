@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import SimplePeer from "simple-peer";
+import { useMessagesStore } from "@/store/useMessageStore";
 
 interface CallState {
   isCallActive: boolean;
@@ -7,7 +8,9 @@ interface CallState {
   stream: MediaStream | undefined;
   remoteStream: MediaStream | undefined;
   startCall: (stream: MediaStream) => void;
-  answerCall: (signal: any, stream: MediaStream) => void;
+  handleOffer: (offer: any, stream: MediaStream) => void;
+  handleAnswer: (answer: any) => void;
+  handleIceCandidate: (candidate: any) => void;
   endCall: () => void;
 }
 
@@ -18,6 +21,11 @@ export const useCallStore = create<CallState>((set, get) => ({
   remoteStream: undefined,
 
   startCall: (stream) => {
+    const { websocket, selectedConversation } = useMessagesStore.getState();
+    // const stream = get().stream;
+    set({ stream });
+    if (!stream || !selectedConversation || !websocket) return;
+
     const peer = new SimplePeer({
       initiator: true,
       trickle: false,
@@ -25,50 +33,76 @@ export const useCallStore = create<CallState>((set, get) => ({
     });
 
     peer.on("signal", (data) => {
-      // TODO: Send this signal data to the other peer via your signaling method
+      if (data.type === "offer") {
+        websocket.send(
+          JSON.stringify({
+            action: "webrtc_offer",
+            offer: data,
+            conversationId: selectedConversation.id,
+          }),
+        );
+      }
     });
 
     peer.on("stream", (remoteStream) => {
-      // Set the remote stream in the state
       set({ remoteStream });
     });
 
-    // Set the peer and local stream in the state
-    set({ peer, stream, isCallActive: true });
+    set({ peer, isCallActive: true });
   },
 
-  answerCall: (signal, stream) => {
+  handleOffer: (offer, stream) => {
+    const { websocket, selectedConversation } = useMessagesStore.getState();
     const peer = new SimplePeer({
       initiator: false,
       trickle: false,
       stream: stream,
     });
 
-    peer.signal(signal); // Signal received from the other peer
+    peer.signal(offer);
 
     peer.on("signal", (data) => {
-      // TODO: Send this signal data to the other peer via your signaling method
+      if (data.type === "answer") {
+        websocket.send(
+          JSON.stringify({
+            action: "webrtc_answer",
+            answer: data,
+            conversationId: selectedConversation?.id,
+          }),
+        );
+      }
     });
 
     peer.on("stream", (remoteStream) => {
-      // Set the remote stream in the state
       set({ remoteStream });
     });
 
-    // Set the peer and local stream in the state
-    set({ peer, stream, isCallActive: true });
+    set({ peer, isCallActive: true });
+  },
+
+  handleAnswer: (answer) => {
+    const peer = get().peer;
+    if (peer) {
+      peer.signal(answer);
+    }
+  },
+
+  handleIceCandidate: (candidate) => {
+    const peer = get().peer;
+    if (peer) {
+      peer.signal(candidate);
+    }
   },
 
   endCall: () => {
     const { peer, stream } = get();
     if (peer) {
-      peer.destroy(); // Destroy the peer connection
+      peer.destroy();
     }
     if (stream) {
-      stream.getTracks().forEach((track) => track.stop()); // Stop all tracks on the local stream
+      stream.getTracks().forEach((track) => track.stop());
     }
 
-    // Reset the state
     set({
       peer: null,
       stream: undefined,

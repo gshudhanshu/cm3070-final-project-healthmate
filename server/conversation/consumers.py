@@ -39,18 +39,55 @@ class ChatConsumer(AsyncWebsocketConsumer):
         text = data.get('text', '')
         sender_id = data.get('sender', None)
         attachments = data.get('attachments', [])
+        
+        # Check the type of message
+        message_type = data.get('action')
+        
+        print(f"Received message of type {message_type}")
+        
+        if message_type == 'chat_message':
+            await self.handle_chat_message(data)
+        elif message_type == 'webrtc_offer':
+            await self.handle_webrtc_offer(data)
+        elif message_type == 'webrtc_answer':
+            await self.handle_webrtc_answer(data)
+        elif message_type == 'webrtc_ice_candidate':
+            await self.handle_webrtc_ice_candidate(data)
 
+
+    async def handle_chat_message(self, data):
+        # Extract chat message data
+        text = data.get('text', '')
+        sender_id = data.get('sender', None)
+        attachments = data.get('attachments', [])
+
+        # Save the chat message and its attachments to the database
         message, sender_data = await self.save_message(sender_id, text)
         if message:
+            # Link attachments to the message if any
             await self.link_attachments_to_message(message, attachments)
-            attachments = await self.get_attachments(message)
+            # Fetch attachment data for sending in the broadcast
+            attachment_data = await self.get_attachments(message)
 
+            # Prepare the message data for broadcast
             message_data = {
-                'id': message.id, 'text': message.text, 'sender': sender_data,
-                'timestamp': str(message.timestamp), 'attachments': attachments,
-                'conversation': self.conversation_id, 'type': 'message'
+                'id': message.id,
+                'text': message.text,
+                'sender': sender_data,
+                'timestamp': str(message.timestamp),
+                'attachments': attachment_data,
+                'conversation': self.conversation_id,
+                'type': 'message'
             }
-            await self.channel_layer.group_send(self.room_group_name, {'type': 'chat_message', 'message': message_data})
+
+            # Send message to room group
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'chat_message',
+                    'message': message_data
+                }
+            )
         else:
             print("Message not saved.")
 
@@ -69,12 +106,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'profile_pic': profile_pic_url
         }
         
-    @database_sync_to_async
-    def get_attachments(self, message):
-        attachments = Attachment.objects.filter(message=message)
-        return AttachmentSerializer(attachments, many=True).data
-        
-        
+     
     # Helper method to save message
     @database_sync_to_async
     def save_message(self, sender_id, text):
@@ -114,6 +146,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 break
         return token
 
+    # Helper method to authenticate user from token
+    @database_sync_to_async
+    def get_authenticated_user(self, query_string):
+        token = self.parse_token(query_string)
+        return self.get_user_from_token(token)
+
+    def parse_token(self, query_string):
+        # Extract the token from the query string
+        for param in query_string.decode().split('&'):
+            if 'token=' in param:
+                return param.split('=')[1]
+        return None
 
     # Helper method to authenticate user from token
     @database_sync_to_async
@@ -133,14 +177,76 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def link_attachments_to_message(self, message, attachments):
-        for attachment_to_upload in attachments:
-            print(attachment_to_upload)
+        for attachment_to_link in attachments:
+            print(attachment_to_link)
             try:
-                attachment = Attachment.objects.get(id=attachment_to_upload['id'])
+                attachment = Attachment.objects.get(id=attachment_to_link['id'])
                 attachment.message = message
                 attachment.save()
             except Attachment.DoesNotExist:
                 pass
+            
 
+    @database_sync_to_async
+    def get_attachments(self, message):
+        # Fetch and serialize attachment data
+        attachments = Attachment.objects.filter(message=message)
+        return AttachmentSerializer(attachments, many=True, read_only=True).data
+            
 
+    # =============
     # WEB RTC
+    # =============    
+    async def handle_webrtc_offer(self, data):
+        offer = data.get('offer')
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'webrtc_offer_message',
+                'offer': offer,
+                'sender': self.user.id
+            }
+        )
+
+    async def handle_webrtc_answer(self, data):
+        answer = data.get('answer')
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'webrtc_answer_message',
+                'answer': answer,
+                'sender': self.user.id
+            }
+        )
+
+    async def handle_webrtc_ice_candidate(self, data):
+        candidate = data.get('candidate')
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'webrtc_ice_candidate_message',
+                'candidate': candidate,
+                'sender': self.user.id
+            }
+        )
+
+    async def webrtc_offer_message(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'webrtc_offer',
+            'offer': event['offer'],
+            'sender': event['sender']
+        }))
+
+    async def webrtc_answer_message(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'webrtc_answer',
+            'answer': event['answer'],
+            'sender': event['sender']
+        }))
+
+    async def webrtc_ice_candidate_message(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'webrtc_ice_candidate',
+            'candidate': event['candidate'],
+            'sender': event['sender']
+        }))
