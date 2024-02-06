@@ -10,6 +10,10 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+
+
 
 class ConversationViewSet(viewsets.ModelViewSet):
     serializer_class = ConversationSerializer
@@ -50,9 +54,27 @@ class MessageViewSet(viewsets.ModelViewSet):
         # Combine and sort by timestamp
         combined = sorted(
             chain(messages, calls), 
-            key=lambda instance: instance.timestamp
+            key=lambda instance: instance.timestamp if isinstance(instance, Message) else instance.start_time
         )
+        
         return combined
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()  # This returns combined Message and Call instances
+
+        # Serialize each object with the appropriate serializer
+        serialized_data = []
+        for item in queryset:
+            if isinstance(item, Message):
+                serializer = MessageSerializer(item)
+            elif isinstance(item, Call):
+                serializer = CallSerializer(item)
+            else:
+                continue  # Skip if the object is neither Message nor Call
+            serialized_data.append(serializer.data)
+
+        return Response(serialized_data)
+
     
     def perform_create(self, serializer):
         user = self.request.user
@@ -68,31 +90,7 @@ class MessageViewSet(viewsets.ModelViewSet):
         attachments_data = self.request.FILES
         for file in attachments_data.getlist('file'):
             Attachment.objects.create(message=message, file=file)
-
-    def to_representation(self, instance):
-        """
-        Custom representation for handling different types of instances (Message or Call)
-        and adding a 'type' field to the serialized data.
-        """
-        if isinstance(instance, Message):
-            representation = MessageSerializer(instance).data
-            
-            representation['type'] = 'message'
-            return representation
-        elif isinstance(instance, Call):
-            representation = CallSerializer(instance).data
-            representation['type'] = 'call'
-            return representation
-        else:
-            return super(MessageViewSet, self).to_representation(instance)
-        
-
-    
-class CallViewSet(viewsets.ModelViewSet):
-    serializer_class = CallSerializer
-    queryset = Call.objects.all()
-    permission_classes = [IsAuthenticated]
-
+          
 
 class FileUploadView(APIView):
     parser_classes = (MultiPartParser, FormParser)
@@ -104,3 +102,55 @@ class FileUploadView(APIView):
             return Response(file_serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CallViewSet(viewsets.ModelViewSet):
+    serializer_class = CallSerializer
+    queryset = Call.objects.all()
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """
+        This view should return a list of all calls
+        where the current user is either the caller or the receiver.
+        """
+        user = self.request.user
+        return Call.objects.filter(models.Q(caller=user) | models.Q(receiver=user))
+    
+    def create(self, request, *args, **kwargs):
+        conversation_id = request.data.get('conversationId')
+        # Get the conversation instance
+        conversation = get_object_or_404(Conversation, id=conversation_id)
+
+        # Determine caller and receiver
+        caller = request.user
+        receiver = conversation.doctor if caller != conversation.patient else conversation.patient
+
+        # Create the call record
+        call = Call.objects.create(
+            conversation=conversation,
+            caller=caller,
+            receiver=receiver
+        )
+
+        # Serialize and return the new call record
+        serializer = self.get_serializer(call)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+    def partial_update(self, request, *args, **kwargs):
+        """
+        Updates call status, such as marking it as 'completed' or 'missed'.
+        """
+        call = self.get_object()
+        serializer = self.get_serializer(call, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        user = self.request.user
+        
+        if (call.caller == user or call.receiver == user):
+            # Update and save the call record
+            serializer.save(end_time=timezone.now())
+            return Response(serializer.data)
+        
+        return Response({'detail': 'User not part of this call'}, status=status.HTTP_403_FORBIDDEN)
+    

@@ -90,11 +90,25 @@ class MessageSerializer(serializers.ModelSerializer):
 
 class CallSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField(method_name='get_type')
+    caller = serializers.SerializerMethodField()
+    receiver = serializers.SerializerMethodField()
     class Meta:
         model = Call
         fields = '__all__'
         
     def get_type(self, obj):
         return 'call'
-
-
+    
+    def get_caller(self, obj):
+        if(obj.caller.account_type == 'patient'):
+            caller_profile = obj.caller.patient_profile
+        else :
+            caller_profile = obj.caller.doctor_profile
+        return SimpleProfileSerializer(caller_profile).data if caller_profile else None
+    
+    def get_receiver(self, obj):
+        if(obj.receiver.account_type == 'patient'):
+            receiver_profile = obj.receiver.patient_profile
+        else :
+            receiver_profile = obj.receiver.doctor_profile
+        return SimpleProfileSerializer(receiver_profile).data if receiver_profile else None

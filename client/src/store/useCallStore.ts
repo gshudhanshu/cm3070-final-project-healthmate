@@ -1,13 +1,20 @@
 import { create } from "zustand";
 import SimplePeer from "simple-peer";
 import { useMessagesStore } from "@/store/useMessageStore";
+import { useAuthStore } from "@/store/useAuthStore";
+import axios from "axios";
+
+const API_URL = process.env.API_URL;
 
 interface CallState {
+  callData: any;
+  conversationId: number | null;
   isCallActive: boolean;
   peer: SimplePeer.Instance | null;
   stream: MediaStream | undefined;
   remoteStream: MediaStream | undefined;
-  startCall: (stream: MediaStream) => void;
+  initiateCall: (conversationId: number) => void;
+  startCall: (callData: any, stream: MediaStream) => void;
   handleOffer: (offer: any, stream: MediaStream) => void;
   handleAnswer: (answer: any) => void;
   handleIceCandidate: (candidate: any) => void;
@@ -15,10 +22,33 @@ interface CallState {
 }
 
 export const useCallStore = create<CallState>((set, get) => ({
+  callData: null,
+  conversationId: null,
   isCallActive: false,
   peer: null,
   stream: undefined,
   remoteStream: undefined,
+
+  initiateCall: async (conversationId) => {
+    const token = useAuthStore.getState().token;
+    try {
+      const response = await axios.post(
+        `${API_URL}/conversations/calls/`,
+        {
+          conversationId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      set({ callData: response.data, conversationId });
+    } catch (error) {
+      console.error("Call initiation failed:", error);
+      // Handle error
+    }
+  },
 
   startCall: (stream) => {
     const { websocket, selectedConversation } = useMessagesStore.getState();
@@ -33,6 +63,7 @@ export const useCallStore = create<CallState>((set, get) => ({
     });
 
     peer.on("signal", (data) => {
+      console.log(data, "data");
       if (data.type === "offer") {
         websocket.send(
           JSON.stringify({
@@ -104,6 +135,8 @@ export const useCallStore = create<CallState>((set, get) => ({
     }
 
     set({
+      callData: null,
+      conversationId: null,
       peer: null,
       stream: undefined,
       remoteStream: undefined,

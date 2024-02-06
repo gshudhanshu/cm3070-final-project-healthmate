@@ -4,6 +4,7 @@ import { devtools } from "zustand/middleware";
 import axios from "axios";
 import { User } from "@/types/user";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useCallStore } from "@/store/useCallStore";
 
 const API_URL = process.env.API_URL;
 const CONVERSATIONS_URL = `${API_URL}/conversations/`;
@@ -17,6 +18,12 @@ interface Message {
   timestamp: string;
   conversation: number;
   attachments: AttachmentResponse[];
+  // calls
+  caller: User | null;
+  receiver: User | null;
+  start_time: string;
+  end_time: string;
+  call_type: string;
 }
 
 interface AttachmentResponse {

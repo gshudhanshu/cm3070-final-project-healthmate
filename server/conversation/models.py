@@ -66,15 +66,24 @@ class Attachment(models.Model):
 class Call(models.Model):
     CALL_TYPES = [
         ('video', 'Video Call'),
-        ('audio', 'Audio Call')
+        ('audio', 'Audio Call'),
+    ]
+    
+    CALL_STATUS = [
+        ('initiated', 'Initiated'),
+        ('ongoing', 'Ongoing'),
+        ('completed', 'Completed'),
+        ('missed', 'Missed'),
+        ('rejected', 'Rejected')
     ]
 
     conversation = models.ForeignKey(Conversation, related_name='calls', on_delete=models.CASCADE)
     caller = models.ForeignKey(User, related_name='calls_made', on_delete=models.CASCADE)
-    receiver= models.ForeignKey(User, related_name='calls_received', on_delete=models.CASCADE)
-    call_type = models.CharField(max_length=10, choices=CALL_TYPES)
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
+    receiver= models.ForeignKey(User, related_name='calls_received', on_delete=models.CASCADE )
+    call_type = models.CharField(max_length=10, choices=CALL_TYPES, blank=True, null=True)
+    call_status = models.CharField(max_length=10, choices=CALL_STATUS, default='initiated')
+    start_time = models.DateTimeField(auto_now_add=True)
+    end_time = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
-        return f"{self.call_type.title()} with {self.conversation}"
+        return f"{self.call_type} call between {self.caller} and {self.receiver} (Status: {self.call_status})"
