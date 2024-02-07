@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { use, useEffect, useRef, useState } from "react";
 import SimplePeer from "simple-peer";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallStore } from "@/store/useCallStore";
+import { useMessagesStore } from "@/store/useMessageStore";
 
 const CallPage = () => {
   const searchParams = useSearchParams();
@@ -13,41 +14,41 @@ const CallPage = () => {
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
   const {
-    stream,
     peer,
     startCall,
     handleOffer,
     handleAnswer,
     handleIceCandidate,
     endCall,
+    callData,
+    stream,
   } = useCallStore();
   const [isCallJoined, setIsCallJoined] = useState(false);
 
-  const callState = window.callState;
-  console.log(callState);
+  console.log("callData", callData);
+  useEffect(() => {
+    useMessagesStore.setState(window.messageState);
+    useCallStore.setState(window.callState);
+  }, []);
 
   useEffect(() => {
-    if (!stream) {
-      navigator.mediaDevices
-        .getUserMedia({ video: true, audio: true })
-        .then((stream) => {
-          if (localVideoRef.current) {
-            localVideoRef.current.srcObject = stream;
-          }
-          useCallStore.setState({ stream });
-        })
-        .catch((err) => console.error("Error getting media stream:", err));
-    }
-  }, [stream]);
+    navigator.mediaDevices
+      .getUserMedia({ video: true, audio: true })
+      .then((stream) => {
+        if (localVideoRef.current) {
+          localVideoRef.current.srcObject = stream;
+        }
+        useCallStore.setState({ stream });
+      })
+      .catch((err) => console.error("Error getting media stream:", err));
+  }, []);
 
   const joinCall = () => {
-    if (!callState) {
-      alert("Call state not found");
-    } else if (!stream) {
+    if (!stream) {
       alert("Media stream not found");
     } else {
       setIsCallJoined(true);
-      startCall(callState.callData, stream);
+      startCall(callData, stream);
     }
     // Additional logic for joining the call
     // e.g., sending a WebSocket message to notify other participants

@@ -46,14 +46,12 @@ export const useCallStore = create<CallState>((set, get) => ({
       set({ callData: response.data, conversationId });
     } catch (error) {
       console.error("Call initiation failed:", error);
-      // Handle error
     }
   },
 
   startCall: (stream) => {
+    console.log(stream.getTracks());
     const { websocket, selectedConversation } = useMessagesStore.getState();
-    // const stream = get().stream;
-    set({ stream });
     if (!stream || !selectedConversation || !websocket) return;
 
     const peer = new SimplePeer({
@@ -130,8 +128,10 @@ export const useCallStore = create<CallState>((set, get) => ({
     if (peer) {
       peer.destroy();
     }
-    if (stream) {
+    if (stream && typeof stream.getTracks === "function") {
       stream.getTracks().forEach((track) => track.stop());
+    } else {
+      console.error("Invalid stream object:", stream);
     }
 
     set({

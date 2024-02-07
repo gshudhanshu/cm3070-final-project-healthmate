@@ -33,7 +33,7 @@ const MessageThread = ({ className }: { className?: string }) => {
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { startCall, endCall, stream, initiateCall } = useCallStore();
+  const { initiateCall } = useCallStore();
 
   useEffect(() => {
     // Fetch messages and connect WebSocket when a conversation is selected
@@ -78,7 +78,9 @@ const MessageThread = ({ className }: { className?: string }) => {
       );
       if (callWindow) {
         const callState = useCallStore.getState();
+        const messageState = useMessagesStore.getState();
         callWindow.callState = callState;
+        callWindow.messageState = messageState;
       }
     }
 

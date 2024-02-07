@@ -15,6 +15,11 @@ User = get_user_model()
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.room_group_name = None  # Initialize with None
+
     async def connect(self):
         # Extract and verify token, then set user and room details
         token = self.get_token_from_query_string(self.scope['query_string'].decode('utf-8'))

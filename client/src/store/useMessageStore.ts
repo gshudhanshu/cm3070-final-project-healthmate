@@ -141,6 +141,7 @@ export const useMessagesStore = create(
 
       websocket.onmessage = (event) => {
         const data = JSON.parse(event.data);
+        console.log("WebSocket Message:", data.type);
         if (data.type === "new_message") {
           set((state) => ({
             messages: [...state.messages, data.message],
