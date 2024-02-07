@@ -78,9 +78,9 @@ const MessageThread = ({ className }: { className?: string }) => {
       );
       if (callWindow) {
         const callState = useCallStore.getState();
-        const messageState = useMessagesStore.getState();
-        callWindow.callState = callState;
-        callWindow.messageState = messageState;
+        // const messageState = useMessagesStore.getState();
+        // callWindow.callState = callState;
+        // callWindow.messageState = messageState;
       }
     }
 

@@ -124,7 +124,7 @@ class CallViewSet(viewsets.ModelViewSet):
 
         # Determine caller and receiver
         caller = request.user
-        receiver = conversation.doctor if caller != conversation.patient else conversation.patient
+        receiver = conversation.doctor if caller == conversation.patient else conversation.patient
 
         # Create the call record
         call = Call.objects.create(

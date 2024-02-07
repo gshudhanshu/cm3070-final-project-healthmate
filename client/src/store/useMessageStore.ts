@@ -8,7 +8,7 @@ import { useCallStore } from "@/store/useCallStore";
 
 const API_URL = process.env.API_URL;
 const CONVERSATIONS_URL = `${API_URL}/conversations/`;
-const SOCKET_URL = `ws://127.0.0.1:8000/socket.io/`;
+const SOCKET_URL = `ws://127.0.0.1:8000/`;
 
 interface Message {
   id: number;
@@ -146,6 +146,8 @@ export const useMessagesStore = create(
           set((state) => ({
             messages: [...state.messages, data.message],
           }));
+        } else {
+          console.log("Invalid action:", data.action);
         }
       };
 
@@ -195,7 +197,6 @@ export const useMessagesStore = create(
           text: message,
           attachments: uploadedAttachments,
         };
-
         get().websocket.send(
           JSON.stringify({
             action: "chat_message",

@@ -14,6 +14,8 @@ const CallPage = () => {
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
   const {
+    connectCallWebSocket,
+    initiateCall,
     peer,
     startCall,
     handleOffer,
@@ -21,40 +23,51 @@ const CallPage = () => {
     handleIceCandidate,
     endCall,
     callData,
-    stream,
+    localStream,
+    getCallData,
+    remoteStream,
   } = useCallStore();
   const [isCallJoined, setIsCallJoined] = useState(false);
 
-  console.log("callData", callData);
   useEffect(() => {
-    useMessagesStore.setState(window.messageState);
-    useCallStore.setState(window.callState);
-  }, []);
+    if (callId) {
+      getCallData(callId);
+      connectCallWebSocket(callId);
+    }
+    return () => {
+      endCall(); // Clean up on component unmount
+    };
+  }, [callId]);
 
   useEffect(() => {
-    navigator.mediaDevices
-      .getUserMedia({ video: true, audio: true })
-      .then((stream) => {
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = stream;
-        }
-        useCallStore.setState({ stream });
-      })
-      .catch((err) => console.error("Error getting media stream:", err));
+    const getMedia = async () => {
+      try {
+        const localStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true,
+        });
+        if (localVideoRef.current)
+          localVideoRef.current.srcObject = localStream;
+        useCallStore.setState({ localStream });
+      } catch (err) {
+        console.error("Failed to get user media", err);
+      }
+    };
+    getMedia();
   }, []);
 
   const joinCall = () => {
-    if (!stream) {
+    if (!localStream) {
       alert("Media stream not found");
     } else {
       setIsCallJoined(true);
-      startCall(callData, stream);
+      startCall(localStream);
     }
     // Additional logic for joining the call
     // e.g., sending a WebSocket message to notify other participants
   };
 
-  const cancelCall = () => {
+  const handleEndCall = () => {
     endCall();
     window.close();
   };
@@ -62,22 +75,11 @@ const CallPage = () => {
   useEffect(() => {
     if (peer) {
       peer.on("stream", (remoteStream) => {
-        if (remoteVideoRef.current) {
+        if (remoteVideoRef.current)
           remoteVideoRef.current.srcObject = remoteStream;
-        }
       });
-
-      // Cleanup on unmount
-      return () => {
-        endCall();
-      };
     }
   }, [peer]);
-
-  const handleEndCall = () => {
-    endCall();
-    window.close();
-  };
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
@@ -96,7 +98,7 @@ const CallPage = () => {
           />
         )}
       </div>
-      {!isCallJoined && (
+      {!isCallJoined ? (
         <>
           <button
             onClick={joinCall}
@@ -105,14 +107,13 @@ const CallPage = () => {
             Join Call
           </button>
           <button
-            onClick={cancelCall}
+            onClick={handleEndCall}
             className="px-4 py-2 m-2 text-white bg-gray-500 rounded hover:bg-gray-700"
           >
             Cancel
           </button>
         </>
-      )}
-      {isCallJoined && (
+      ) : (
         <button
           onClick={handleEndCall}
           className="px-4 py-2 text-white bg-red-500 rounded hover:bg-red-700"

@@ -48,7 +48,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Check the type of message
         message_type = data.get('action')
         
-        print(f"Received message of type {message_type}")
+        print(f"***Received message of type {message_type}")
         
         if message_type == 'chat_message':
             await self.handle_chat_message(data)
@@ -209,7 +209,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             {
                 'type': 'webrtc_offer_message',
                 'offer': offer,
-                'sender': self.user.id
+                'sender': self.user.username
             }
         )
 
@@ -220,7 +220,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             {
                 'type': 'webrtc_answer_message',
                 'answer': answer,
-                'sender': self.user.id
+                'sender': self.user.username
             }
         )
 
@@ -231,7 +231,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             {
                 'type': 'webrtc_ice_candidate_message',
                 'candidate': candidate,
-                'sender': self.user.id
+                'sender': self.user.username
             }
         )
 
