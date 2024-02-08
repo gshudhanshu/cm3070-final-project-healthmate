@@ -74,7 +74,7 @@ export const useCallStore = create<CallState>((set, get) => ({
 
   // Method to connect to WebSocket for signaling
   connectCallWebSocket: (callId) => {
-    const { token, user } = useAuthStore.getState();
+    const { token } = useAuthStore.getState();
     const callWebSocket = new WebSocket(
       `${SOCKET_URL}call/${callId}/?token=${token}`,
     );
@@ -83,27 +83,18 @@ export const useCallStore = create<CallState>((set, get) => ({
       const data = JSON.parse(event.data);
       // Handle different types of messages
       console.log("Call WebSocket Message:", data);
-      switch (data.type) {
-        case "webrtc_offer":
-          if (user?.username == get().callData.caller.username) {
-            get().handleOffer(data.offer);
-          }
-          break;
-        case "webrtc_answer":
-          if (user?.username == get().callData.receiver.username) {
-            console.log(get().callData);
-            get().handleAnswer(data.answer);
-          }
-          break;
-        case "ice_candidate":
-          get().handleIceCandidate(data.candidate);
-          break;
-        default:
-          console.log("Invalid action:", data);
+
+      if (data.type === "webrtc_offer" && get().isCallActive) {
+        get().handleOffer(data.offer);
+      } else if (data.type === "webrtc_answer") {
+        get().handleAnswer(data.answer);
+      } else if (data.type === "ice_candidate") {
+        get().handleIceCandidate(data.candidate);
+      } else {
+        console.log("Invalid action:", data);
       }
     };
     callWebSocket.onclose = () => console.log("Call WebSocket Disconnected");
-
     set({ callWebSocket });
   },
 
@@ -116,7 +107,9 @@ export const useCallStore = create<CallState>((set, get) => ({
     const { callWebSocket, conversationId } = get();
     if (!stream || !callWebSocket) {
       console.log("Invalid stream or callWebSocket");
+      return;
     }
+
     const peer = new SimplePeer({
       initiator: true,
       trickle: false,
@@ -135,13 +128,16 @@ export const useCallStore = create<CallState>((set, get) => ({
       }
     });
 
-    peer.on("stream", (remoteStream) => {
-      console.log("remoteStream", remoteStream);
-      set({ remoteStream });
-    });
+    // peer.on("stream", (remoteStream) => {
+    //   console.log("remoteStream", remoteStream);
+    //   set({ remoteStream });
+    // });
 
-    set({ peer, isCallActive: true });
-    console.log("Call started", peer);
+    set({
+      peer,
+      isCallActive: true,
+      localStream: stream,
+    });
   },
 
   // Method to handle incoming offer
@@ -181,11 +177,9 @@ export const useCallStore = create<CallState>((set, get) => ({
   // Method to handle incoming answer
   handleAnswer: (answer) => {
     const peer = get().peer;
-    console.log(peer);
     if (peer) {
       peer.signal(answer);
     }
-    console.log("handleAnswer", answer);
   },
 
   // Method to handle ICE candidates
