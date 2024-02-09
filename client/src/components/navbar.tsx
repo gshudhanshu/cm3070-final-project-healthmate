@@ -66,7 +66,7 @@ export function MainNav({
     <nav
       className={cn("relative bg-white shadow dark:bg-slate-800", className)}
     >
-      <div className="container mx-auto px-6 py-4">
+      <div className="container px-6 py-4 mx-auto">
         <div className="lg:flex lg:items-center lg:justify-between">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex">
@@ -76,7 +76,7 @@ export function MainNav({
             {/* Mobile menu button */}
             <div className="flex gap-3 lg:hidden">
               {/* action buttons in the sm and md hide in  */}
-              <div className="hidden items-center gap-3 sm:flex md:flex lg:mt-0 lg:hidden">
+              <div className="items-center hidden gap-3 sm:flex md:flex lg:mt-0 lg:hidden">
                 {user !== null ? (
                   <>
                     <Notification />
@@ -125,7 +125,7 @@ export function MainNav({
                   <Link
                     href={item.href}
                     key={index}
-                    className="mt-2 transform rounded-md px-3 py-2 text-slate-700 transition-colors duration-300 hover:bg-slate-100 lg:mt-0 dark:text-slate-200 dark:hover:bg-slate-700"
+                    className="px-3 py-2 mt-2 transition-colors duration-300 transform rounded-md text-slate-700 hover:bg-slate-100 lg:mt-0 dark:text-slate-200 dark:hover:bg-slate-700"
                   >
                     {item.label}
                   </Link>
@@ -133,12 +133,12 @@ export function MainNav({
               })}
             </div>
             {/* action buttons inside the mobile nav size */}
-            <div className="mx-3 mt-4 flex items-center gap-3 sm:hidden lg:mt-0 ">
+            <div className="flex items-center gap-3 mx-3 mt-4 sm:hidden lg:mt-0 ">
               {user !== null ? <AuthActions /> : <GuestActions />}
             </div>
           </div>
           {/* action buttons inside the mobile nav size */}
-          <div className="mx-3 mt-4 hidden items-center gap-3 lg:mt-0 lg:flex ">
+          <div className="items-center hidden gap-3 mx-3 mt-4 lg:mt-0 lg:flex ">
             {user !== null ? <AuthActions /> : <GuestActions />}
           </div>
         </div>

@@ -36,12 +36,29 @@ class ConsumerUtilities:
                 token = param.split('=')[1]
                 break
         return token
+    
+    # Helper method to serialize the user
+    @staticmethod
+    def serialize_user(self, user):
+        profile_pic_url = None
+        if user.account_type == 'patient':
+            profile_pic_url = Patient.objects.get(user=user).profile_pic.url if Patient.objects.get(user=user).profile_pic else None
+        elif user.account_type == 'doctor':
+            profile_pic_url = Doctor.objects.get(user=user).profile_pic.url if Doctor.objects.get(user=user).profile_pic else None
+
+        return {
+            'id': user.id, 'username': user.username,
+            'first_name': user.first_name, 'last_name': user.last_name,
+            'email': user.email, 'account_type': user.account_type,
+            'profile_pic': profile_pic_url
+        }
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.room_group_name = None  # Initialize with None
+        self.conversation_id = None
 
     async def connect(self):
         token = ConsumerUtilities.get_token_from_query_string(self.scope['query_string'].decode('utf-8'))
@@ -62,16 +79,25 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         data = json.loads(text_data)
+        
+        print(f"***Received message of type {data.get('action')}")
+                
         if data.get('action') == 'chat_message':
             await self.handle_chat_message(data)
+        elif data.get('action') == 'call_message':
+            await self.handle_call_message(data)
 
-
-        # Receive message from room group
+    # Receive message from room group
     async def chat_message(self, event):
         message = event['message']
         await self.send(text_data=json.dumps({'message': message, 'type': 'new_message'}))
-
-
+        
+    async def call_message(self, event):
+        print(event)
+        call = event['call']
+        await self.send(text_data=json.dumps({'call': call, 'type': 'new_call'}))
+        
+    
     async def handle_chat_message(self, data):
         # Extract chat message data
         text = data.get('text', '')
@@ -107,21 +133,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
         else:
             print("Message not saved.")
-
-    # Helper method to serialize the sender
-    def serialize_user(self, user):
-        profile_pic_url = None
-        if user.account_type == 'patient':
-            profile_pic_url = Patient.objects.get(user=user).profile_pic.url if Patient.objects.get(user=user).profile_pic else None
-        elif user.account_type == 'doctor':
-            profile_pic_url = Doctor.objects.get(user=user).profile_pic.url if Doctor.objects.get(user=user).profile_pic else None
-
-        return {
-            'id': user.id, 'username': user.username,
-            'first_name': user.first_name, 'last_name': user.last_name,
-            'email': user.email, 'account_type': user.account_type,
-            'profile_pic': profile_pic_url
-        }
+            
+            
+    async def handle_call_message(self, data):
+        print(data)
+        call = data.get('callData', {})
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'call_message',
+                'call': call
+            }
+        )
+            
         
      
     # Helper method to save message
@@ -131,7 +155,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             sender = User.objects.get(id=sender_id)
             conversation = Conversation.objects.get(id=self.conversation_id)
             message = Message.objects.create(sender=sender, conversation=conversation, text=text)
-            sender_data = self.serialize_user(sender) 
+            sender_data = ConsumerUtilities.serialize_user(self, user=sender)
             # sender_data = SimpleProfileSerializer(sender).data
             return message, sender_data
         return None, None
@@ -163,6 +187,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Fetch and serialize attachment data
         attachments = Attachment.objects.filter(message=message)
         return AttachmentSerializer(attachments, many=True, read_only=True).data
+    
         
 
 
@@ -170,6 +195,7 @@ class CallConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.room_group_name = None  # Initialize with None
+        self.conversation_id = None
 
     async def connect(self):
         token = ConsumerUtilities.get_token_from_query_string(self.scope['query_string'].decode('utf-8'))
@@ -193,9 +219,8 @@ class CallConsumer(AsyncWebsocketConsumer):
         
         # Check the type of message
         message_type = data.get('action')
-        
+        self.conversation_id = data.get('conversationId')
         print(f"***Received message of type {message_type}")
-    
         
         if message_type == 'webrtc_offer':
             await self.handle_webrtc_offer(data)
@@ -207,12 +232,12 @@ class CallConsumer(AsyncWebsocketConsumer):
         
     async def handle_webrtc_offer(self, data):
         offer = data.get('offer')
-                
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 'type': 'webrtc_offer_message',
                 'offer': offer,
+                'conversation_id': self.conversation_id,
                 'sender': self.user.username,
                 'sender_channel_name': self.channel_name
             }
@@ -243,6 +268,7 @@ class CallConsumer(AsyncWebsocketConsumer):
         )
 
     async def webrtc_offer_message(self, event):
+        await self.notify_chat_about_call()
         if self.channel_name != event['sender_channel_name']:
             await self.send(text_data=json.dumps({
                 'type': 'webrtc_offer',
@@ -265,3 +291,23 @@ class CallConsumer(AsyncWebsocketConsumer):
                 'candidate': event['candidate'],
                 'sender': event['sender']
             }))
+            
+    
+    @database_sync_to_async
+    def notify_chat_about_call(self):
+        # Assuming you have a way to get the related conversation ID for the call
+        conversation_id = self.conversation_id
+        print(f"***Notifying chat about call in conversation {conversation_id}")
+        user_details = ConsumerUtilities.serialize_user(self, self.user)
+        message_data = {
+            'type': 'call_notification',
+            'caller_details': user_details,
+            'call_id': self.call_id,
+        }
+        self.channel_layer.group_send(
+            f'chat_{conversation_id}',
+            {
+                'type': 'chat_message',
+                'message': message_data
+            }
+        )

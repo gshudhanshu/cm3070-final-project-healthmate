@@ -62,6 +62,7 @@ interface MessagesState {
     message: string,
     attachments: File[],
   ) => void;
+  sendCallMessage: (conversationId: number, callData: any) => void;
   selectConversation: (conversations: Conversation) => void;
   toggleSidebar: () => void;
   getOppositeParticipant: (conversation: Conversation) => User | null;
@@ -146,8 +147,10 @@ export const useMessagesStore = create(
           set((state) => ({
             messages: [...state.messages, data.message],
           }));
+        } else if (data.type === "new_call") {
+          set((state) => ({ messages: [...state.messages, data.call] }));
         } else {
-          console.log("Invalid action:", data.action);
+          console.log("Invalid action:", data.type);
         }
       };
 
@@ -207,6 +210,23 @@ export const useMessagesStore = create(
         console.error("Error sending message:", error);
         // Handle error
       }
+    },
+    sendCallMessage: async (conversationId, callData) => {
+      const { user } = useAuthStore.getState();
+      if (!user || !get().websocket) return;
+
+      const messageData = {
+        conversationId,
+        sender: user.id,
+        ...callData,
+      };
+
+      get().websocket.send(
+        JSON.stringify({
+          action: "call_message",
+          ...messageData,
+        }),
+      );
     },
   })),
 );

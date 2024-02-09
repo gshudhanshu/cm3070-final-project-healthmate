@@ -5,6 +5,7 @@ import SimplePeer from "simple-peer";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallStore } from "@/store/useCallStore";
 import { useMessagesStore } from "@/store/useMessageStore";
+import { Button } from "@/components/ui/button";
 
 const CallPage = () => {
   const searchParams = useSearchParams();
@@ -30,8 +31,9 @@ const CallPage = () => {
   const [isCallJoined, setIsCallJoined] = useState(false);
 
   useEffect(() => {
-    if (callId) {
+    if (callId && conversationId) {
       getCallData(callId);
+      useCallStore.setState({ conversationId });
       connectCallWebSocket(callId);
     }
     return () => {
@@ -43,8 +45,20 @@ const CallPage = () => {
     const getMedia = async () => {
       try {
         const localStream = await navigator.mediaDevices.getUserMedia({
-          video: true,
           audio: true,
+          video: {
+            facingMode: "user",
+            width: {
+              min: 640,
+              ideal: 1280,
+              max: 1920,
+            },
+            height: {
+              min: 480,
+              ideal: 720,
+              max: 1080,
+            },
+          },
         });
         if (localVideoRef.current)
           localVideoRef.current.srcObject = localStream;
@@ -82,45 +96,40 @@ const CallPage = () => {
   }, [peer]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
-      <div className="mb-4">
-        <video
-          ref={localVideoRef}
-          autoPlay
-          muted
-          className="bg-black rounded-lg"
-        />
-        {isCallJoined && (
+    <div className="container my-10">
+      <div>
+        <div className="grid grid-rows-1 gap-6 md:grid-cols-2">
           <video
-            ref={remoteVideoRef}
+            controls
+            ref={localVideoRef}
             autoPlay
-            className="bg-black rounded-lg"
+            muted
+            className="w-full bg-black rounded-lg "
           />
+          {isCallJoined && (
+            <video
+              controls
+              ref={remoteVideoRef}
+              autoPlay
+              className="w-full bg-black rounded-lg "
+            />
+          )}
+        </div>
+      </div>
+      <div className="flex justify-center w-full my-10">
+        {!isCallJoined ? (
+          <div className="flex flex-col gap-6 sm:flex-row">
+            <Button onClick={joinCall}>Join Call</Button>
+            <Button onClick={handleEndCall} variant={"secondary"}>
+              Cancel
+            </Button>
+          </div>
+        ) : (
+          <Button onClick={handleEndCall} variant={"destructive"}>
+            End Call
+          </Button>
         )}
       </div>
-      {!isCallJoined ? (
-        <>
-          <button
-            onClick={joinCall}
-            className="px-4 py-2 m-2 text-white bg-green-500 rounded hover:bg-green-700"
-          >
-            Join Call
-          </button>
-          <button
-            onClick={handleEndCall}
-            className="px-4 py-2 m-2 text-white bg-gray-500 rounded hover:bg-gray-700"
-          >
-            Cancel
-          </button>
-        </>
-      ) : (
-        <button
-          onClick={handleEndCall}
-          className="px-4 py-2 text-white bg-red-500 rounded hover:bg-red-700"
-        >
-          End Call
-        </button>
-      )}
     </div>
   );
 };

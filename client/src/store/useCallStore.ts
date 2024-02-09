@@ -13,7 +13,7 @@ interface CallState {
   disconnectCallWebSocket: () => void;
   callData: any;
   getCallData: (callId: string) => void;
-  conversationId: number | null;
+  conversationId: string | null;
   isCallActive: boolean;
   peer: SimplePeer.Instance | null;
   localStream: MediaStream | undefined;
@@ -66,7 +66,11 @@ export const useCallStore = create<CallState>((set, get) => ({
           },
         },
       );
-      set({ callData: response.data, conversationId });
+      console.log("conversationID", conversationId);
+      set({
+        callData: response.data,
+        conversationId,
+      });
     } catch (error) {
       console.error("Call initiation failed:", error);
     }

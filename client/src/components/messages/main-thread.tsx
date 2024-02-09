@@ -1,3 +1,5 @@
+"use client";
+
 // components/MessageThread.tsx
 import React, { useEffect, useRef, useState } from "react";
 import { useMessagesStore } from "@/store/useMessageStore";
@@ -9,9 +11,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronLeftIcon, DocumentIcon } from "@heroicons/react/24/outline";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import IncomingCallDrawer from "@/components/messages/incoming-call-drawer";
 import { useCallStore } from "@/store/useCallStore";
 
 import dayjs from "dayjs";
+import { PhoneIcon } from "lucide-react";
 
 const MessageThread = ({ className }: { className?: string }) => {
   const {
@@ -24,6 +28,7 @@ const MessageThread = ({ className }: { className?: string }) => {
     sendMessage,
     connectWebSocket,
     disconnectWebSocket,
+    sendCallMessage,
   } = useMessagesStore();
   const [newMessage, setNewMessage] = useState("");
   const [files, setFiles] = useState<File[]>([]);
@@ -78,53 +83,12 @@ const MessageThread = ({ className }: { className?: string }) => {
       );
       if (callWindow) {
         const callState = useCallStore.getState();
+        sendCallMessage(selectedConversation.id, callState);
         // const messageState = useMessagesStore.getState();
         // callWindow.callState = callState;
         // callWindow.messageState = messageState;
       }
     }
-
-    // if (selectedConversation) {
-    //   navigator.mediaDevices
-    //     .getUserMedia({ video: true, audio: true })
-    //     .then((stream) => {
-    //       const callState = useCallStore.getState();
-    //       // Open a new window for the call
-    //       const callWindow = window.open(
-    //         `/dashboard/messages/call?participant=${getOppositeParticipant(
-    //           selectedConversation,
-    //         )?.username}&type=video`,
-    //         "callWindow",
-    //         "width=800,height=600",
-    //       );
-
-    //       if (callWindow) {
-    //         callWindow.onload = () => {
-    //           const callState = {
-    //             stream,
-    //             endCall: useCallStore.getState().endCall,
-    //             // add other necessary data or functions from useCallStore
-    //           };
-    //           callWindow.callState = callState;
-    //         };
-    //         startCall(stream);
-    //       }
-    //     })
-    //     .catch((err) => {
-    //       console.error("Error getting media stream:", err);
-    //       if (err.name === "NotAllowedError") {
-    //         alert(
-    //           "You need to grant camera and microphone permissions to start the call",
-    //         );
-    //       } else if (err.name === "NotFoundError") {
-    //         alert(
-    //           "No media devices found. Please connect a camera and microphone.",
-    //         );
-    //       } else {
-    //         alert("Error starting the call: " + err.message);
-    //       }
-    //     });
-    // }
   };
 
   // Determine if we are in a mobile view
@@ -156,15 +120,18 @@ const MessageThread = ({ className }: { className?: string }) => {
             {dayjs().format("DD MMM YY, HH:mm A")}
           </span>
           {selectedConversation && (
-            <Button onClick={handleInitiateCall}>Call</Button>
+            <>
+              <Button onClick={handleInitiateCall}>Call</Button>
+              {/* <IncomingCallDrawer /> */}
+            </>
           )}
         </div>
         <ScrollArea className="h-[50vh]">
           {/* Render messages here, align all messages on left side, timestamp on right side, and an avatar before message and name */}
           <div className="flex flex-col gap-4 p-4">
-            {messages.map((message) =>
+            {messages.map((message, idx) =>
               message.type == "message" ? (
-                <div key={message.id}>
+                <div key={idx}>
                   <div className="flex items-start gap-3">
                     <Avatar>
                       <AvatarImage
@@ -218,10 +185,27 @@ const MessageThread = ({ className }: { className?: string }) => {
                 </div>
               ) : (
                 message.type == "call" && (
-                  <div>
-                    {message.caller?.username ?? ""} called at{" "}
-                    {dayjs(message.start_time).format("HH:mm A")}
-                  </div>
+                  <a
+                    href={`/dashboard/messages/call?callId=${message.id}&conversationId${selectedConversation?.id}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      window.open(
+                        `/dashboard/messages/call?callId=${message.id}&conversationId=${selectedConversation?.id}`,
+                        "callWindow",
+                        "width=800,height=600",
+                      );
+                    }}
+                  >
+                    <div
+                      key={idx}
+                      className="flex items-center justify-center gap-3 px-4 py-2 mx-auto text-sm font-medium text-white rounded-full cursor-pointer w-fit bg-primary hover:bg-green-600"
+                    >
+                      <PhoneIcon className="w-4 h-4" />
+                      {message.caller?.username ?? ""} called to{" "}
+                      {message.receiver?.username ?? ""} at{" "}
+                      {dayjs(message.start_time).format("DD MMM YY, HH:mm A")}
+                    </div>
+                  </a>
                 )
               ),
             )}
