@@ -19,6 +19,8 @@ export interface DoctorProfile {
     country: string;
   };
   experience: string | null;
+  availability: string | null;
+  appointment_slots: { time: string; status: string }[];
   profile_pic: string | null;
   cost: string | null;
   currency: string | null;
@@ -51,4 +53,5 @@ export interface DoctorProfile {
       date_created: string;
     },
   ];
+  average_rating: number;
 }

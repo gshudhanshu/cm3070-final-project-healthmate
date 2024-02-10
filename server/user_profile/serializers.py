@@ -1,6 +1,10 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import Doctor, Patient, Language, LanguageProficiency, Review, Speciality, Qualification, DoctorQualification, Address
+from appointment.models import Appointment
+from django.utils import timezone
+from datetime import time, timedelta
+
 
 User = get_user_model()
 
@@ -50,6 +54,8 @@ class DoctorSerializer(serializers.ModelSerializer):
     qualifications = DoctorQualificationSerializer(source='doctor_qualifications', many=True, read_only=True)
     reviews = serializers.SerializerMethodField()
     hospital_address = AddressSerializer(read_only=True)
+    average_rating = serializers.SerializerMethodField(read_only=True) 
+    appointment_slots = serializers.SerializerMethodField()
     
     class Meta:
         model = Doctor
@@ -57,6 +63,40 @@ class DoctorSerializer(serializers.ModelSerializer):
         
     def get_reviews(self, obj):
         return ReviewSerializer(obj.reviews.all()[:5], many=True).data
+    
+    def get_average_rating(self, obj):
+        return obj.average_rating()
+    
+    def get_appointment_slots(self, obj):
+        # Calculate today's date
+        today = timezone.now().date()
+        # Define the start and end times for slots
+        start_time = time(8, 0)  # 8 AM
+        end_time = time(20, 0)  # 8 PM
+
+        # Generate all 1-hour slots for today
+        all_slots = [time(hour=h, minute=0) for h in range(start_time.hour, end_time.hour + 1)]
+
+        # Retrieve today's appointments for this doctor
+        appointments = Appointment.objects.filter(doctor=obj.user, date=today)
+
+        booked_slots = [appointment.time for appointment in appointments]
+
+        # Create a list of objects for all slots indicating their booking status
+        slots_with_status = []
+        for slot in all_slots:
+            slot_str = slot.strftime('%H:%M')
+            # Check if this slot is booked
+            is_booked = any(booked_slot == slot for booked_slot in booked_slots)
+            slot_info = {
+                'time': slot_str,
+                'status': 'booked' if is_booked else 'unbooked'
+            }
+            slots_with_status.append(slot_info)
+
+        return slots_with_status
+
+
         
 
 class PatientSerializer(serializers.ModelSerializer):

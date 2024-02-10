@@ -1,27 +1,54 @@
 from rest_framework import viewsets
+from django_filters import rest_framework as filters
 from .models import Doctor, Patient, Review
 from .serializers import DoctorSerializer, PatientSerializer, ReviewSerializer
 from .permissions import IsOwnerOrReadOnly, IsDoctorOrReadOnly, IsReadOnlyOrIsNew
+from .filters import DoctorFilter
 from rest_framework import permissions
 
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
 
 
-class DoctorViewSet(viewsets.ModelViewSet):
+class DoctorPagination(PageNumberPagination):
+    page_size = 1
+    
+    def get_paginated_response(self, data):
+        next_page = self.page.number + 1 if self.page.has_next() else None
+        previous_page = self.page.number - 1 if self.page.has_previous() else None
+
+        return Response({
+            'next_page': next_page,
+            'current_page': self.page.number,
+            'previous_page': previous_page,
+            'count': self.page.paginator.count,
+            'results': data
+        })
+
+
+class DoctorViewSet(viewsets.ModelViewSet, filters.FilterSet):
     """
     A viewset for viewing and editing doctor instances.
     """
     serializer_class = DoctorSerializer
+    pagination_class = DoctorPagination
     permission_classes = [IsOwnerOrReadOnly]
     lookup_field = 'user__username'
     queryset = Doctor.objects.all()
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = DoctorFilter
     
     def get_queryset(self):
         """
         This view should return a list of all records for
         any user but only allow updating their own profile.
         """
+        
+        query_params = self.request.query_params
+        print(f"Query Params: {query_params}")
+
+        
         queryset = Doctor.objects.all()
         user = self.request.user
         if user.is_authenticated and self.lookup_field == user.username and hasattr(user, 'doctor_profile'):
@@ -29,7 +56,7 @@ class DoctorViewSet(viewsets.ModelViewSet):
         return queryset
 
 class ReviewPagination(PageNumberPagination):
-    page_size = 1
+    page_size = 10
 
 class DoctorReviewsAPIView(ListAPIView):
     serializer_class = ReviewSerializer

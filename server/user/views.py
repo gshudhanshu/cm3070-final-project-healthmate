@@ -8,3 +8,4 @@ from .serializers import RegisterSerializer
 #     queryset = CustomUser.objects.all()
 #     permission_classes = (AllowAny,)
 #     serializer_class = RegisterSerializer
+
