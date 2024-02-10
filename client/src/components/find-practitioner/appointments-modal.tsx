@@ -22,6 +22,7 @@ import ErrorComponent from "@/components/common/error";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone.js";
 import utc from "dayjs/plugin/utc.js";
+import { Input } from "@/components/ui/input";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -63,9 +64,7 @@ const formatDate = (date: Date): string => {
   return date.toISOString().split("T")[0];
 };
 
-interface SlotsResponse {
-  slots: string[];
-}
+const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 const AppointmentModal = ({
   isModalOpen,
@@ -79,7 +78,7 @@ const AppointmentModal = ({
   const [slots, setSlots] = useState<Slot[]>([] as Slot[]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const { fetchDoctor, doctorUsername, doctor, bookAppointment } =
+  const { fetchDoctor, doctorUsername, doctor, bookAppointment, purpose } =
     useFindDocStore();
 
   const selectSlot = (slot: SetStateAction<Slot>) => {
@@ -92,7 +91,7 @@ const AppointmentModal = ({
       return;
     }
     console.log("Booking appointment for", selectedSlot.datetime_utc);
-    bookAppointment(doctorUsername, selectedSlot.datetime_utc);
+    bookAppointment(doctorUsername, selectedSlot.datetime_utc, purpose);
     alert("Appointment booked successfully");
   };
 
@@ -196,19 +195,38 @@ const AppointmentModal = ({
                 <Button
                   key={index}
                   variant={
-                    selectedSlot.status == "booked"
-                      ? "destructive"
-                      : selectedSlot.time == slot.time
-                        ? "default"
+                    selectedSlot.time === slot.time
+                      ? "default"
+                      : slot.status === "booked"
+                        ? "destructive"
                         : "secondary"
                   }
-                  onClick={() => selectSlot(slot)}
-                  disabled={isDateInPast(selectedDate)}
+                  onClick={() => {
+                    slot.status !== "booked" ? selectSlot(slot) : null;
+                  }}
+                  disabled={
+                    slot.status === "booked" || isDateInPast(selectedDate)
+                  }
                 >
-                  {slot.time}
+                  {dayjs(slot.datetime_utc)
+                    .tz(localTimezone, true)
+                    .format("h:mm A")}
                 </Button>
               ))
             )}
+          </div>
+          <div className="flex items-center gap-2 pt-5">
+            <label htmlFor="purpose" className="font-bold">
+              Purpose:
+            </label>
+            <Input
+              type="text"
+              name="purpose"
+              value={purpose}
+              onChange={(event) =>
+                useFindDocStore.setState({ purpose: event.target.value })
+              }
+            />
           </div>
         </div>
         <div className="grid items-center grid-cols-2 gap-2 p-5 text-center">

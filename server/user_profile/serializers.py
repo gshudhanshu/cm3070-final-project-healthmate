@@ -71,46 +71,40 @@ class DoctorSerializer(serializers.ModelSerializer):
     def get_average_rating(self, obj):
         return obj.average_rating()
     
+    
     def get_appointment_slots(self, obj):
         request = self.context.get('request')
-        # Get date from request parameters or use today's date
-        date_str = request.query_params.get('date', timezone.now().astimezone(pytz.utc).strftime('%Y-%m-%d'))
-        # Get timezone from request parameters or use UTC
-        tz_str = request.query_params.get('timezone', 'UTC')
-        tz = pytz.timezone(tz_str)
+        user_timezone = request.user.timezone if hasattr(request.user, 'timezone') else 'UTC'
+        tz = pytz.timezone(user_timezone) if isinstance(user_timezone, str) else user_timezone
 
-        # Parse the date parameter
-        try:
-            appointment_date = datetime.strptime(date_str, '%Y-%m-%d')
-        except ValueError:
-            # If there's an error parsing the date, use today's date
-            appointment_date = timezone.now().astimezone(pytz.utc).date()
-
-        appointment_date = make_aware(datetime.combine(appointment_date, datetime.min.time()), timezone=pytz.utc)
+        # Use today's date in the user's timezone
+        today_user_tz = timezone.now().astimezone(tz).date()
 
         slots_with_status = []
         # Define working hours (8 AM to 8 PM)
         for hour in range(8, 20):
-            slot_time = time(hour, 0)
-            slot_datetime = make_aware(datetime.combine(appointment_date, slot_time), timezone=pytz.utc)
-            # Adjust slot_datetime to the requested timezone
-            slot_datetime_tz = slot_datetime.astimezone(tz)
+            # Create naive datetime for the slot
+            slot_naive_datetime = datetime.combine(today_user_tz, time(hour, 0))
+            # Make it timezone aware using the user's timezone
+            slot_aware_datetime = make_aware(slot_naive_datetime, timezone=tz)
+            # Convert to UTC to match stored appointments
+            slot_utc_datetime = slot_aware_datetime.astimezone(pytz.utc)
 
-            # Check if the slot is booked
             is_booked = Appointment.objects.filter(
                 doctor=obj.user,
-                date=slot_datetime_tz.date(),
-                time=slot_datetime_tz.time()
+                date=slot_utc_datetime.date(),
+                time=slot_utc_datetime.time()
             ).exists()
 
             slots_with_status.append({
-                'date': slot_datetime_tz.strftime('%Y-%m-%d'),
-                'time': slot_datetime_tz.strftime('%H:%M'),
+                'date': slot_aware_datetime.strftime('%Y-%m-%d'),
+                'time': slot_aware_datetime.strftime('%H:%M'),
                 'status': 'booked' if is_booked else 'unbooked',
-                'datetime_utc': slot_datetime.isoformat()
+                'datetime_utc': slot_utc_datetime.isoformat()
             })
 
         return slots_with_status
+    
         
 
 class PatientSerializer(serializers.ModelSerializer):
@@ -135,8 +129,8 @@ class SimpleProfileSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(source='user.first_name')
     last_name = serializers.CharField(source='user.last_name')
     email = serializers.EmailField(source='user.email')
-    account_type = serializers.EmailField(source='user.account_type')
-    timezone = serializers.ChoiceField(choices=pytz.all_timezones)
+    account_type = serializers.CharField(source='user.account_type')
+    timezone = serializers.CharField(source='user.timezone')
 
     class Meta:
         model = User

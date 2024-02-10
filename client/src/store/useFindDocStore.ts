@@ -23,6 +23,7 @@ interface FindDocState {
   doctors: DoctorProfile[];
   doctor: DoctorProfile;
   doctorUsername: string;
+  purpose: string;
   searchParams: SearchParams;
   pagination: {
     count: number;
@@ -40,6 +41,7 @@ interface FindDocState {
   bookAppointment: (
     doctorUsername: string,
     datetime_utc: string,
+    purpose: string,
   ) => Promise<void>;
 }
 
@@ -48,6 +50,7 @@ export const useFindDocStore = create(
     doctors: [],
     doctor: {} as DoctorProfile,
     doctorUsername: "",
+    purpose: "",
     searchParams: {},
     pagination: {
       count: 0,
@@ -95,18 +98,24 @@ export const useFindDocStore = create(
         console.error("Fetching doctor failed:", error);
       }
     },
-    bookAppointment: async (doctorUsername: string, datetime_utc: string) => {
+    bookAppointment: async (
+      doctorUsername: string,
+      datetime_utc: string,
+      purpose: string,
+    ) => {
       try {
         const response = await axios.post(
           `${API_URL}/appointments/appointment/`,
           {
             doctor: doctorUsername,
             datetime_utc,
+            purpose,
           },
         );
-        if (response.status === 201)
+        if (response.status === 201) {
           console.log("Appointment booked successfully:", response.data);
-        else console.error("Booking appointment failed:", response);
+          set({ purpose: "" });
+        } else console.error("Booking appointment failed:", response);
       } catch (error) {
         console.error("Booking appointment failed:", error);
       }
