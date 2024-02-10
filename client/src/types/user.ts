@@ -8,6 +8,12 @@ export interface User {
   account_type: string;
 }
 
+export interface Slot {
+  time: string;
+  status: string;
+  datetime_utc: string;
+}
+
 export interface DoctorProfile {
   user: User;
   phone: string | null;
@@ -20,7 +26,7 @@ export interface DoctorProfile {
   };
   experience: string | null;
   availability: string | null;
-  appointment_slots: { time: string; status: string }[];
+  appointment_slots: Slot[];
   profile_pic: string | null;
   cost: string | null;
   currency: string | null;

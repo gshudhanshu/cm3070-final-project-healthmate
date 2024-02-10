@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -14,11 +14,16 @@ import {
   ChevronRightIcon,
 } from "@heroicons/react/24/solid";
 import { Button } from "../ui/button";
+import { DoctorProfile, Slot } from "@/types/user";
+import { useFindDocStore } from "@/store/useFindDocStore";
+import LoadingComponent from "@/components/common/loading";
+import ErrorComponent from "@/components/common/error";
 
-// Define the shape of the slots data
-interface Slots {
-  [key: string]: string[];
-}
+import dayjs from "dayjs";
+import timezone from "dayjs/plugin/timezone.js";
+import utc from "dayjs/plugin/utc.js";
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 // Mock data for available slots
 const availableSlots = [
@@ -62,27 +67,51 @@ interface SlotsResponse {
   slots: string[];
 }
 
-const AppointmentModal = ({}) => {
+const AppointmentModal = ({
+  isModalOpen,
+  closeModal,
+}: {
+  isModalOpen: boolean;
+  closeModal: Function;
+}) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
-  const [slots, setSlots] = useState<string[]>([]);
+  const [selectedSlot, setSelectedSlot] = useState<Slot>({} as Slot);
+  const [slots, setSlots] = useState<Slot[]>([] as Slot[]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const selectSlot = (slot: string) => {
+  const { fetchDoctor, doctorUsername, doctor, bookAppointment } =
+    useFindDocStore();
+
+  const selectSlot = (slot: SetStateAction<Slot>) => {
     setSelectedSlot(slot);
   };
 
+  const handleBookAppointment = () => {
+    if (selectedSlot.status == "booked") {
+      alert("This slot is already booked");
+      return;
+    }
+    console.log("Booking appointment for", selectedSlot.datetime_utc);
+    bookAppointment(doctorUsername, selectedSlot.datetime_utc);
+    alert("Appointment booked successfully");
+  };
+
   useEffect(() => {
+    console.log("Fetching slots for", doctorUsername);
     const fetchSlots = async () => {
-      setIsLoading(true);
       try {
-        // Replace '/api/slots' with your actual API endpoint
-        // let response = await fetch(
-        //   `/api/slots?date=${formatDate(selectedDate)}`,
-        // );
-        // const data: SlotsResponse = await response.json();
-        // setSlots(data.slots);
-        setSlots(availableSlots);
+        const timezone = dayjs.tz.guess();
+        const date = formatDate(selectedDate);
+        console.log(timezone);
+        await fetchDoctor(doctorUsername, date, timezone);
+        console.log("Fetching slots for", doctorUsername);
+        console.log("Doctor", doctor);
+        if (!doctor) {
+          alert("Doctor not found");
+          return;
+        }
+
+        setSlots(doctor.appointment_slots);
       } catch (error) {
         console.error("Failed to fetch slots:", error);
         // Handle errors as appropriate for your application
@@ -90,9 +119,9 @@ const AppointmentModal = ({}) => {
       setIsLoading(false);
     };
 
-    if (isWithinNextWeek(selectedDate)) {
-      fetchSlots();
-    }
+    // if (isWithinNextWeek(selectedDate)) {
+    fetchSlots();
+    // }
   }, [selectedDate]);
 
   const navigateDate = (days: number) => {
@@ -102,34 +131,46 @@ const AppointmentModal = ({}) => {
     }
   };
 
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <button>Edit Profile</button>
-      </DialogTrigger>
+  if (isLoading) {
+    return <LoadingComponent />;
+  }
 
-      <DialogContent className="m-0 gap-0 border-0 p-0">
-        <DialogHeader className="rounded-t-lg bg-primary p-4 text-white">
+  if (!doctor) {
+    return <ErrorComponent />;
+  }
+
+  return (
+    <Dialog open={isModalOpen} onOpenChange={(e) => closeModal()}>
+      {/* <DialogTrigger asChild>
+        <button>Edit Profile</button>
+      </DialogTrigger> */}
+
+      <DialogContent className="gap-0 p-0 m-0 border-0">
+        <DialogHeader className="p-4 text-white rounded-t-lg bg-primary">
           <DialogTitle className="text-center">Book an appointment</DialogTitle>
         </DialogHeader>
         <DialogDescription className="text-center text-slate-600 dark:text-slate-400">
           {/* Doctor's Info */}
-          <div className="flex flex-col items-center justify-between bg-slate-200 p-3 text-center">
-            <h2 className="text-slate group w-full text-center text-xl font-semibold">
-              Dr. Destin Roberts
-              <ArrowUpRightIcon className="ml-1 inline h-4 w-4 rotate-45 transition-all duration-100 group-hover:rotate-0" />
+          <div className="flex flex-col items-center justify-between p-3 text-center bg-slate-200">
+            <h2 className="w-full text-xl font-semibold text-center capitalize text-slate group">
+              <a href={`/doctors/${doctor.user.username}`}>
+                {doctor.user.first_name} {doctor.user.last_name}
+              </a>
+              <ArrowUpRightIcon className="inline w-4 h-4 ml-1 transition-all duration-100 rotate-45 group-hover:rotate-0" />
             </h2>
-            <p className="text-sm">Cardiology, Medicine - MD Cardiology</p>
+            <p className="text-sm">
+              {doctor.specialties.map((j) => j.name).join(", ")}
+            </p>
           </div>
         </DialogDescription>
         <div className="px-5">
           {/* Date Navigation */}
-          <div className="my-5 flex items-center justify-between">
+          <div className="flex items-center justify-between my-5">
             <Button
               onClick={() => navigateDate(-1)}
               disabled={!isWithinNextWeek(addDays(selectedDate, -1))}
             >
-              <ChevronLeftIcon className="h-6 w-6" />
+              <ChevronLeftIcon className="w-6 h-6" />
             </Button>
             <span className="text-lg font-medium text-slate-600">
               {selectedDate.toLocaleDateString("en-US", {
@@ -142,31 +183,39 @@ const AppointmentModal = ({}) => {
               onClick={() => navigateDate(1)}
               disabled={!isWithinNextWeek(addDays(selectedDate, 1))}
             >
-              <ChevronRightIcon className="h-6 w-6" />
+              <ChevronRightIcon className="w-6 h-6" />
             </Button>
           </div>
 
           {/* Time Slots */}
-          <div className="mt-4 grid grid-cols-3 gap-4 ">
+          <div className="grid grid-cols-3 gap-4 mt-4 ">
             {isLoading ? (
-              <p>Loading...</p>
+              <LoadingComponent />
             ) : (
-              slots.map((slot, index) => (
+              doctor.appointment_slots.map((slot, index) => (
                 <Button
                   key={index}
-                  variant={selectedSlot === slot ? "default" : "secondary"}
+                  variant={
+                    selectedSlot.status == "booked"
+                      ? "destructive"
+                      : selectedSlot.time == slot.time
+                        ? "default"
+                        : "secondary"
+                  }
                   onClick={() => selectSlot(slot)}
                   disabled={isDateInPast(selectedDate)}
                 >
-                  {slot}
+                  {slot.time}
                 </Button>
               ))
             )}
           </div>
         </div>
-        <div className="grid grid-cols-2 items-center gap-2 p-5 text-center">
-          <div className="text-xl font-semibold text-primary">Cost: Free</div>
-          <Button onClick={() => console.log("Booking appointment...")}>
+        <div className="grid items-center grid-cols-2 gap-2 p-5 text-center">
+          <div className="text-xl font-semibold text-primary">
+            Cost: {doctor.cost} {doctor.currency}
+          </div>
+          <Button onClick={() => handleBookAppointment()}>
             Book Appointment
           </Button>
         </div>

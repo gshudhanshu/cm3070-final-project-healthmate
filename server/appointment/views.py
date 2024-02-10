@@ -4,6 +4,7 @@ from .serializers import AppointmentSerializer
 from rest_framework.permissions import IsAuthenticated
 from datetime import timedelta, time
 from django.utils import timezone
+import pytz
 
 
 
@@ -14,32 +15,62 @@ class AppointmentViewSet(viewsets.ModelViewSet):
     serializer_class = AppointmentSerializer
     queryset = Appointment.objects.all()
     permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """
+        Restricts the returned appointments to those associated with the given user,
+        either as a patient or as a doctor.
+        """
+        queryset = super().get_queryset()
+        user = self.request.user
 
+        if user.is_authenticated:
+            # Check if the user has a doctor profile
+            if hasattr(user, 'doctor_profile'):
+                # User is a doctor, return appointments for this doctor
+                queryset = queryset.filter(doctor=user.doctor_profile)
+            else:
+                # User is assumed to be a patient, return appointments for this patient
+                queryset = queryset.filter(patient=user)
 
-    def get_today_appointments_slots(self):
-        today = timezone.now().date()
-        start_time = time(8, 0)  # 8 AM
-        end_time = time(20, 0)  # 8 PM
+        return queryset
 
-        # Generate all 1-hour slots for today
-        all_slots = [time(hour, 0) for hour in range(start_time.hour, end_time.hour)]
+    # def perform_create(self, serializer):
+    #     """
+    #     Set the patient to the current user and validate appointment time.
+    #     """
+    #     patient = self.request.user
+    #     doctor_username = self.request.data.get('doctor')
+    #     appointment_time = serializer.validated_data.get('time')
+    #     appointment_date = serializer.validated_data.get('date')
 
-        # Retrieve today's appointments from the database
-        today_appointments = self.queryset.filter(date=today)
+    #     # Get doctor object
+    #     doctor = get_object_or_404(Doctor, pk=doctor_id)
 
-        # Extract times of today's appointments
-        booked_slots = [appointment.time for appointment in today_appointments]
+    #     # Ensure the appointment time is within the doctor's working hours
+    #     # and adjust for the doctor's timezone if necessary
+    #     now = timezone.now()
+    #     if appointment_time < now:
+    #         # Prevent booking in the past
+    #         raise ValidationError('Cannot book an appointment in the past.')
 
-        # Determine booked and unbooked slots
-        booked_slots_str = [slot.strftime('%H:%M') for slot in booked_slots]
-        all_slots_str = [slot.strftime('%H:%M') for slot in all_slots]
-        unbooked_slots_str = list(set(all_slots_str) - set(booked_slots_str))
+    #     # Example: Ensure the appointment is within the next 30 days
+    #     if appointment_time > now + timedelta(days=30):
+    #         raise ValidationError('Can only book appointments within the next 30 days.')
 
-        # Convert back to time objects if necessary, or directly return the string representation
-        unbooked_slots = [time(int(slot.split(':')[0]), int(slot.split(':')[1])) for slot in unbooked_slots_str]
+    #     # Adjust appointment time to doctor's timezone if different from UTC
+    #     # appointment_time = appointment_time.astimezone(timezone.get_default_timezone())
 
-        return {
-            'booked_slots': booked_slots_str,
-            'unbooked_slots': unbooked_slots_str,
-            'all_slots_full': len(unbooked_slots) == 0
-        }
+    #     serializer.save(patient=patient, doctor=doctor)
+
+    # @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    # def book(self, request, pk=None):
+    #     """
+    #     Custom action to book an appointment.
+    #     """
+    #     appointment = self.get_object()
+    #     # Implement booking logic here
+    #     # For example, update the appointment status to 'booked'
+    #     appointment.status = 'booked'
+    #     appointment.save()
+    #     return Response({'status': 'Appointment booked'}, status=status.HTTP_200_OK)

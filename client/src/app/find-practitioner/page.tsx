@@ -330,8 +330,21 @@ const filters = [
 ];
 
 export default function Page() {
-  const { searchDoctors, setSearchParams, doctors, searchParams, pagination } =
-    useFindDocStore();
+  const {
+    searchDoctors,
+    setSearchParams,
+    doctors,
+    searchParams,
+    pagination,
+    fetchDoctor,
+  } = useFindDocStore();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModalWithDoctor = (doctorUsername: string) => {
+    useFindDocStore.setState({ doctorUsername });
+    setIsModalOpen(true);
+  };
 
   useEffect(() => {
     searchDoctors(); // Perform an initial search
@@ -564,7 +577,13 @@ export default function Page() {
                               ? doctor.cost + " " + doctor.currency
                               : "Free"}
                           </p>
-                          <Button variant="default" className="max-w-40">
+                          <Button
+                            variant="default"
+                            className="max-w-40"
+                            onClick={() =>
+                              openModalWithDoctor(doctor.user.username)
+                            }
+                          >
                             Book Appointment
                           </Button>
                         </div>
@@ -611,7 +630,12 @@ export default function Page() {
           </section>
         </div>
       </div>
-      <AppointmentModal />
+      {isModalOpen && (
+        <AppointmentModal
+          isModalOpen={isModalOpen}
+          closeModal={() => setIsModalOpen(false)}
+        />
+      )}
     </section>
   );
 }

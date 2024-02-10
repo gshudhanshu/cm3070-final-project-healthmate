@@ -3,7 +3,10 @@ from django.contrib.auth import get_user_model
 from .models import Doctor, Patient, Language, LanguageProficiency, Review, Speciality, Qualification, DoctorQualification, Address
 from appointment.models import Appointment
 from django.utils import timezone
-from datetime import time, timedelta
+from datetime import datetime, time, timedelta
+import pytz
+from django.utils.timezone import make_aware
+
 
 
 User = get_user_model()
@@ -14,9 +17,10 @@ class AddressSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    timezone = serializers.ChoiceField(choices=pytz.all_timezones)
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'email']
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'timezone']
         ref_name = 'UserProfile'
         
         
@@ -68,35 +72,43 @@ class DoctorSerializer(serializers.ModelSerializer):
         return obj.average_rating()
     
     def get_appointment_slots(self, obj):
-        # Calculate today's date
-        today = timezone.now().date()
-        # Define the start and end times for slots
-        start_time = time(8, 0)  # 8 AM
-        end_time = time(20, 0)  # 8 PM
+        # Attempt to get user's timezone from request or user model
+        request = self.context.get('request')
+        
+        date_param = request.query_params.get('date', None)
+        timezone_param = request.query_params.get('timezone', 'UTC')
+        
+        user_timezone = getattr(request.user, 'timezone', 'UTC') if request else 'UTC'
+        tz = pytz.timezone(str(user_timezone))
 
-        # Generate all 1-hour slots for today
-        all_slots = [time(hour=h, minute=0) for h in range(start_time.hour, end_time.hour + 1)]
+        # Define working hours (8 AM to 8 PM)
+        working_hours_start = 8
+        working_hours_end = 20
 
-        # Retrieve today's appointments for this doctor
-        appointments = Appointment.objects.filter(doctor=obj.user, date=today)
+        # Get today's date in user's timezone
+        now_in_user_tz = timezone.now().astimezone(tz)
+        today = now_in_user_tz.date()
 
-        booked_slots = [appointment.time for appointment in appointments]
-
-        # Create a list of objects for all slots indicating their booking status
         slots_with_status = []
-        for slot in all_slots:
-            slot_str = slot.strftime('%H:%M')
-            # Check if this slot is booked
-            is_booked = any(booked_slot == slot for booked_slot in booked_slots)
-            slot_info = {
-                'time': slot_str,
-                'status': 'booked' if is_booked else 'unbooked'
-            }
-            slots_with_status.append(slot_info)
+
+        # Generate slots for today within working hours
+        for hour in range(working_hours_start, working_hours_end):
+            slot_time = time(hour, 0)
+            # Combine date and time in user's timezone
+            slot_datetime = datetime.combine(today, slot_time)
+            slot_datetime = tz.localize(slot_datetime)
+
+            # Check if the slot is booked
+            is_booked = Appointment.objects.filter(doctor=obj.user, date=today, time=slot_time).exists()
+
+            # Append slot info
+            slots_with_status.append({
+                'time': slot_time.strftime('%H:%M'),
+                'status': 'booked' if is_booked else 'unbooked',
+                'datetime_utc': slot_datetime.astimezone(pytz.utc).isoformat()
+            })
 
         return slots_with_status
-
-
         
 
 class PatientSerializer(serializers.ModelSerializer):
@@ -122,10 +134,11 @@ class SimpleProfileSerializer(serializers.ModelSerializer):
     last_name = serializers.CharField(source='user.last_name')
     email = serializers.EmailField(source='user.email')
     account_type = serializers.EmailField(source='user.account_type')
+    timezone = serializers.ChoiceField(choices=pytz.all_timezones)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'profile_pic', 'account_type']
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'profile_pic', 'account_type', 'timezone']
         ref_name = 'SimpleProfile'
     
     def get_profile_pic(self, obj):

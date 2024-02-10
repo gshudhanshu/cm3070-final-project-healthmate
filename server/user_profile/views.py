@@ -44,16 +44,13 @@ class DoctorViewSet(viewsets.ModelViewSet, filters.FilterSet):
         This view should return a list of all records for
         any user but only allow updating their own profile.
         """
-        
-        query_params = self.request.query_params
-        print(f"Query Params: {query_params}")
-
-        
+                
         queryset = Doctor.objects.all()
         user = self.request.user
         if user.is_authenticated and self.lookup_field == user.username and hasattr(user, 'doctor_profile'):
             queryset = queryset.filter(user=user)
         return queryset
+
 
 class ReviewPagination(PageNumberPagination):
     page_size = 10

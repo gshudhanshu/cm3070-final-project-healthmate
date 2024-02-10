@@ -22,12 +22,12 @@ class CustomUserAdmin(BaseUserAdmin):
     form = CustomUserChangeForm
     add_form = CustomUserCreationForm
     
-    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'is_active', 'account_type')
+    list_display = ('username', 'email', 'first_name', 'last_name', 'timezone', 'is_staff', 'is_active', 'account_type')
     list_filter = ('is_staff', 'is_active', 'account_type')
     
     fieldsets = (
         (None, {'fields': ('username', 'email', 'password')}),
-        ('Personal info', {'fields': ('first_name', 'last_name', 'account_type')}),
+        ('Personal info', {'fields': ('first_name', 'last_name', 'account_type', 'timezone')}),
         ('Permissions', {'fields': ('is_staff', 'is_active', 'is_superuser', 'groups', 'user_permissions')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
@@ -35,7 +35,7 @@ class CustomUserAdmin(BaseUserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'email', 'password1', 'password2', 'first_name', 'last_name', 'account_type')}
+            'fields': ('username', 'email', 'password1', 'password2', 'first_name', 'last_name', 'account_type', 'timezone')}
         ),
     )
     
