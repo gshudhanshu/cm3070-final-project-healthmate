@@ -30,7 +30,7 @@ export function Notification() {
             </p>
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
+        {/* <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem>
             Profile
@@ -41,7 +41,7 @@ export function Notification() {
         <DropdownMenuItem>
           Log out
           <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
-        </DropdownMenuItem>
+        </DropdownMenuItem>*/}
       </DropdownMenuContent>
     </DropdownMenu>
   );

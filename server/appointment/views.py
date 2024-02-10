@@ -1,10 +1,18 @@
-from rest_framework import viewsets
+from rest_framework import status, viewsets
+from rest_framework.response import Response
 from .models import Appointment
 from .serializers import AppointmentSerializer
 from rest_framework.permissions import IsAuthenticated
 from datetime import timedelta, time
 from django.utils import timezone
 import pytz
+from dateutil.parser import parse
+
+
+
+
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 
 
@@ -34,43 +42,33 @@ class AppointmentViewSet(viewsets.ModelViewSet):
                 queryset = queryset.filter(patient=user)
 
         return queryset
+    
+    
+    def create(self, request, *args, **kwargs):
+        # Extract data from request
+        doctor_username = request.data.get('doctor')
+        datetime_utc_str = request.data.get('datetime_utc')
+        purpose = request.data.get('purpose', '')
 
-    # def perform_create(self, serializer):
-    #     """
-    #     Set the patient to the current user and validate appointment time.
-    #     """
-    #     patient = self.request.user
-    #     doctor_username = self.request.data.get('doctor')
-    #     appointment_time = serializer.validated_data.get('time')
-    #     appointment_date = serializer.validated_data.get('date')
+        # Convert datetime_utc to aware datetime object
+        datetime_aware = parse(datetime_utc_str)
 
-    #     # Get doctor object
-    #     doctor = get_object_or_404(Doctor, pk=doctor_id)
+        # Find doctor by username
+        try:
+            doctor = User.objects.get(username=doctor_username)
+        except User.DoesNotExist:
+            return Response({'error': 'Doctor not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    #     # Ensure the appointment time is within the doctor's working hours
-    #     # and adjust for the doctor's timezone if necessary
-    #     now = timezone.now()
-    #     if appointment_time < now:
-    #         # Prevent booking in the past
-    #         raise ValidationError('Cannot book an appointment in the past.')
+        # Create appointment
+        appointment = Appointment(
+            patient=request.user,
+            doctor=doctor,
+            date=datetime_aware.date(),
+            time=datetime_aware.time(),
+            purpose=purpose
+        )
+        appointment.save()
 
-    #     # Example: Ensure the appointment is within the next 30 days
-    #     if appointment_time > now + timedelta(days=30):
-    #         raise ValidationError('Can only book appointments within the next 30 days.')
-
-    #     # Adjust appointment time to doctor's timezone if different from UTC
-    #     # appointment_time = appointment_time.astimezone(timezone.get_default_timezone())
-
-    #     serializer.save(patient=patient, doctor=doctor)
-
-    # @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
-    # def book(self, request, pk=None):
-    #     """
-    #     Custom action to book an appointment.
-    #     """
-    #     appointment = self.get_object()
-    #     # Implement booking logic here
-    #     # For example, update the appointment status to 'booked'
-    #     appointment.status = 'booked'
-    #     appointment.save()
-    #     return Response({'status': 'Appointment booked'}, status=status.HTTP_200_OK)
+        # Serialize and return the newly created appointment
+        serializer = self.get_serializer(appointment)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

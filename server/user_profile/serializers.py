@@ -72,40 +72,42 @@ class DoctorSerializer(serializers.ModelSerializer):
         return obj.average_rating()
     
     def get_appointment_slots(self, obj):
-        # Attempt to get user's timezone from request or user model
         request = self.context.get('request')
-        
-        date_param = request.query_params.get('date', None)
-        timezone_param = request.query_params.get('timezone', 'UTC')
-        
-        user_timezone = getattr(request.user, 'timezone', 'UTC') if request else 'UTC'
-        tz = pytz.timezone(str(user_timezone))
+        # Get date from request parameters or use today's date
+        date_str = request.query_params.get('date', timezone.now().astimezone(pytz.utc).strftime('%Y-%m-%d'))
+        # Get timezone from request parameters or use UTC
+        tz_str = request.query_params.get('timezone', 'UTC')
+        tz = pytz.timezone(tz_str)
 
-        # Define working hours (8 AM to 8 PM)
-        working_hours_start = 8
-        working_hours_end = 20
+        # Parse the date parameter
+        try:
+            appointment_date = datetime.strptime(date_str, '%Y-%m-%d')
+        except ValueError:
+            # If there's an error parsing the date, use today's date
+            appointment_date = timezone.now().astimezone(pytz.utc).date()
 
-        # Get today's date in user's timezone
-        now_in_user_tz = timezone.now().astimezone(tz)
-        today = now_in_user_tz.date()
+        appointment_date = make_aware(datetime.combine(appointment_date, datetime.min.time()), timezone=pytz.utc)
 
         slots_with_status = []
-
-        # Generate slots for today within working hours
-        for hour in range(working_hours_start, working_hours_end):
+        # Define working hours (8 AM to 8 PM)
+        for hour in range(8, 20):
             slot_time = time(hour, 0)
-            # Combine date and time in user's timezone
-            slot_datetime = datetime.combine(today, slot_time)
-            slot_datetime = tz.localize(slot_datetime)
+            slot_datetime = make_aware(datetime.combine(appointment_date, slot_time), timezone=pytz.utc)
+            # Adjust slot_datetime to the requested timezone
+            slot_datetime_tz = slot_datetime.astimezone(tz)
 
             # Check if the slot is booked
-            is_booked = Appointment.objects.filter(doctor=obj.user, date=today, time=slot_time).exists()
+            is_booked = Appointment.objects.filter(
+                doctor=obj.user,
+                date=slot_datetime_tz.date(),
+                time=slot_datetime_tz.time()
+            ).exists()
 
-            # Append slot info
             slots_with_status.append({
-                'time': slot_time.strftime('%H:%M'),
+                'date': slot_datetime_tz.strftime('%Y-%m-%d'),
+                'time': slot_datetime_tz.strftime('%H:%M'),
                 'status': 'booked' if is_booked else 'unbooked',
-                'datetime_utc': slot_datetime.astimezone(pytz.utc).isoformat()
+                'datetime_utc': slot_datetime.isoformat()
             })
 
         return slots_with_status

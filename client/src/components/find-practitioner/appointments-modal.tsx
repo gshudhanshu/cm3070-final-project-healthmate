@@ -149,8 +149,8 @@ const AppointmentModal = ({
         <DialogHeader className="p-4 text-white rounded-t-lg bg-primary">
           <DialogTitle className="text-center">Book an appointment</DialogTitle>
         </DialogHeader>
-        <DialogDescription className="text-center text-slate-600 dark:text-slate-400">
-          {/* Doctor's Info */}
+        {/* Doctor's Info */}
+        <div className="text-center text-slate-600 dark:text-slate-400">
           <div className="flex flex-col items-center justify-between p-3 text-center bg-slate-200">
             <h2 className="w-full text-xl font-semibold text-center capitalize text-slate group">
               <a href={`/doctors/${doctor.user.username}`}>
@@ -162,7 +162,7 @@ const AppointmentModal = ({
               {doctor.specialties.map((j) => j.name).join(", ")}
             </p>
           </div>
-        </DialogDescription>
+        </div>
         <div className="px-5">
           {/* Date Navigation */}
           <div className="flex items-center justify-between my-5">
