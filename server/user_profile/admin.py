@@ -4,15 +4,18 @@ from django import forms
 
 
 # Register your models here.
-from .models import Speciality, Qualification, Language, LanguageProficiency, Doctor, DoctorQualification, Patient, Review, Address
+from .models import Speciality, Qualification, Language, DoctorLanguageProficiency, Doctor, DoctorQualification, Patient,PatientLanguageProficiency, Review, Address
 
 admin.site.register(Speciality)
 admin.site.register(Qualification)
 admin.site.register(Language)
-admin.site.register(LanguageProficiency)
+admin.site.register(DoctorLanguageProficiency)
 
-class LanguageProficiencyInline(admin.TabularInline):
-    model = LanguageProficiency
+class DoctorLanguageProficiencyInline(admin.TabularInline):
+    model = DoctorLanguageProficiency
+    extra = 1
+class PatientLanguageProficiencyInline(admin.TabularInline):
+    model = PatientLanguageProficiency
     extra = 1
     
 class DoctorQualificationInline(admin.TabularInline):
@@ -53,7 +56,7 @@ class DoctorAdmin(admin.ModelAdmin):
     list_display = ('user', 'average_rating_admin', 'phone', 'hospital_address', 'experience', 'cost', 'currency')
     search_fields = ('user__username', 'specialties__name', 'qualifications__name')
     list_filter = ('specialties', 'qualifications', 'languages')
-    inlines = [LanguageProficiencyInline, DoctorQualificationInline]
+    inlines = [DoctorLanguageProficiencyInline, DoctorQualificationInline]
     
     def average_rating_admin(self, obj):
         return obj.average_rating()
@@ -65,6 +68,8 @@ class PatientAdmin(admin.ModelAdmin):
     list_display = ('user', 'phone', 'dob', 'gender', 'blood_group')
     search_fields = ('user__username', 'language__name', 'blood_group')
     list_filter = ('gender', 'marital_status', 'blood_group')
+    inlines = [PatientLanguageProficiencyInline]
+
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):

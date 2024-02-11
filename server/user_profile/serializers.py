@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Doctor, Patient, Language, LanguageProficiency, Review, Speciality, Qualification, DoctorQualification, Address
+from .models import Doctor, Patient, Language, DoctorLanguageProficiency,PatientLanguageProficiency, Review, Speciality, Qualification, DoctorQualification, Address
 from appointment.models import Appointment
 from django.utils import timezone
 from datetime import datetime, time, timedelta
@@ -26,11 +26,18 @@ class UserProfileSerializer(serializers.ModelSerializer):
         ref_name = 'UserProfile'
         
         
-class LanguageProficiencySerializer(serializers.ModelSerializer):
+class DoctorLanguageProficiencySerializer(serializers.ModelSerializer):
     name = serializers.ReadOnlyField(source='language.name')
     
     class Meta:
-        model = LanguageProficiency
+        model = DoctorLanguageProficiency
+        fields = ['name', 'level']
+        
+class PatientLanguageProficiencySerializer(serializers.ModelSerializer):
+    name = serializers.ReadOnlyField(source='language.name')
+    
+    class Meta:
+        model = PatientLanguageProficiency
         fields = ['name', 'level']
   
         
@@ -56,7 +63,7 @@ class DoctorQualificationSerializer(serializers.ModelSerializer):
 class DoctorSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer(read_only=True)
     specialties = SpecialitySerializer(many=True, read_only=True)
-    languages = LanguageProficiencySerializer(source='languageproficiency_set', many=True, read_only=True)
+    languages = DoctorLanguageProficiencySerializer(source='doctor_language_proficiencies', many=True, read_only=True)
     qualifications = DoctorQualificationSerializer(source='doctor_qualifications', many=True, read_only=True)
     reviews = serializers.SerializerMethodField()
     hospital_address = AddressSerializer(read_only=True)
@@ -111,10 +118,13 @@ class DoctorSerializer(serializers.ModelSerializer):
 
 class PatientSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer(read_only=True)
-    
+    languages = PatientLanguageProficiencySerializer(source='patient_language_proficiencies', many=True, read_only=True)
+    address =  AddressSerializer(read_only=True)
+
     class Meta:
         model = Patient
-        fields = ['user', 'phone', 'dob', 'marital_status', 'gender', 'height', 'weight', 'blood_group', 'address', 'profile_pic']
+        fields = '__all__'
+        # fields = ['languages', 'address', 'user']
 
 
 class ReviewSerializer(serializers.ModelSerializer):

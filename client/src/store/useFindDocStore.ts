@@ -4,20 +4,10 @@ import qs from "qs";
 import axios from "axios";
 import { DoctorProfile } from "@/types/user";
 
+import { SearchParams } from "@/types/findDoc";
+
 const API_URL = process.env.API_URL;
 const SEARCH_DOCTORS_URL = `${API_URL}/user_profile/doctors`;
-
-interface SearchParams {
-  name?: string;
-  location?: string;
-  speciality?: string[];
-  priceRange?: [number, number];
-  experience?: string[];
-  qualifications?: string[];
-  languages?: string[];
-  page?: number;
-  [key: string]: any;
-}
 
 interface FindDocState {
   doctors: DoctorProfile[];

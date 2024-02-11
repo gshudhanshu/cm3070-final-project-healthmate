@@ -1,0 +1,67 @@
+import { useAuthStore } from "@/store/useAuthStore";
+import { create } from "zustand";
+import { devtools } from "zustand/middleware";
+import axios from "axios";
+import { MedicalRecord } from "@/types/medicalRecord";
+
+const API_URL = process.env.API_URL;
+const MEDICAL_RECORDS_URL = `${API_URL}/medical_records`;
+
+interface MedicalRecordsState {
+  medicalRecord: MedicalRecord | null;
+  fetchMedicalRecords: (username: string) => Promise<void>;
+  addMedicalRecord: (recordData: Partial<MedicalRecord>) => Promise<void>;
+  updateMedicalRecord: (
+    recordId: number,
+    recordData: Partial<MedicalRecord>,
+  ) => Promise<void>;
+}
+
+export const useMedicalRecordsStore = create(
+  devtools<MedicalRecordsState>((set, get) => ({
+    medicalRecord: null,
+    fetchMedicalRecords: async (username) => {
+      const { token } = useAuthStore.getState();
+      try {
+        const response = await axios.get(`${MEDICAL_RECORDS_URL}/${username}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        set({ medicalRecord: response.data });
+      } catch (error) {
+        console.error("Fetching medical records failed:", error);
+      }
+    },
+    addMedicalRecord: async (recordData) => {
+      try {
+        const response = await axios.post(MEDICAL_RECORDS_URL, recordData, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        set((state) => ({
+          medicalRecord: response.data,
+        }));
+      } catch (error) {
+        console.error("Adding medical record failed:", error);
+      }
+    },
+    updateMedicalRecord: async (recordId, recordData) => {
+      try {
+        const response = await axios.patch(
+          `${MEDICAL_RECORDS_URL}${recordId}/`,
+          recordData,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          },
+        );
+        set((state) => ({ medicalRecord: response.data }));
+      } catch (error) {
+        console.error("Updating medical record failed:", error);
+      }
+    },
+  })),
+);

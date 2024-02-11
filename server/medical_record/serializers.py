@@ -1,10 +1,6 @@
 from rest_framework import serializers
-from .models import MedicalRecord, Disorder, Medicine, Diagnosis, AppointmentHistory
-
-class MedicalRecordSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MedicalRecord
-        fields = '__all__'
+from .models import MedicalRecord, Disorder, Medicine, Diagnosis
+from user_profile.serializers import PatientSerializer
 
 class DisorderSerializer(serializers.ModelSerializer):
     class Meta:
@@ -21,7 +17,12 @@ class DiagnosisSerializer(serializers.ModelSerializer):
         model = Diagnosis
         fields = '__all__'
 
-class AppointmentHistorySerializer(serializers.ModelSerializer):
+class MedicalRecordSerializer(serializers.ModelSerializer):
+    disorders = DisorderSerializer(many=True, read_only=True)
+    medicines = MedicineSerializer(many=True, read_only=True)
+    diagnoses = DiagnosisSerializer(many=True, read_only=True)
+    patient = PatientSerializer(read_only=True)
+
     class Meta:
-        model = AppointmentHistory
+        model = MedicalRecord
         fields = '__all__'

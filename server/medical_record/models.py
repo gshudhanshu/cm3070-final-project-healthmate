@@ -39,11 +39,3 @@ class Diagnosis(models.Model):
     
     def __str__(self):
         return self.diagnosis
-
-class AppointmentHistory(models.Model):
-    medical_record = models.ForeignKey(MedicalRecord, related_name='appointment_history', on_delete=models.CASCADE)
-    appointment = models.ForeignKey('appointment.Appointment', on_delete=models.CASCADE)
-    date = models.DateField()
-    
-    def __str__(self):
-        return f"Appointment on {self.date.strftime('%Y-%m-%d')}"
