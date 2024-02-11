@@ -135,10 +135,7 @@ const MessageThread = ({ className }: { className?: string }) => {
                   <div className="flex items-start gap-3">
                     <Avatar>
                       <AvatarImage
-                        src={
-                          `${process.env.NEXT_PUBLIC_BACKEND_URL}${message.sender.profile_pic}` ??
-                          ""
-                        }
+                        src={`${message.sender.profile_pic}` ?? ""}
                       />
                       <AvatarFallback>
                         {message.sender.first_name[0] +

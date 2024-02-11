@@ -6,6 +6,8 @@ from django.utils import timezone
 from datetime import datetime, time, timedelta
 import pytz
 from django.utils.timezone import make_aware
+from django.conf import settings
+
 
 
 
@@ -137,7 +139,8 @@ class SimpleProfileSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'first_name', 'last_name', 'email', 'profile_pic', 'account_type', 'timezone']
         ref_name = 'SimpleProfile'
     
+    # def get_profile_pic(self, obj):
+    #     return obj.profile_pic.url if obj.profile_pic else None
+    
     def get_profile_pic(self, obj):
-        return obj.profile_pic.url if obj.profile_pic else None
-
-
+        return f"{settings.BASE_URL}{obj.profile_pic.url}" if obj.profile_pic else None

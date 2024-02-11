@@ -104,14 +104,11 @@ export const useFindDocStore = create(
       purpose: string,
     ) => {
       try {
-        const response = await axios.post(
-          `${API_URL}/appointments/appointment/`,
-          {
-            doctor: doctorUsername,
-            datetime_utc,
-            purpose,
-          },
-        );
+        const response = await axios.post(`${API_URL}/appointments/`, {
+          doctor: doctorUsername,
+          datetime_utc,
+          purpose,
+        });
         if (response.status === 201) {
           console.log("Appointment booked successfully:", response.data);
           set({ purpose: "" });

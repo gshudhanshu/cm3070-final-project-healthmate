@@ -6,48 +6,16 @@ import { User } from "@/types/user";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useCallStore } from "@/store/useCallStore";
 
+import {
+  AttachmentResponse,
+  Conversation,
+  Message,
+  MessageData,
+} from "@/types/conversation";
+
 const API_URL = process.env.API_URL;
 const CONVERSATIONS_URL = `${API_URL}/conversations/`;
 const SOCKET_URL = `ws://127.0.0.1:8000/`;
-
-interface Message {
-  id: number;
-  sender: User;
-  type: string;
-  text: string;
-  timestamp: string;
-  conversation: number;
-  attachments: AttachmentResponse[];
-  // calls
-  caller: User | null;
-  receiver: User | null;
-  start_time: string;
-  end_time: string;
-  call_type: string;
-}
-
-interface AttachmentResponse {
-  id: string;
-  file_name: string;
-  file_size: string;
-  file_extension: string;
-  file_url: string;
-  file: string;
-}
-
-interface Conversation {
-  id: number;
-  patient: User | null;
-  doctor: User | null;
-  last_message: Message;
-}
-
-interface MessageData {
-  conversationId: number;
-  sender: number;
-  text: string;
-  attachments: AttachmentResponse[];
-}
 
 interface MessagesState {
   websocket: any;

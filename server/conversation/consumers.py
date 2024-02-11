@@ -1,6 +1,7 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
+from django.conf import settings
 
 from .models import Conversation, Message, Attachment
 from django.contrib.auth import get_user_model
@@ -45,12 +46,14 @@ class ConsumerUtilities:
             profile_pic_url = Patient.objects.get(user=user).profile_pic.url if Patient.objects.get(user=user).profile_pic else None
         elif user.account_type == 'doctor':
             profile_pic_url = Doctor.objects.get(user=user).profile_pic.url if Doctor.objects.get(user=user).profile_pic else None
+            
+        print(f"***Profile pic URL: {profile_pic_url}")
 
         return {
             'id': user.id, 'username': user.username,
             'first_name': user.first_name, 'last_name': user.last_name,
             'email': user.email, 'account_type': user.account_type,
-            'profile_pic': profile_pic_url
+            'profile_pic': f"{settings.BASE_URL}{profile_pic_url}"
         }
 
 
