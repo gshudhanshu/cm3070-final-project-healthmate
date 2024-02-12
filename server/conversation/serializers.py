@@ -23,7 +23,12 @@ class AttachmentSerializer(serializers.ModelSerializer):
     def get_file_size(self, obj):
         if not obj.file:
             return None
-        size = obj.file.size
+        
+        try:
+            size = obj.file.size
+        except FileNotFoundError:
+            return None
+        
         if size < 1024:
             return f"{size} B"
         elif size < 1048576:

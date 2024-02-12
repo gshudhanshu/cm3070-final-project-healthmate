@@ -6,30 +6,32 @@ import { Badge } from "@/components/ui/badge";
 import PersonalDetails from "@/components/medical-records/personal-details";
 import { useMedicalRecordsStore } from "@/store/useMedicalRecordStore";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useMessagesStore } from "@/store/useMessageStore";
 import LoadingComponent from "@/components/common/loading";
 import ActiveMedicines from "@/components/medical-records/active-medicines";
 import RecentDiagnosis from "@/components/medical-records/recent-diagnosis";
 import AppointmentHistory from "@/components/medical-records/appointment-history";
 
 export default function Page({
-  selectedPatientId,
+  isDoctorFetching,
 }: {
-  selectedPatientId?: number;
+  isDoctorFetching?: boolean;
 }) {
   const { fetchMedicalRecords, medicalRecord } = useMedicalRecordsStore();
+  const { selectedConversation } = useMessagesStore();
   const { user } = useAuthStore();
 
-  console.log(selectedPatientId);
-  const [patientId, setPatientId] = useState<number | null>(
-    selectedPatientId || user?.id || null,
-  );
+  const patientId = user?.id;
 
   useEffect(() => {
     console.log(patientId);
-    if (patientId) {
-      fetchMedicalRecords(patientId.toString());
+    if (isDoctorFetching) {
+      fetchMedicalRecords(
+        selectedConversation?.patient?.username || "",
+        selectedConversation?.id.toString(),
+      );
     }
-  }, []);
+  }, [selectedConversation]);
 
   if (!medicalRecord) return <LoadingComponent />;
 

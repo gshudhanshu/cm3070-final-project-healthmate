@@ -37,7 +37,7 @@ const MessagesPage: React.FC = () => {
               <MessageThread className="pb-10 pr-6" />
             </TabsContent>
             <TabsContent value="medical-records">
-              <MedicalRecordPage selectedPatientId={3} />
+              <MedicalRecordPage isDoctorFetching={true} />
             </TabsContent>
           </Tabs>
         </>

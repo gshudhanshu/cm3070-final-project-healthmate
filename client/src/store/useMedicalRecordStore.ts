@@ -11,7 +11,7 @@ interface MedicalRecordsState {
   medicalRecord: MedicalRecord | null;
   fetchMedicalRecords: (
     username: string,
-    conversation_id: string,
+    conversation_id: any,
   ) => Promise<void>;
   addMedicalRecord: (recordData: Partial<MedicalRecord>) => Promise<void>;
   updateMedicalRecord: (
@@ -26,7 +26,7 @@ export const useMedicalRecordsStore = create(
     fetchMedicalRecords: async (username, conversationId) => {
       const { token } = useAuthStore.getState();
       try {
-        const response = await axios.get(`${MEDICAL_RECORDS_URL}/${username}`, {
+        const response = await axios.get(`${MEDICAL_RECORDS_URL}/`, {
           params: {
             username,
             conversation_id: conversationId,

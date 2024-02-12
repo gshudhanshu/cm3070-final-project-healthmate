@@ -30,7 +30,12 @@ class MedicalRecordSerializer(serializers.ModelSerializer):
         model = MedicalRecord
         fields = '__all__'
 
-    def get_appointments(self, obj):
-        appointments = Appointment.objects.filter(patient=obj.patient.user)
+    # def get_appointments(self, obj):
+    #     appointments = Appointment.objects.filter(patient=obj.patient.user)
+    #     return AppointmentSerializer(appointments, many=True).data
+    
+    def get_appointments(self, instance):
+        # Assuming that `instance` is a `MedicalRecord` instance
+        patient = instance.patient.user  # Assuming `patient` is a `CustomUser` instance
+        appointments = Appointment.objects.filter(patient=patient)
         return AppointmentSerializer(appointments, many=True).data
-
