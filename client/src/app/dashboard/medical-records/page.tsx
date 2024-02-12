@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import PersonalDetails from "@/components/medical-records/personal-details";
@@ -11,15 +11,25 @@ import ActiveMedicines from "@/components/medical-records/active-medicines";
 import RecentDiagnosis from "@/components/medical-records/recent-diagnosis";
 import AppointmentHistory from "@/components/medical-records/appointment-history";
 
-export default function Page() {
+export default function Page({
+  selectedPatientId,
+}: {
+  selectedPatientId?: number;
+}) {
   const { fetchMedicalRecords, medicalRecord } = useMedicalRecordsStore();
   const { user } = useAuthStore();
 
+  console.log(selectedPatientId);
+  const [patientId, setPatientId] = useState<number | null>(
+    selectedPatientId || user?.id || null,
+  );
+
   useEffect(() => {
-    if (user && user.username) {
-      fetchMedicalRecords(user?.id.toString());
+    console.log(patientId);
+    if (patientId) {
+      fetchMedicalRecords(patientId.toString());
     }
-  }, [user?.username]);
+  }, []);
 
   if (!medicalRecord) return <LoadingComponent />;
 

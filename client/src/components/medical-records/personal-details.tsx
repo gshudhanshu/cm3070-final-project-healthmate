@@ -12,7 +12,6 @@ import { useMedicalRecordsStore } from "@/store/useMedicalRecordStore";
 export default function PersonalDetails({ className }: { className?: string }) {
   const { medicalRecord } = useMedicalRecordsStore();
 
-  console.log(medicalRecord);
   if (!medicalRecord) return null;
   return (
     <div className="flex flex-col gap-4">

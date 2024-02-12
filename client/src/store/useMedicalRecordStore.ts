@@ -9,7 +9,10 @@ const MEDICAL_RECORDS_URL = `${API_URL}/medical_records`;
 
 interface MedicalRecordsState {
   medicalRecord: MedicalRecord | null;
-  fetchMedicalRecords: (username: string) => Promise<void>;
+  fetchMedicalRecords: (
+    username: string,
+    conversation_id: string,
+  ) => Promise<void>;
   addMedicalRecord: (recordData: Partial<MedicalRecord>) => Promise<void>;
   updateMedicalRecord: (
     recordId: number,
@@ -20,10 +23,14 @@ interface MedicalRecordsState {
 export const useMedicalRecordsStore = create(
   devtools<MedicalRecordsState>((set, get) => ({
     medicalRecord: null,
-    fetchMedicalRecords: async (username) => {
+    fetchMedicalRecords: async (username, conversationId) => {
       const { token } = useAuthStore.getState();
       try {
         const response = await axios.get(`${MEDICAL_RECORDS_URL}/${username}`, {
+          params: {
+            username,
+            conversation_id: conversationId,
+          },
           headers: {
             Authorization: `Bearer ${token}`,
           },
