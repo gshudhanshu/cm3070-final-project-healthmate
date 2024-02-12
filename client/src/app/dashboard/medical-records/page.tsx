@@ -7,6 +7,9 @@ import PersonalDetails from "@/components/medical-records/personal-details";
 import { useMedicalRecordsStore } from "@/store/useMedicalRecordStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import LoadingComponent from "@/components/common/loading";
+import ActiveMedicines from "@/components/medical-records/active-medicines";
+import RecentDiagnosis from "@/components/medical-records/recent-diagnosis";
+import AppointmentHistory from "@/components/medical-records/appointment-history";
 
 export default function Page() {
   const { fetchMedicalRecords, medicalRecord } = useMedicalRecordsStore();
@@ -21,38 +24,20 @@ export default function Page() {
   if (!medicalRecord) return <LoadingComponent />;
 
   return (
-    <section className="container mx-auto my-8">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold">Medical Records</h2>
-        <Button>Print</Button>
+    <section className="container flex flex-col my-8">
+      <div className="mb-4">
+        <h2 className="text-3xl font-medium text-center">Medical Records</h2>
       </div>
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-semibold">Patient Information</h3>
-        <PersonalDetails />
-      </div>
-
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-semibold">Medical History</h3>
-        <Button>Edit</Button>
-      </div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div>
-          <h4 className="text-lg font-semibold">Active Medicines</h4>
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+        <div className="flex flex-col items-center justify-between mb-4">
+          <PersonalDetails />
         </div>
-        <div>
-          <h4 className="text-lg font-semibold">Recent Diagnosis</h4>
+        <div className="flex flex-col gap-4 ">
+          <ActiveMedicines />
+          <RecentDiagnosis />
         </div>
-      </div>
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-semibold">Appointment History</h3>
-        <Button>Edit</Button>
-      </div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div>
-          <h4 className="text-lg font-semibold">Upcoming Appointments</h4>
-        </div>
-        <div>
-          <h4 className="text-lg font-semibold">Past Appointments</h4>
+        <div className="flex mb-4">
+          <AppointmentHistory />
         </div>
       </div>
     </section>

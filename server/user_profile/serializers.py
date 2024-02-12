@@ -154,3 +154,20 @@ class SimpleProfileSerializer(serializers.ModelSerializer):
     
     def get_profile_pic(self, obj):
         return f"{settings.BASE_URL}{obj.profile_pic.url}" if obj.profile_pic else None
+    
+    
+
+class SimpleDoctorProfileSerializer(serializers.ModelSerializer):
+    user = UserProfileSerializer(read_only=True)
+    specialties = SpecialitySerializer(many=True, read_only=True)
+    qualifications = DoctorQualificationSerializer(source='doctor_qualifications', many=True, read_only=True)
+    hospital_address = AddressSerializer(read_only=True)
+    average_rating = serializers.SerializerMethodField(read_only=True) 
+    
+    class Meta:
+        model = Doctor
+        fields = '__all__'
+            
+    def get_average_rating(self, obj):
+        return obj.average_rating()
+    

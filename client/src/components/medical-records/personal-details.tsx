@@ -5,6 +5,8 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 import { useMedicalRecordsStore } from "@/store/useMedicalRecordStore";
 
 export default function PersonalDetails({ className }: { className?: string }) {
@@ -13,15 +15,42 @@ export default function PersonalDetails({ className }: { className?: string }) {
   console.log(medicalRecord);
   if (!medicalRecord) return null;
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <div className="flex flex-col gap-4">
+      <h2 className="my-4 text-xl font-semibold">Personal Information</h2>
+
       <div>
-        <h4 className="text-lg font-semibold">Personal Information</h4>
-        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+        <Avatar className="w-40 h-40">
+          <AvatarImage src={medicalRecord.patient.profile_pic || ""} />
+          <AvatarFallback>
+            {medicalRecord.patient.user.first_name[0] || "P"}
+          </AvatarFallback>
+        </Avatar>
+      </div>
+      <div>
+        <div className="flex flex-col">
           <div>
             <p>
               <span className="font-semibold">Name:</span>
               {medicalRecord.patient.user.first_name}{" "}
               {medicalRecord.patient.user.last_name}
+            </p>
+            <p>
+              <span className="font-semibold">Gender:</span>{" "}
+              {medicalRecord.patient.gender}
+            </p>
+            <p>
+              <span className="font-semibold">Age:</span>{" "}
+              {medicalRecord.patient.dob &&
+                new Date().getFullYear() -
+                  new Date(medicalRecord.patient.dob).getFullYear()}
+            </p>
+            <p>
+              <span className="font-semibold">Height:</span>{" "}
+              {medicalRecord.patient.height} cm
+            </p>
+            <p>
+              <span className="font-semibold">Weight:</span>{" "}
+              {medicalRecord.patient.weight} Kg
             </p>
             <p>
               <span className="font-semibold">Date of Birth:</span>{" "}
@@ -52,17 +81,19 @@ export default function PersonalDetails({ className }: { className?: string }) {
               {medicalRecord.patient.address.postal_code}{" "}
               {medicalRecord.patient.address.country}
             </p>
-            <p>
-              <span className="font-semibold">Language:</span>{" "}
-              {medicalRecord.patient.languages.map((lang, index) => (
-                <Badge key={index}>{lang.name}</Badge>
-              ))}
-            </p>
           </div>
         </div>
       </div>
       <div>
-        <h4 className="text-lg font-semibold">Disorders</h4>
+        <h4 className="font-semibold">Language</h4>
+        <div className="flex flex-wrap gap-2">
+          {medicalRecord.patient.languages.map((lang, idx) => (
+            <Badge key={idx}>{lang.name}</Badge>
+          ))}
+        </div>
+      </div>
+      <div>
+        <h4 className="font-semibold">Disorders</h4>
         <div className="flex flex-wrap gap-2">
           {medicalRecord.disorders.map((disorder, idx) => (
             <HoverCard key={idx}>
@@ -70,8 +101,12 @@ export default function PersonalDetails({ className }: { className?: string }) {
                 <Badge>{disorder.name}</Badge>
               </HoverCardTrigger>
               <HoverCardContent>
-                <p>First Noticed: {disorder.first_noticed}</p>
-                <p>Details: {disorder.details}</p>
+                <p>
+                  <b>First Noticed:</b> {disorder.first_noticed}
+                </p>
+                <p>
+                  <b>Details:</b> {disorder.details}
+                </p>
               </HoverCardContent>
             </HoverCard>
           ))}

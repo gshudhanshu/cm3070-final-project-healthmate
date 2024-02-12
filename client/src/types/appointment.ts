@@ -1,9 +1,9 @@
-import { User } from "./user";
+import { DoctorProfile, User } from "./user";
 import { Conversation } from "./conversation";
 
 export interface Appointment {
   id: number;
-  doctor: User;
+  doctor: DoctorProfile;
   patient: User;
   date: string;
   time: string;

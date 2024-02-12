@@ -32,8 +32,8 @@ class Medicine(models.Model):
         return (self.end_date - self.start_date).days if self.end_date else None
 
 class Diagnosis(models.Model):
-    medical_record = models.ForeignKey(MedicalRecord, related_name='diagnoses', on_delete=models.CASCADE)
-    diagnosis = models.CharField(max_length=200)
+    medical_record = models.ForeignKey(MedicalRecord, related_name='diagnosis', on_delete=models.CASCADE)
+    name = models.CharField(max_length=200)
     details = models.TextField()
     date = models.DateField()
     

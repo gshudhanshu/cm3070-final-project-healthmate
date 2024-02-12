@@ -1,4 +1,5 @@
 import { PatientProfile } from "./user";
+import { Appointment } from "./appointment";
 
 export interface Disorder {
   name: string;
@@ -14,7 +15,7 @@ export interface Medicine {
 }
 
 export interface Diagnosis {
-  diagnosis: string;
+  name: string;
   details: string;
   date: string;
 }
@@ -26,5 +27,6 @@ export interface MedicalRecord {
   patient: PatientProfile;
   disorders: Disorder[];
   medicines: Medicine[];
-  diagnoses: Diagnosis[];
+  diagnosis: Diagnosis[];
+  appointments: Appointment[];
 }

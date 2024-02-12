@@ -44,19 +44,19 @@ export interface Speciality {
 export interface DoctorProfile {
   user: User;
   phone: string | null;
-  hospital_address: Address;
+  hospital_address?: Address;
   experience: string | null;
   availability: string | null;
-  appointment_slots: Slot[];
+  appointment_slots?: Slot[];
   profile_pic: string | null;
   cost: string | null;
   currency: string | null;
   description: string | null;
-  specialties: Speciality[];
-  qualifications: Qualifications[];
-  languages: Language[];
-  reviews: Review[];
-  average_rating: number;
+  specialties?: Speciality[];
+  qualifications?: Qualifications[];
+  languages?: Language[];
+  reviews?: Review[];
+  average_rating?: number;
 }
 
 export interface PatientProfile {
