@@ -11,7 +11,7 @@ interface MedicalRecordsState {
   medicalRecord: MedicalRecord | null;
   fetchMedicalRecords: (
     username: string,
-    conversation_id: any,
+    conversation_id?: any,
   ) => Promise<void>;
   addMedicalRecord: (recordData: Partial<MedicalRecord>) => Promise<void>;
   updateMedicalRecord: (

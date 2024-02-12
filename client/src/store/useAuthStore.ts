@@ -37,9 +37,10 @@ export const useAuthStore = create(
           get().fetchUser(); // Fetch user details
         }
       } catch (error) {
-        console.error("Login failed:", error);
+        console.log("Login failed:", error);
+        set({ user: null, token: null });
+        localStorage.removeItem("token");
         throw error;
-        // Handle error
       }
     },
     fetchUser: async () => {

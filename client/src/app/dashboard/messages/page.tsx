@@ -9,6 +9,7 @@ import { useMessagesStore } from "@/store/useMessageStore";
 import { useMedicalRecordsStore } from "@/store/useMedicalRecordStore";
 
 import MedicalRecordPage from "@/app/dashboard/medical-records/page";
+import AddNewRecord from "@/components/medical-records/add-new-record";
 
 const MessagesPage: React.FC = () => {
   const { isSidebarVisible, toggleSidebar } = useMessagesStore();
@@ -32,12 +33,18 @@ const MessagesPage: React.FC = () => {
             <TabsList className="mt-6">
               <TabsTrigger value="messages">Messages</TabsTrigger>
               <TabsTrigger value="medical-records">Medical Records</TabsTrigger>
+              <TabsTrigger value="add-new-medical-record">
+                Add New Record
+              </TabsTrigger>
             </TabsList>
             <TabsContent value="messages">
               <MessageThread className="pb-10 pr-6" />
             </TabsContent>
             <TabsContent value="medical-records">
               <MedicalRecordPage isDoctorFetching={true} />
+            </TabsContent>
+            <TabsContent value="add-new-medical-record">
+              <AddNewRecord />
             </TabsContent>
           </Tabs>
         </>

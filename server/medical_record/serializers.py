@@ -29,10 +29,6 @@ class MedicalRecordSerializer(serializers.ModelSerializer):
     class Meta:
         model = MedicalRecord
         fields = '__all__'
-
-    # def get_appointments(self, obj):
-    #     appointments = Appointment.objects.filter(patient=obj.patient.user)
-    #     return AppointmentSerializer(appointments, many=True).data
     
     def get_appointments(self, instance):
         # Assuming that `instance` is a `MedicalRecord` instance

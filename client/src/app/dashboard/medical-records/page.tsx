@@ -21,15 +21,14 @@ export default function Page({
   const { selectedConversation } = useMessagesStore();
   const { user } = useAuthStore();
 
-  const patientId = user?.id;
-
   useEffect(() => {
-    console.log(patientId);
     if (isDoctorFetching) {
       fetchMedicalRecords(
         selectedConversation?.patient?.username || "",
         selectedConversation?.id.toString(),
       );
+    } else if (user?.username) {
+      fetchMedicalRecords(user?.username);
     }
   }, [selectedConversation]);
 
