@@ -1,8 +1,8 @@
 import { renderHook, act } from "@testing-library/react";
 import MockAdapter from "axios-mock-adapter";
 import axios from "axios";
-import { useAppointmentStore } from "../useAppointmentStore"; // Update the import path accordingly
-import { useAuthStore } from "../useAuthStore"; // Update the import path accordingly
+import { useAppointmentStore } from "../useAppointmentStore";
+import { useAuthStore } from "../useAuthStore";
 
 const API_URL = process.env.API_URL;
 const APPOINTMENTS_URL = `${API_URL}/appointments/`;
@@ -23,7 +23,7 @@ describe("useAppointmentStore", () => {
 
   afterEach(() => {
     mockAxios.reset();
-    useAppointmentStore.setState({ appointments: null }); // Reset the store state
+    useAppointmentStore.setState({ appointments: null });
   });
 
   it("fetchAppointments should fetch and set appointments", async () => {

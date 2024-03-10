@@ -77,8 +77,6 @@ const CallPage = () => {
       setIsCallJoined(true);
       startCall(localStream);
     }
-    // Additional logic for joining the call
-    // e.g., sending a WebSocket message to notify other participants
   };
 
   const handleEndCall = () => {

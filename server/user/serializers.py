@@ -13,5 +13,5 @@ class UserCreateSerializer(UserCreateSerializer):
 class UserSerializer(UserCreateSerializer):
     timezone = serializers.ChoiceField(choices=pytz.all_timezones)
     class Meta(UserCreateSerializer.Meta):
-        fields = ['id', 'username', 'first_name', 'last_name', 'account_type', 'email', 'timezone']
+        fields = ['id', 'username', 'first_name', 'last_name', 'account_type', 'email', 'timezone', 'password']
         ref_name = 'CustomUser'

@@ -40,7 +40,8 @@ class UserSerializerTestCase(TestCase):
             'password': 'testpassword',
             'account_type': 'patient',
             'first_name': 'John',
-            'last_name': 'Doe'
+            'last_name': 'Doe',
+            'timezone': 'UTC'
         }
         self.serializer = UserSerializer(data=self.user_data)
 
@@ -54,4 +55,3 @@ class UserSerializerTestCase(TestCase):
 
     def test_timezone_field(self):
         self.assertIn('timezone', self.serializer.fields)
-
