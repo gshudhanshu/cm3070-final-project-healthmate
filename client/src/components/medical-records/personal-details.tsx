@@ -12,16 +12,19 @@ import { useMedicalRecordsStore } from "@/store/useMedicalRecordStore";
 export default function PersonalDetails({ className }: { className?: string }) {
   const { medicalRecord } = useMedicalRecordsStore();
 
-  if (!medicalRecord) return null;
+  if (!medicalRecord?.hasOwnProperty("patient")) {
+    return <div>No result found</div>;
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <h2 className="my-4 text-xl font-semibold">Personal Information</h2>
 
       <div>
-        <Avatar className="w-40 h-40">
-          <AvatarImage src={medicalRecord.patient.profile_pic || ""} />
+        <Avatar className="h-40 w-40">
+          <AvatarImage src={medicalRecord?.patient?.profile_pic || ""} />
           <AvatarFallback>
-            {medicalRecord.patient.user.first_name[0] || "P"}
+            {medicalRecord.patient?.user?.first_name[0] || "P"}
           </AvatarFallback>
         </Avatar>
       </div>

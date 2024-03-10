@@ -73,6 +73,9 @@ class MedicalRecordViewSet(viewsets.ModelViewSet):
             if hasattr(user, 'patient_profile') and username == user.username:
                 return MedicalRecord.objects.filter(patient__user=user).first()
             # If the data fetcher is a doctor
+            if hasattr(user, 'doctor_profile') and username == user.username:
+                return None
+            # If the data fetcher is a doctor
             elif hasattr(user, 'doctor_profile'):
                 print(user.account_type)
                 if conversation_id:

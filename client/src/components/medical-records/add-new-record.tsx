@@ -18,6 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useMessagesStore } from "@/store/useMessageStore";
 
 // Define Zod schema for form validation
 const medicalRecordSchema = z.object({
@@ -63,11 +64,13 @@ export default function MedicalRecordForm() {
   } = useForm<MedicalRecordFormSchema>({
     resolver: zodResolver(medicalRecordSchema),
     defaultValues: {
-      disorders: [{ name: "", details: "", first_noticed: "" }],
-      medicines: [{ name: "", dosage: "", start_date: "", end_date: "" }],
-      diagnoses: [{ name: "", details: "", date: "" }],
+      // disorders: [{ name: "", details: "", first_noticed: "" }],
+      // medicines: [{ name: "", dosage: "", start_date: "", end_date: "" }],
+      // diagnoses: [{ name: "", details: "", date: "" }],
     },
   });
+
+  const { selectedConversation } = useMessagesStore();
 
   const {
     fields: disorderFields,
@@ -110,133 +113,207 @@ export default function MedicalRecordForm() {
     }
   };
 
+  if (!selectedConversation) {
+    return (
+      <div className="mx-auto mt-8 max-w-md rounded-md bg-white p-4 shadow-md">
+        <h2 className="mb-4 text-xl font-semibold">
+          Please select a conversation
+        </h2>
+      </div>
+    );
+  }
+
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="max-w-md p-4 mx-auto mt-8 bg-white rounded-md shadow-md"
-    >
-      <h2 className="mb-4 text-xl font-semibold">Add New Medical Record</h2>
+    <Form {...form}>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="mx-auto mt-8 max-w-md rounded-md bg-white p-4 shadow-md"
+      >
+        <h2 className="mb-4 text-xl font-semibold">Add New Medical Record</h2>
 
-      <div className="mb-6">
-        <h3 className="mb-2 text-lg font-semibold">Disorders</h3>
-        {disorderFields.map((item, index) => (
-          <div key={item.id} className="flex flex-col gap-3 mb-4">
-            <Input
-              {...register(`disorders.${index}.name`)}
-              placeholder="Disorder Name"
-            />
-            <Textarea
-              {...register(`disorders.${index}.details`)}
-              placeholder="Details"
-            />
-            <Input
-              type="date"
-              {...register(`disorders.${index}.first_noticed`)}
-              placeholder="First Noticed"
-            />
+        <div className="mb-6">
+          <h3 className="mb-2 text-lg font-semibold">Disorders</h3>
+          {disorderFields.map((item, index) => (
+            <div key={item.id} className="mb-4 flex flex-col gap-3">
+              <Input
+                {...register(`disorders.${index}.name`)}
+                placeholder="Disorder Name"
+              />
+              <Textarea
+                {...register(`disorders.${index}.details`)}
+                placeholder="Details"
+              />
+              <Input
+                type="text"
+                {...register(`disorders.${index}.first_noticed`)}
+                placeholder="First Noticed"
+                onFocus={(e) => (e.target.type = "date")}
+              />
+
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  onClick={() => removeDisorder(index)}
+                  variant={"destructive"}
+                  className="w-fit"
+                >
+                  Remove
+                </Button>
+                {index === disorderFields.length - 1 && (
+                  <Button
+                    type="button"
+                    onClick={() =>
+                      appendDisorder({
+                        name: "",
+                        details: "",
+                        first_noticed: "",
+                      })
+                    }
+                  >
+                    Add Disorder
+                  </Button>
+                )}
+              </div>
+            </div>
+          ))}
+          {disorderFields.length === 0 && (
             <Button
               type="button"
-              onClick={() => removeDisorder(index)}
-              variant={"destructive"}
-              className="w-fit"
+              onClick={() =>
+                appendDisorder({ name: "", details: "", first_noticed: "" })
+              }
             >
-              Remove
+              Add Disorder
             </Button>
-          </div>
-        ))}
-        <Button
-          type="button"
-          onClick={() =>
-            appendDisorder({ name: "", details: "", first_noticed: "" })
-          }
-        >
-          Add Disorder
-        </Button>
-      </div>
+          )}
+        </div>
 
-      <div className="mb-6">
-        <h3 className="mb-2 text-lg font-semibold">Medicines</h3>
-        {medicineFields.map((item, index) => (
-          <div key={item.id} className="flex flex-col gap-3 mb-4">
-            <Input
-              {...register(`medicines.${index}.name`)}
-              placeholder="Medicine Name"
-            />
-            <Input
-              {...register(`medicines.${index}.dosage`)}
-              placeholder="Dosage"
-            />
-            <Input
-              type="date"
-              {...register(`medicines.${index}.start_date`)}
-              placeholder="Start Date"
-            />
-            <Input
-              type="date"
-              {...register(`medicines.${index}.end_date`)}
-              placeholder="End Date"
-            />
+        <div className="mb-6">
+          <h3 className="mb-2 text-lg font-semibold">Medicines</h3>
+          {medicineFields.map((item, index) => (
+            <div key={item.id} className="mb-4 flex flex-col gap-3">
+              <Input
+                {...register(`medicines.${index}.name`)}
+                placeholder="Medicine Name"
+              />
+              <Input
+                {...register(`medicines.${index}.dosage`)}
+                placeholder="Dosage"
+              />
+              <Input
+                type="text"
+                {...register(`medicines.${index}.start_date`)}
+                placeholder="Start Date"
+                onFocus={(e) => (e.target.type = "date")}
+              />
+              <Input
+                type="text"
+                {...register(`medicines.${index}.end_date`)}
+                placeholder="End Date"
+                onFocus={(e) => (e.target.type = "date")}
+              />
+
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  onClick={() => removeMedicine(index)}
+                  variant={"destructive"}
+                  className="w-fit"
+                >
+                  Remove
+                </Button>
+                {index === removeMedicine.length - 1 && (
+                  <Button
+                    type="button"
+                    onClick={() =>
+                      appendMedicine({
+                        name: "",
+                        dosage: "",
+                        start_date: "",
+                        end_date: "",
+                      })
+                    }
+                  >
+                    Add Medicine
+                  </Button>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {medicineFields.length === 0 && (
             <Button
               type="button"
-              onClick={() => removeMedicine(index)}
-              variant={"destructive"}
-              className="w-fit"
+              onClick={() =>
+                appendMedicine({
+                  name: "",
+                  dosage: "",
+                  start_date: "",
+                  end_date: "",
+                })
+              }
             >
-              Remove
+              Add Disorder
             </Button>
-          </div>
-        ))}
-        <Button
-          type="button"
-          onClick={() =>
-            appendMedicine({
-              name: "",
-              dosage: "",
-              start_date: "",
-              end_date: "",
-            })
-          }
-        >
-          Add Medicine
-        </Button>
-      </div>
+          )}
+        </div>
 
-      <div className="mb-6">
-        <h3 className="mb-2 text-lg font-semibold">Diagnoses</h3>
-        {diagnosisFields.map((item, index) => (
-          <div key={item.id} className="flex flex-col gap-3 mb-4">
-            <Input
-              {...register(`diagnoses.${index}.name`)}
-              placeholder="Diagnosis Name"
-            />
-            <Textarea
-              {...register(`diagnoses.${index}.details`)}
-              placeholder="Details"
-            />
-            <Input
-              type="date"
-              {...register(`diagnoses.${index}.date`)}
-              placeholder="Date"
-            />
+        <div className="mb-6">
+          <h3 className="mb-2 text-lg font-semibold">Diagnoses</h3>
+          {diagnosisFields.map((item, index) => (
+            <div key={item.id} className="mb-4 flex flex-col gap-3">
+              <Input
+                {...register(`diagnoses.${index}.name`)}
+                placeholder="Diagnosis Name"
+              />
+              <Textarea
+                {...register(`diagnoses.${index}.details`)}
+                placeholder="Details"
+              />
+              <Input
+                type="text"
+                {...register(`diagnoses.${index}.date`)}
+                placeholder="Date"
+                onFocus={(e) => (e.target.type = "date")}
+              />
+
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  onClick={() => removeDiagnosis(index)}
+                  variant={"destructive"}
+                  className="w-fit"
+                >
+                  Remove
+                </Button>
+                {index === diagnosisFields.length - 1 && (
+                  <Button
+                    type="button"
+                    onClick={() =>
+                      appendDiagnosis({ name: "", details: "", date: "" })
+                    }
+                  >
+                    Add Diagnosis
+                  </Button>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {diagnosisFields.length === 0 && (
             <Button
               type="button"
-              variant={"destructive"}
-              onClick={() => removeDiagnosis(index)}
-              className="w-fit"
+              onClick={() =>
+                appendDiagnosis({ name: "", details: "", date: "" })
+              }
             >
-              Remove
+              Add Diagnosis
             </Button>
-          </div>
-        ))}
-        <Button
-          type="button"
-          onClick={() => appendDiagnosis({ name: "", details: "", date: "" })}
-        >
-          Add Diagnosis
-        </Button>
-      </div>
+          )}
+        </div>
 
-      <Button type="submit">Submit</Button>
-    </form>
+        <Button type="submit">Submit</Button>
+      </form>
+    </Form>
   );
 }

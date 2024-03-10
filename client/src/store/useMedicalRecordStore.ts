@@ -35,6 +35,7 @@ export const useMedicalRecordsStore = create(
             Authorization: `Bearer ${token}`,
           },
         });
+        console.log(response);
         set({ medicalRecord: response.data });
       } catch (error) {
         console.error("Fetching medical records failed:", error);

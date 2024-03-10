@@ -33,21 +33,29 @@ export default function Page({
   }, [selectedConversation]);
 
   if (!medicalRecord) return <LoadingComponent />;
+  if (!medicalRecord?.hasOwnProperty("patient"))
+    return (
+      <div className="flex h-[40rem] max-h-screen items-center justify-center">
+        <div>
+          <h2 className="text-2xl">No results found!</h2>
+        </div>
+      </div>
+    );
 
   return (
-    <section className="container flex flex-col my-8">
+    <section className="container my-8 flex flex-col">
       <div className="mb-4">
-        <h2 className="text-3xl font-medium text-center">Medical Records</h2>
+        <h2 className="text-center text-3xl font-medium">Medical Records</h2>
       </div>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-        <div className="flex flex-col items-center justify-between mb-4">
+        <div className="mb-4 flex flex-col items-center justify-between">
           <PersonalDetails />
         </div>
         <div className="flex flex-col gap-4 ">
           <ActiveMedicines />
           <RecentDiagnosis />
         </div>
-        <div className="flex mb-4">
+        <div className="mb-4 flex">
           <AppointmentHistory />
         </div>
       </div>
