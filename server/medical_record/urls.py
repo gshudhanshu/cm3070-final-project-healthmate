@@ -7,5 +7,5 @@ from .views import MedicalRecordViewSet
 
 urlpatterns = [
     # path('', include(router.urls)),
-    path('', MedicalRecordViewSet.as_view({'get':'retrieve'}))
+    path('', MedicalRecordViewSet.as_view({'get':'retrieve', 'post':'create'}))
 ]

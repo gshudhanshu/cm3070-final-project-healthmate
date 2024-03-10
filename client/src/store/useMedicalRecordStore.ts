@@ -43,11 +43,15 @@ export const useMedicalRecordsStore = create(
     },
     addMedicalRecord: async (recordData) => {
       try {
-        const response = await axios.post(MEDICAL_RECORDS_URL, recordData, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+        const response = await axios.post(
+          `${MEDICAL_RECORDS_URL}/`,
+          recordData,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
           },
-        });
+        );
         set((state) => ({
           medicalRecord: response.data,
         }));

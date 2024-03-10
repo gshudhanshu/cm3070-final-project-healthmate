@@ -143,6 +143,7 @@ class SimpleProfileSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source='user.email')
     account_type = serializers.CharField(source='user.account_type')
     timezone = serializers.CharField(source='user.timezone')
+    id = serializers.IntegerField(source='user.id')
 
     class Meta:
         model = User

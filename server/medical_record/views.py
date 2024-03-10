@@ -3,7 +3,11 @@ from .models import MedicalRecord
 from .serializers import MedicalRecordSerializer
 from conversation.models import Conversation
 from django.db.models import Q
+from django.db import transaction
 from django.shortcuts import get_object_or_404
+from .serializers import DisorderSerializer, MedicineSerializer, DiagnosisSerializer
+from rest_framework import status
+from rest_framework.response import Response
 
 
 from django.contrib.auth import get_user_model
@@ -97,3 +101,32 @@ class MedicalRecordViewSet(viewsets.ModelViewSet):
         else:
             # User is not authenticated
             return None
+        
+    
+    @transaction.atomic
+    def create(self, request, *args, **kwargs):
+        # Extract the nested data
+        disorders_data = request.data.pop('disorders', [])
+        medicines_data = request.data.pop('medicines', [])
+        diagnoses_data = request.data.pop('diagnoses', [])
+
+        # Now handle the creation of the MedicalRecord
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        medical_record = serializer.save()
+
+        # Handle the creation of nested objects
+        disorders_serializer = DisorderSerializer(data=disorders_data, many=True)
+        if disorders_serializer.is_valid():
+            disorders_serializer.save(medical_record=medical_record)
+
+        medicines_serializer = MedicineSerializer(data=medicines_data, many=True)
+        if medicines_serializer.is_valid():
+            medicines_serializer.save(medical_record=medical_record)
+
+        diagnoses_serializer = DiagnosisSerializer(data=diagnoses_data, many=True)
+        if diagnoses_serializer.is_valid():
+            diagnoses_serializer.save(medical_record=medical_record)
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
