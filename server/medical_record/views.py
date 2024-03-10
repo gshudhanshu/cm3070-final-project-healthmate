@@ -1,6 +1,6 @@
 from rest_framework import viewsets, permissions
 from .models import MedicalRecord
-from .serializers import MedicalRecordSerializer
+from .serializers import MedicalRecordSerializer, MedicalRecordCreateSerializer
 from conversation.models import Conversation
 from django.db.models import Q
 from django.db import transaction
@@ -8,6 +8,9 @@ from django.shortcuts import get_object_or_404
 from .serializers import DisorderSerializer, MedicineSerializer, DiagnosisSerializer
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
+
+
 
 
 from django.contrib.auth import get_user_model
@@ -105,28 +108,53 @@ class MedicalRecordViewSet(viewsets.ModelViewSet):
     
     @transaction.atomic
     def create(self, request, *args, **kwargs):
-        # Extract the nested data
-        disorders_data = request.data.pop('disorders', [])
-        medicines_data = request.data.pop('medicines', [])
-        diagnoses_data = request.data.pop('diagnoses', [])
+        # # Extract the nested data
+        # disorders_data = request.data.pop('disorders', [])
+        # medicines_data = request.data.pop('medicines', [])
+        # diagnoses_data = request.data.pop('diagnoses', [])
 
-        # Now handle the creation of the MedicalRecord
-        serializer = self.get_serializer(data=request.data)
+        # # Extract the patient_id from the request data
+        # patient_id = request.data.get('patient_id')
+        # if not patient_id:
+        #     raise ValidationError({'patient_id': 'This field is required.'})
+
+        
+        # # Modify the request data to include the patient_id
+        # request.data['patient'] = patient_id
+        
+        # print(request.data)
+
+        # # Now handle the creation of the MedicalRecord
+        # serializer = MedicalRecordCreateSerializer(data=request.data)
+        # serializer.is_valid(raise_exception=True)
+        # medical_record = serializer.save()
+        
+        # print(medical_record)
+
+        # # Handle the creation of nested objects
+        # if disorders_data:
+        #     disorders_serializer = DisorderSerializer(data=disorders_data, many=True)
+        #     if disorders_serializer.is_valid(raise_exception=True):
+        #         disorders_serializer.save(medical_record=medical_record)
+
+        # if medicines_data:
+        #     medicines_serializer = MedicineSerializer(data=medicines_data, many=True)
+        #     if medicines_serializer.is_valid(raise_exception=True):
+        #         medicines_serializer.save(medical_record=medical_record)
+
+        # if diagnoses_data:
+        #     diagnoses_serializer = DiagnosisSerializer(data=diagnoses_data, many=True)
+        #     if diagnoses_serializer.is_valid(raise_exception=True):
+        #         diagnoses_serializer.save(medical_record=medical_record)
+
+        # headers = self.get_success_headers(serializer.data)
+        # return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        
+        request.data['patient'] = request.data.get('patient_id')
+        
+        serializer = MedicalRecordCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         medical_record = serializer.save()
 
-        # Handle the creation of nested objects
-        disorders_serializer = DisorderSerializer(data=disorders_data, many=True)
-        if disorders_serializer.is_valid():
-            disorders_serializer.save(medical_record=medical_record)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        medicines_serializer = MedicineSerializer(data=medicines_data, many=True)
-        if medicines_serializer.is_valid():
-            medicines_serializer.save(medical_record=medical_record)
-
-        diagnoses_serializer = DiagnosisSerializer(data=diagnoses_data, many=True)
-        if diagnoses_serializer.is_valid():
-            diagnoses_serializer.save(medical_record=medical_record)
-
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
