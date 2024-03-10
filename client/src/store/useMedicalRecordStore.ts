@@ -52,9 +52,9 @@ export const useMedicalRecordsStore = create(
             },
           },
         );
-        set((state) => ({
-          medicalRecord: response.data,
-        }));
+        // set((state) => ({
+        //   medicalRecord: response.data,
+        // }));
       } catch (error) {
         console.error("Adding medical record failed:", error);
       }

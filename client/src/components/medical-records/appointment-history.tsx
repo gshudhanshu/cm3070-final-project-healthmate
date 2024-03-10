@@ -16,12 +16,12 @@ export default function AppointmentHistory() {
     <div>
       <h4 className="my-4 text-lg font-semibold">Appointment History</h4>
       <div className="flex flex-col gap-4">
-        {medicalRecord?.appointments.map((appointment, idx) => (
+        {medicalRecord?.appointments.toReversed().map((appointment, idx) => (
           <div
             key={idx}
-            className="flex flex-col gap-2 p-4 rounded-lg bg-slate-100"
+            className="flex flex-col gap-2 rounded-lg bg-slate-100 p-4"
           >
-            <p className="font-medium text-md">
+            <p className="text-md font-medium">
               <span key={idx} className="mr-1">
                 {appointment.doctor.specialties
                   ?.map((specialty, idx) => specialty.name)

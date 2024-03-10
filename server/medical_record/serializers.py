@@ -56,7 +56,7 @@ class MedicalRecordCreateSerializer(serializers.ModelSerializer):
         medicines_data = validated_data.pop('medicines', [])
         diagnoses_data = validated_data.pop('diagnoses', [])
         
-        medical_record = MedicalRecord.objects.create(**validated_data)
+        medical_record, created = MedicalRecord.objects.get_or_create(**validated_data)
 
         for disorder_data in disorders_data:
             Disorder.objects.create(medical_record=medical_record, **disorder_data)
