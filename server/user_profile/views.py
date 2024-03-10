@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from django_filters import rest_framework as filters
 from .models import Doctor, Patient, Review
-from .serializers import DoctorSerializer, PatientSerializer, ReviewSerializer,DoctorCreateUpdateSerializer
+from .serializers import DoctorSerializer, PatientSerializer, ReviewSerializer
 from .permissions import IsOwnerOrReadOnly, IsDoctorOrReadOnly, IsReadOnlyOrIsNew
 from .filters import DoctorFilter
 from rest_framework import permissions

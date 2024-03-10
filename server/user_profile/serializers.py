@@ -117,6 +117,8 @@ class DoctorSerializer(serializers.ModelSerializer):
 
         return slots_with_status
     
+    
+    
 
         
 
