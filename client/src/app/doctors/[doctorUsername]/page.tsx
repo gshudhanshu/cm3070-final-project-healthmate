@@ -3,7 +3,7 @@
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 import { useEffect } from "react";
-import { useDoctorProfileStore } from "@/store/useDoctorProfileStore";
+import { useUserProfileStore } from "@/store/useUserProfileStore";
 import ErrorComponent from "@/components/common/error";
 import LoadingComponent from "@/components/common/loading";
 import ProfileHeader from "@/components/doctor-profile/profile-header";
@@ -18,7 +18,7 @@ export default function Page({
   const { doctorUsername } = params;
 
   const { doctorProfile, fetchDoctorProfile, isLoading, error } =
-    useDoctorProfileStore();
+    useUserProfileStore();
 
   useEffect(() => {
     if (doctorUsername) {

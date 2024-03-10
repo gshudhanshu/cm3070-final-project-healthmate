@@ -10,9 +10,14 @@ interface DoctorProfileState {
   isLoading: boolean;
   error: Error | null;
   fetchDoctorProfile: (doctorUsername: string) => void;
+  updateUserProfile: (
+    username: string,
+    account_type: string,
+    profileData: any,
+  ) => void;
 }
 
-export const useDoctorProfileStore = create(
+export const useUserProfileStore = create(
   devtools<DoctorProfileState>((set) => ({
     doctorProfile: null,
     isLoading: true,
@@ -26,6 +31,22 @@ export const useDoctorProfileStore = create(
         set({ doctorProfile: response.data, isLoading: false });
       } catch (error: any) {
         set({ error, isLoading: false });
+      }
+    },
+    updateUserProfile: async (username, account_type, profileData) => {
+      if (account_type === "patient") {
+        const response = await axios.put(
+          `${API_URL}/user_profile/patients/${username}/`,
+          profileData,
+        );
+        return response.data;
+      }
+      if (account_type === "doctor") {
+        const response = await axios.put(
+          `${API_URL}/user_profile/doctors/${username}/`,
+          profileData,
+        );
+        return response.data;
       }
     },
   })),

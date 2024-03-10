@@ -8,6 +8,7 @@ export interface User {
   email: string;
   profile_pic: string | null;
   account_type: string;
+  timezone: string | null;
 }
 
 export interface Slot {

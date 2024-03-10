@@ -31,14 +31,16 @@ class DoctorLanguageProficiencySerializer(serializers.ModelSerializer):
     
     class Meta:
         model = DoctorLanguageProficiency
-        fields = ['name', 'level']
+        fields = ['id','name', 'level']
+        extra_kwargs = {'id': {'read_only': False, 'required': False}}
         
 class PatientLanguageProficiencySerializer(serializers.ModelSerializer):
     name = serializers.ReadOnlyField(source='language.name')
     
     class Meta:
         model = PatientLanguageProficiency
-        fields = ['name', 'level']
+        fields = ['id','name', 'level']
+        
   
         
 class SpecialitySerializer(serializers.ModelSerializer):
@@ -57,7 +59,8 @@ class DoctorQualificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DoctorQualification
-        fields = ['name', 'university','start_year', 'finish_year']
+        fields = ['id','name', 'university','start_year', 'finish_year']
+        extra_kwargs = {'id': {'read_only': False, 'required': False}}
         
 
 class DoctorSerializer(serializers.ModelSerializer):
@@ -114,6 +117,7 @@ class DoctorSerializer(serializers.ModelSerializer):
 
         return slots_with_status
     
+
         
 
 class PatientSerializer(serializers.ModelSerializer):

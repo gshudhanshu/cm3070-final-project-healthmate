@@ -1,7 +1,8 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from django_filters import rest_framework as filters
 from .models import Doctor, Patient, Review
-from .serializers import DoctorSerializer, PatientSerializer, ReviewSerializer
+from .serializers import DoctorSerializer, PatientSerializer, ReviewSerializer,DoctorCreateUpdateSerializer
 from .permissions import IsOwnerOrReadOnly, IsDoctorOrReadOnly, IsReadOnlyOrIsNew
 from .filters import DoctorFilter
 from rest_framework import permissions
@@ -39,6 +40,7 @@ class DoctorViewSet(viewsets.ModelViewSet, filters.FilterSet):
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = DoctorFilter
     
+    
     def get_queryset(self):
         """
         This view should return a list of all records for
@@ -50,6 +52,7 @@ class DoctorViewSet(viewsets.ModelViewSet, filters.FilterSet):
         if user.is_authenticated and self.lookup_field == user.username and hasattr(user, 'doctor_profile'):
             queryset = queryset.filter(user=user)
         return queryset
+    
 
 
 class ReviewPagination(PageNumberPagination):
