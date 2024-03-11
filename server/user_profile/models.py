@@ -96,8 +96,8 @@ class Doctor(models.Model):
 class DoctorQualification(models.Model):
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='doctor_qualifications')
     qualification = models.ForeignKey(Qualification, on_delete=models.CASCADE, related_name='doctor_entries')
-    start_year = models.IntegerField()
-    finish_year = models.IntegerField()
+    start_year = models.IntegerField(null = True, blank = True)
+    finish_year = models.IntegerField(null = True, blank = True)
 
     def __str__(self):
         return f"{self.qualification} - {self.start_year} to {self.finish_year}"

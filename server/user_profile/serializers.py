@@ -99,8 +99,8 @@ class SpecialitySerializer(serializers.ModelSerializer):
 #         fields = '__all__' 
         
 class DoctorQualificationSerializer(serializers.ModelSerializer):
-    name = serializers.ReadOnlyField(source='qualification.name')
-    university = serializers.ReadOnlyField(source='qualification.university')
+    name = serializers.CharField(source='qualification.name')
+    university = serializers.CharField(source='qualification.university')
 
     class Meta:
         model = DoctorQualification
@@ -245,8 +245,8 @@ class DoctorSerializer(serializers.ModelSerializer):
             DoctorQualification.objects.create(
                 doctor=doctor,
                 qualification=qualification,
-                start_year=qualification_data['start_year'],
-                finish_year=qualification_data['finish_year']
+                start_year=qualification_data.get('start_year'),
+                finish_year=qualification_data.get('finish_year')
             )
 
     def update_address(self, doctor, address_data):
