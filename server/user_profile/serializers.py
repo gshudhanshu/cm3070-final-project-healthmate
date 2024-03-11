@@ -7,6 +7,8 @@ from datetime import datetime, time, timedelta
 import pytz
 from django.utils.timezone import make_aware
 from django.conf import settings
+from django.db import transaction
+
 
 
 
@@ -24,6 +26,22 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'username', 'first_name', 'last_name', 'email', 'timezone']
         ref_name = 'UserProfile'
+        extra_kwargs = {
+            'username': {'read_only': True},  
+            'email': {'read_only': True},
+        }
+
+    
+    def update(self, instance, validated_data):
+        # remove the username and email from the validated data
+        instance.username = validated_data.get('username', instance.username)
+        instance.first_name = validated_data.get('first_name', instance.first_name)
+        instance.last_name = validated_data.get('last_name', instance.last_name)
+        instance.email = validated_data.get('email', instance.email)
+        instance.timezone = validated_data.get('timezone', instance.timezone)
+        instance.save()
+        return instance
+
         
         
 class DoctorLanguageProficiencySerializer(serializers.ModelSerializer):
@@ -64,18 +82,19 @@ class DoctorQualificationSerializer(serializers.ModelSerializer):
         
 
 class DoctorSerializer(serializers.ModelSerializer):
-    user = UserProfileSerializer(read_only=True)
-    specialties = SpecialitySerializer(many=True, read_only=True)
-    languages = DoctorLanguageProficiencySerializer(source='doctor_language_proficiencies', many=True, read_only=True)
-    qualifications = DoctorQualificationSerializer(source='doctor_qualifications', many=True, read_only=True)
+    user = UserProfileSerializer()
+    specialties = SpecialitySerializer(many=True,)
+    languages = DoctorLanguageProficiencySerializer(source='doctor_language_proficiencies', many=True, )
+    qualifications = DoctorQualificationSerializer(source='doctor_qualifications', many=True, )
     reviews = serializers.SerializerMethodField()
-    hospital_address = AddressSerializer(read_only=True)
-    average_rating = serializers.SerializerMethodField(read_only=True) 
+    hospital_address = AddressSerializer()
+    average_rating = serializers.SerializerMethodField() 
     appointment_slots = serializers.SerializerMethodField()
     
     class Meta:
         model = Doctor
         fields = '__all__'
+        
         
     def get_reviews(self, obj):
         return ReviewSerializer(obj.reviews.all()[:5], many=True).data
@@ -116,9 +135,91 @@ class DoctorSerializer(serializers.ModelSerializer):
             })
 
         return slots_with_status
+
     
-    
-    
+    def update(self, instance, validated_data):
+        
+        user_data = validated_data.pop('user', None)
+        print(user_data)
+
+        if user_data:
+            # Retrieve the User instance from the Doctor instance
+            user_instance = instance.user
+            
+            # Skip updating 'username' and 'email' by popping them out of user_data
+            user_data.pop('username', None)  # Remove 'username' to prevent its update
+            user_data.pop('email', None)  # Remove 'email' to prevent its update
+            
+            # Manually update the User instance with the remaining data
+            for attr, value in user_data.items():
+                setattr(user_instance, attr, value)
+            user_instance.save()
+
+        
+        languages_data = validated_data.pop('doctor_language_proficiencies', [])
+        specialties_data = validated_data.pop('specialties', [])
+        qualifications_data = validated_data.pop('doctor_qualifications', [])
+        address_data = validated_data.pop('hospital_address', None)
+        
+        
+
+        with transaction.atomic():
+            # Update the Doctor instance
+            for attr, value in validated_data.items():
+                setattr(instance, attr, value)
+            instance.save()
+
+            # Languages
+            self.update_languages(instance, languages_data)
+
+            # Specialties
+            self.update_specialties(instance, specialties_data)
+
+            # Qualifications
+            self.update_qualifications(instance, qualifications_data)
+
+            # Address
+            self.update_address(instance, address_data)
+
+        return instance
+
+    def update_languages(self, doctor, languages_data):
+        doctor.doctor_language_proficiencies.all().delete()
+        for language_data in languages_data:
+            language, _ = Language.objects.get_or_create(name=language_data['language']['name'])
+            DoctorLanguageProficiency.objects.create(
+                doctor=doctor,
+                language=language,
+                level=language_data['level']
+            )
+
+    def update_specialties(self, doctor, specialties_data):
+        doctor.specialties.clear()
+        for specialty_data in specialties_data:
+            specialty, _ = Speciality.objects.get_or_create(name=specialty_data['name'])
+            doctor.specialties.add(specialty)
+
+    def update_qualifications(self, doctor, qualifications_data):
+        DoctorQualification.objects.filter(doctor=doctor).delete()
+        for qualification_data in qualifications_data:
+            qualification, _ = Qualification.objects.get_or_create(
+                name=qualification_data['qualification']['name'],
+                university=qualification_data['qualification']['university']
+            )
+            DoctorQualification.objects.create(
+                doctor=doctor,
+                qualification=qualification,
+                start_year=qualification_data['start_year'],
+                finish_year=qualification_data['finish_year']
+            )
+
+    def update_address(self, doctor, address_data):
+        
+        if address_data:
+            address_id = doctor.hospital_address_id
+            Address.objects.filter(id=address_id).update(**address_data)
+
+
 
         
 

@@ -53,6 +53,13 @@ class DoctorViewSet(viewsets.ModelViewSet, filters.FilterSet):
             queryset = queryset.filter(user=user)
         return queryset
     
+    def get_serializer_context(self):
+        """
+        Extra context provided to the serializer class.
+        """
+        return {'request': self.request, 'format': self.format_kwarg, 'view': self}
+
+    
 
 
 class ReviewPagination(PageNumberPagination):
