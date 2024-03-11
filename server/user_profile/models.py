@@ -48,7 +48,7 @@ class PatientLanguageProficiency(models.Model):
         ('conversational', 'Conversational'),
         ('basic', 'Basic'),
     ]
-    level = models.CharField(max_length=20, choices=PROFICIENCY_LEVELS)
+    level = models.CharField(max_length=20, choices=PROFICIENCY_LEVELS,  default='native')
     language = models.ForeignKey(Language, on_delete=models.CASCADE)
     patient = models.ForeignKey('Patient', on_delete=models.CASCADE, related_name='patient_language_proficiencies')
 

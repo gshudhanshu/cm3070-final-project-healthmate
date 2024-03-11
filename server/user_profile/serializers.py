@@ -290,12 +290,24 @@ class PatientSerializer(serializers.ModelSerializer):
             address_serializer = AddressSerializer(instance=instance.address, data=address_data, partial=True)
             address_serializer.is_valid(raise_exception=True)
             instance.address = address_serializer.save()
-            
+          
 
-        languages_data = validated_data.pop('patient_language_proficiencies', [])
-        instance.patient_language_proficiencies.all().delete()
         for language_data in languages_data:
-            self.fields['languages'].create(language_data)
+            # Accessing the nested 'name' correctly
+            language_name = language_data.get('language', {}).get('name')
+            if not language_name:
+                # Handle the case where language name is missing or structure is unexpected
+                print("Language name missing or data structure is incorrect.")
+                continue  # Skip this iteration
+
+            language, _ = Language.objects.get_or_create(name=language_name)
+            PatientLanguageProficiency.objects.create(
+                 patient=instance,
+                language=language,
+                level=language_data.get('level') or 'native'
+            )
+
+
         
         # Update the remaining direct fields on Patient
         for attr, value in validated_data.items():

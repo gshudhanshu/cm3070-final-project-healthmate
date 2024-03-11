@@ -59,8 +59,8 @@ const profileFormSchema = z.object({
   dob: z.date().optional(),
   marital_status: z.enum(["single", "married", "divorced", "widowed"]),
   gender: z.enum(["male", "female", "other"]),
-  height: z.number().optional(),
-  weight: z.number().optional(),
+  height: z.coerce.number().optional(),
+  weight: z.coerce.number().optional(),
   blood_group: z.string().optional(),
   languages: z.array(LanguageSchema).optional(),
   address: AddressSchema,
@@ -70,10 +70,8 @@ const profileFormSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export function PatientProfileForm() {
-  const {
-    updateUserProfile,
-    //  fetchPatientProfile, patientProfile
-  } = useUserProfileStore();
+  const { updateUserProfile, fetchPatientProfile, patientProfile } =
+    useUserProfileStore();
   const { user } = useAuthStore();
 
   const [formDefaultValues, setFormDefaultValues] = useState<
@@ -106,37 +104,39 @@ export function PatientProfileForm() {
 
   const { reset } = form;
 
-  //   useEffect(() => {
-  //     if (!user) return;
-  //     const loadProfile = async () => {
-  //       await fetchPatientProfile(user?.username);
-  //       // Ensure doctorProfile data is available here
-  //       // Then use reset to update form with async fetched values
-  //       setFormDefaultValues({
-  //         ...formDefaultValues,
-  //         first_name: patientProfile?.user.first_name,
-  //         last_name: patientProfile?.user.last_name,
-  //         email: patientProfile?.user.email,
-  //         phone: patientProfile?.phone || "",
-  //         dob: patientProfile?.dob ? new Date(patientProfile?.dob) : undefined,
-  //         marital_status: patientProfile?.marital_status || "single",
-  //         gender: patientProfile?.gender || "other",
-  //         height: patientProfile?.height || undefined,
-  //         weight: patientProfile?.weight || undefined,
-  //         blood_group: patientProfile?.blood_group || "",
-  //         address: {
-  //           street: patientProfile?.address?.street || "",
-  //           city: patientProfile?.address?.city || "",
-  //           state: patientProfile?.address?.state || "",
-  //           postal_code: patientProfile?.address?.postal_code || "",
-  //           country: patientProfile?.address?.country || "",
-  //         },
-  //         languages: patientProfile?.languages || [{ name: "" }],
-
-  //       });
-  //     };
-  //     loadProfile();
-  //   }, [user, fetchPatientProfile]);
+  useEffect(() => {
+    if (!user) return;
+    const loadProfile = async () => {
+      await fetchPatientProfile(user?.username);
+      // Ensure doctorProfile data is available here
+      // Then use reset to update form with async fetched values
+      setFormDefaultValues({
+        ...formDefaultValues,
+        first_name: patientProfile?.user.first_name,
+        last_name: patientProfile?.user.last_name,
+        email: patientProfile?.user.email,
+        phone: patientProfile?.phone || "",
+        dob: patientProfile?.dob ? new Date(patientProfile?.dob) : undefined,
+        marital_status:
+          patientProfile?.marital_status as (typeof profileFormSchema.shape.marital_status._def.values)[number],
+        gender:
+          patientProfile?.gender as (typeof profileFormSchema.shape.gender._def.values)[number],
+        height: patientProfile?.height || undefined,
+        weight: patientProfile?.weight || undefined,
+        blood_group: patientProfile?.blood_group || "",
+        address: {
+          street: patientProfile?.address?.street || "",
+          city: patientProfile?.address?.city || "",
+          state: patientProfile?.address?.state || "",
+          postal_code: patientProfile?.address?.postal_code || "",
+          country: patientProfile?.address?.country || "",
+        },
+        languages: patientProfile?.languages || [{ name: "" }],
+        timezone: patientProfile?.user?.timezone || "UTC",
+      });
+    };
+    loadProfile();
+  }, [user, fetchPatientProfile]);
 
   useEffect(() => {
     form.reset(formDefaultValues);
@@ -157,6 +157,12 @@ export function PatientProfileForm() {
         languages: data.languages,
         address: data.address,
         phone: data.phone,
+        dob: data.dob ? format(data.dob, "yyyy-MM-dd") : undefined,
+        marital_status: data.marital_status,
+        gender: data.gender,
+        height: data.height,
+        weight: data.weight,
+        blood_group: data.blood_group,
       };
       updateUserProfile(user.username, user.account_type, formattedData);
     } catch (error) {
@@ -214,25 +220,11 @@ export function PatientProfileForm() {
 
           {/* Dob */}
 
-          {/* <FormField
-            control={form.control}
-            name="dob"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Date of Birth</FormLabel>
-                <FormControl>
-                  <Input placeholder="Date of birth" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          /> */}
-
           <FormField
             control={form.control}
             name="dob"
             render={({ field }) => (
-              <FormItem className="flex flex-col">
+              <FormItem className="flex flex-col justify-end">
                 <FormLabel>Date of birth</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -240,7 +232,7 @@ export function PatientProfileForm() {
                       <Button
                         variant={"outline"}
                         className={cn(
-                          "w-[240px] pl-3 text-left font-normal",
+                          "pl-3 text-left font-normal",
                           !field.value && "text-muted-foreground",
                         )}
                       >
@@ -503,7 +495,7 @@ export function PatientProfileForm() {
                 className="mt-2"
                 onClick={() => removeLanguage(languageFields.length - 1)}
               >
-                Remove Speciality
+                Remove
               </Button>
             </div>
           </div>

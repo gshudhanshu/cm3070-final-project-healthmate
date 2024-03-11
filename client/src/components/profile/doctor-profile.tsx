@@ -60,12 +60,12 @@ const profileFormSchema = z.object({
   hospital_address: AddressSchema,
   specialties: z.array(SpecialitySchema),
   qualifications: z.array(QualificationSchema),
-  experience: z
+  experience: z.coerce
     .number()
     .min(0, "Experience must be a positive number")
     .optional(),
   languages: z.array(LanguageSchema).optional(),
-  cost: z.number().min(0, "Cost must be a positive number"),
+  cost: z.coerce.number().min(0, "Cost must be a positive number"),
   currency: z.string().max(3, "Currency code must be 3 characters"),
   description: z.string(),
   availability: z.enum(["full-time", "part-time", "weekends", "evenings"]),
