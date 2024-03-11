@@ -119,6 +119,7 @@ class DoctorSerializer(serializers.ModelSerializer):
     average_rating = serializers.SerializerMethodField() 
     appointment_slots = serializers.SerializerMethodField()
     
+    
     class Meta:
         model = Doctor
         fields = '__all__'
@@ -293,6 +294,7 @@ class PatientSerializer(serializers.ModelSerializer):
           
 
         for language_data in languages_data:
+            instance.patient_language_proficiencies.all().delete()
             # Accessing the nested 'name' correctly
             language_name = language_data.get('language', {}).get('name')
             if not language_name:

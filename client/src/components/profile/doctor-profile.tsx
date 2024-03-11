@@ -51,6 +51,15 @@ const QualificationSchema = z.object({
   university: z.string(),
 });
 
+const MAX_FILE_SIZE = 1024 * 1024 * 5;
+const ACCEPTED_IMAGE_MIME_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+];
+const ACCEPTED_IMAGE_TYPES = ["jpeg", "jpg", "png", "webp"];
+
 const profileFormSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
   last_name: z.string().min(1, "Last name is required"),
@@ -69,6 +78,15 @@ const profileFormSchema = z.object({
   currency: z.string().max(3, "Currency code must be 3 characters"),
   description: z.string(),
   availability: z.enum(["full-time", "part-time", "weekends", "evenings"]),
+  profile_pic: z
+    .any()
+    .refine((files) => {
+      return files?.[0]?.size <= MAX_FILE_SIZE;
+    }, `Max image size is 5MB.`)
+    .refine(
+      (files) => ACCEPTED_IMAGE_MIME_TYPES.includes(files?.[0]?.type),
+      "Only .jpg, .jpeg, .png and .webp formats are supported.",
+    ),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -573,6 +591,19 @@ export function DoctorProfileForm() {
               </Button>
             </div>
           </div>
+          <FormField
+            control={form.control}
+            name="profile_pic"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Profile picture</FormLabel>
+                <FormControl>
+                  <Input type="file" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
         <Button type="submit">Update profile</Button>
       </form>

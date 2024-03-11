@@ -54,6 +54,11 @@ export const useUserProfileStore = create(
         const response = await axios.put(
           `${API_URL}/user_profile/patients/${username}/`,
           profileData,
+          // {
+          //   headers: {
+          //     "Content-Type": "multipart/form-data",
+          //   },
+          // },
         );
         return response.data;
       }
@@ -61,6 +66,11 @@ export const useUserProfileStore = create(
         const response = await axios.put(
           `${API_URL}/user_profile/doctors/${username}/`,
           profileData,
+          // {
+          //   headers: {
+          //     "Content-Type": "multipart/form-data",
+          //   },
+          // },
         );
         return response.data;
       }

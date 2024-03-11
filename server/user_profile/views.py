@@ -6,6 +6,9 @@ from .serializers import DoctorSerializer, PatientSerializer, ReviewSerializer
 from .permissions import IsOwnerOrReadOnly, IsDoctorOrReadOnly, IsReadOnlyOrIsNew
 from .filters import DoctorFilter
 from rest_framework import permissions
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+
+
 
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
@@ -39,6 +42,8 @@ class DoctorViewSet(viewsets.ModelViewSet, filters.FilterSet):
     queryset = Doctor.objects.all()
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = DoctorFilter
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
+
     
     
     def get_queryset(self):
@@ -86,6 +91,8 @@ class PatientViewSet(viewsets.ModelViewSet):
     serializer_class = PatientSerializer
     permission_classes = [IsOwnerOrReadOnly,IsDoctorOrReadOnly]
     lookup_field = 'user__username'
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
+
 
     def get_queryset(self):
         """

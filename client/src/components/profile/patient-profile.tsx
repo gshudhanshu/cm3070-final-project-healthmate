@@ -51,6 +51,15 @@ const LanguageSchema = z.object({
   name: z.string(),
 });
 
+const MAX_FILE_SIZE = 5000000;
+const ACCEPTED_IMAGE_MIME_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+];
+const ACCEPTED_IMAGE_TYPES = ["jpeg", "jpg", "png", "webp"];
+
 const profileFormSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
   last_name: z.string().min(1, "Last name is required"),
@@ -65,6 +74,7 @@ const profileFormSchema = z.object({
   languages: z.array(LanguageSchema).optional(),
   address: AddressSchema,
   timezone: z.string().optional(),
+  profile_pic: z.any(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -499,6 +509,19 @@ export function PatientProfileForm() {
               </Button>
             </div>
           </div>
+          <FormField
+            control={form.control}
+            name="profile_pic"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Profile picture</FormLabel>
+                <FormControl>
+                  <Input type="file" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
         <Button type="submit">Update profile</Button>
       </form>

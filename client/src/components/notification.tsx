@@ -14,6 +14,7 @@ import {
 import { BellIcon } from "@heroicons/react/24/outline";
 
 export function Notification() {
+  return null;
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
