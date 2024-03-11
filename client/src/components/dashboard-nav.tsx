@@ -17,8 +17,9 @@ export function DashboardNav() {
         <div className="gapx-4 flex flex-wrap justify-center">
           {dashboardNavItems.map(
             (item, index) =>
-              user?.account_type === "doctor" &&
-              item.label !== "Medical Records" && (
+              ((user?.account_type === "doctor" &&
+                item.label !== "Medical Records") ||
+                user?.account_type === "patient") && (
                 <Link href={item.href} key={index}>
                   <div className="rounded-md px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-green-600">
                     {item.label}

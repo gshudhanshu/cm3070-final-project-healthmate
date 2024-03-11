@@ -226,7 +226,7 @@ class DoctorSerializer(serializers.ModelSerializer):
             DoctorLanguageProficiency.objects.create(
                 doctor=doctor,
                 language=language,
-                level=language_data.get('level')
+                level=language_data.get('level') or 'native'
             )
 
     def update_specialties(self, doctor, specialties_data):

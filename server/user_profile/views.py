@@ -84,7 +84,8 @@ class PatientViewSet(viewsets.ModelViewSet):
     A viewset for viewing and editing patient instances.
     """
     serializer_class = PatientSerializer
-    permission_classes = [IsDoctorOrReadOnly, IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly,IsDoctorOrReadOnly,]
+    lookup_field = 'user__username'
 
     def get_queryset(self):
         """

@@ -2,11 +2,20 @@
 
 import React from "react";
 import { DoctorProfileForm } from "@/components/profile/doctor-profile";
+import { PatientProfileForm } from "@/components/profile/patient-profile";
 
-export default function page() {
+import { useAuthStore } from "@/store/useAuthStore";
+
+export default function Page() {
+  const { user } = useAuthStore();
+
   return (
-    <section className="container mb-8 space-y-4 px-0">
-      <DoctorProfileForm />
+    <section className="container my-8 mb-16">
+      {user?.account_type === "doctor" ? (
+        <DoctorProfileForm />
+      ) : (
+        <PatientProfileForm />
+      )}
     </section>
   );
 }

@@ -22,8 +22,14 @@ class IsDoctorOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         # Allow viewing patient profiles for any request
         # if not trying to write (POST, PUT, PATCH, DELETE).
+        
+        # if request.method in permissions.SAFE_METHODS:
+        #     return request.user and request.user.is_authenticated and hasattr(request.user, 'doctor_profile')
+        
         if request.method in permissions.SAFE_METHODS:
-            return request.user and request.user.is_authenticated and hasattr(request.user, 'doctor_profile')
+            return True
+        return hasattr(request.user, 'doctor_profile')
+
         
         # Write permissions are only allowed to the owner of the patient profile.
         return False
