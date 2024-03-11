@@ -16,23 +16,38 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 
 class IsDoctorOrReadOnly(permissions.BasePermission):
     """
-    Custom permission to only allow doctors to view patient profiles.
+    Custom permission to only allow doctors to view and edit patient profiles,
+    but also allow patients to view and edit their own profiles.
     """
-    
     def has_permission(self, request, view):
-        # Allow viewing patient profiles for any request
-        # if not trying to write (POST, PUT, PATCH, DELETE).
-        
-        # if request.method in permissions.SAFE_METHODS:
-        #     return request.user and request.user.is_authenticated and hasattr(request.user, 'doctor_profile')
-        
+        # Allow viewing for any safe method requests (GET, HEAD, OPTIONS)
         if request.method in permissions.SAFE_METHODS:
             return True
-        return hasattr(request.user, 'doctor_profile')
 
-        
-        # Write permissions are only allowed to the owner of the patient profile.
+        # Allow write operations if the user is a doctor
+        user = request.user
+        if user.is_authenticated and user.account_type == 'doctor':
+            return True
+
+        # Allow patients to make write operations on their own profile
+        # Note: The specific object permission check happens in `has_object_permission`
+        if user.is_authenticated and user.account_type == 'patient':
+            return hasattr(view, 'kwargs') and view.kwargs.get('user__username') == user.username
+
         return False
+
+    def has_object_permission(self, request, view, obj):
+        # Read permissions are allowed for any request,
+        # so we'll always allow GET, HEAD, or OPTIONS requests.
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        # Allow write operations if the user is a doctor
+        if request.user.account_type == 'doctor':
+            return True
+
+        # Allow write operations if the patient is updating their own profile
+        return obj.user == request.user
     
     
 class IsReadOnlyOrIsNew(permissions.BasePermission):

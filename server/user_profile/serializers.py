@@ -85,6 +85,7 @@ class PatientLanguageProficiencySerializer(serializers.ModelSerializer):
     class Meta:
         model = PatientLanguageProficiency
         fields = ['id','name', 'level']
+        extra_kwargs = {'id': {'read_only': False, 'required': False}}
         
   
         
@@ -260,14 +261,49 @@ class DoctorSerializer(serializers.ModelSerializer):
         
 
 class PatientSerializer(serializers.ModelSerializer):
-    user = UserProfileSerializer(read_only=True)
-    languages = PatientLanguageProficiencySerializer(source='patient_language_proficiencies', many=True, read_only=True)
-    address =  AddressSerializer(read_only=True)
+    user = UserProfileSerializer()
+    languages = PatientLanguageProficiencySerializer(source='patient_language_proficiencies', many=True, )
+    address =  AddressSerializer()
 
     class Meta:
         model = Patient
         fields = '__all__'
         # fields = ['languages', 'address', 'user']
+        
+    def update(self, instance, validated_data):
+        # print("Validated data:", validated_data)
+        # Extract nested data
+        user_data = validated_data.pop('user', None)
+        languages_data = validated_data.pop('patient_language_proficiencies', [])
+        address_data = validated_data.pop('address', None)
+        
+
+        # Update the User instance
+        if user_data:
+            user_serializer = UserProfileSerializer(instance=instance.user, data=user_data, partial=True)
+            user_serializer.is_valid(raise_exception=True)
+            user_serializer.save()
+            
+
+        # Update or create the Address instance
+        if address_data:
+            address_serializer = AddressSerializer(instance=instance.address, data=address_data, partial=True)
+            address_serializer.is_valid(raise_exception=True)
+            instance.address = address_serializer.save()
+            
+
+        languages_data = validated_data.pop('patient_language_proficiencies', [])
+        instance.patient_language_proficiencies.all().delete()
+        for language_data in languages_data:
+            self.fields['languages'].create(language_data)
+        
+        # Update the remaining direct fields on Patient
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        return instance
+
 
 
 class ReviewSerializer(serializers.ModelSerializer):
