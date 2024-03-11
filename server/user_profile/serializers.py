@@ -45,15 +45,42 @@ class UserProfileSerializer(serializers.ModelSerializer):
         
         
 class DoctorLanguageProficiencySerializer(serializers.ModelSerializer):
-    name = serializers.ReadOnlyField(source='language.name')
+    name = serializers.CharField(source='language.name')
     
     class Meta:
         model = DoctorLanguageProficiency
         fields = ['id','name', 'level']
         extra_kwargs = {'id': {'read_only': False, 'required': False}}
         
+    # def create(self, validated_data):
+    #     # Get or create the Language instance based on the name
+    #     language_name = validated_data.pop('name')
+    #     language, _ = Language.objects.get_or_create(name=language_name)
+        
+    #     # Create the DoctorLanguageProficiency instance
+    #     proficiency_instance = DoctorLanguageProficiency.objects.create(
+    #         language=language, **validated_data)
+        
+    #     return proficiency_instance
+
+    # def update(self, instance, validated_data):
+    #     # Assuming language names can be updated,
+    #     # you'd handle that here similarly to 'create'
+    #     language_name = validated_data.pop('name', None)
+    #     if language_name:
+    #         language, _ = Language.objects.get_or_create(name=language_name)
+    #         instance.language = language
+            
+    #     # Update other fields as normal
+    #     for attr, value in validated_data.items():
+    #         setattr(instance, attr, value)
+    #     instance.save()
+
+    #     return instance
+
+        
 class PatientLanguageProficiencySerializer(serializers.ModelSerializer):
-    name = serializers.ReadOnlyField(source='language.name')
+    name = serializers.CharField(source='language.name')
     
     class Meta:
         model = PatientLanguageProficiency
@@ -139,6 +166,8 @@ class DoctorSerializer(serializers.ModelSerializer):
     
     def update(self, instance, validated_data):
         
+        print('validated_data',validated_data)
+        
         user_data = validated_data.pop('user', None)
         print(user_data)
 
@@ -186,11 +215,18 @@ class DoctorSerializer(serializers.ModelSerializer):
     def update_languages(self, doctor, languages_data):
         doctor.doctor_language_proficiencies.all().delete()
         for language_data in languages_data:
-            language, _ = Language.objects.get_or_create(name=language_data['language']['name'])
+            # Accessing the nested 'name' correctly
+            language_name = language_data.get('language', {}).get('name')
+            if not language_name:
+                # Handle the case where language name is missing or structure is unexpected
+                print("Language name missing or data structure is incorrect.")
+                continue  # Skip this iteration
+
+            language, _ = Language.objects.get_or_create(name=language_name)
             DoctorLanguageProficiency.objects.create(
                 doctor=doctor,
                 language=language,
-                level=language_data['level']
+                level=language_data.get('level')
             )
 
     def update_specialties(self, doctor, specialties_data):
