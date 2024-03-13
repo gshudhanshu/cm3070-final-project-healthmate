@@ -8,15 +8,13 @@ from .filters import DoctorFilter
 from rest_framework import permissions
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
-
-
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
 
 class DoctorPagination(PageNumberPagination):
-    page_size = 1
+    page_size = 10
     
     def get_paginated_response(self, data):
         next_page = self.page.number + 1 if self.page.has_next() else None
@@ -44,8 +42,6 @@ class DoctorViewSet(viewsets.ModelViewSet, filters.FilterSet):
     filterset_class = DoctorFilter
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
-    
-    
     def get_queryset(self):
         """
         This view should return a list of all records for

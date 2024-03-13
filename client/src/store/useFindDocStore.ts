@@ -11,7 +11,8 @@ const SEARCH_DOCTORS_URL = `${API_URL}/user_profile/doctors`;
 
 interface FindDocState {
   doctors: DoctorProfile[];
-  doctor: DoctorProfile;
+  // doctor: DoctorProfile;
+  doctorSlots: DoctorProfile;
   doctorUsername: string;
   purpose: string;
   searchParams: SearchParams;
@@ -23,11 +24,12 @@ interface FindDocState {
   };
   searchDoctors: () => Promise<void>;
   setSearchParams: (params: SearchParams) => void;
-  fetchDoctor: (
+  fetchDoctorWithSlots: (
     username: string,
     date: string,
     timezone: string,
   ) => Promise<void>;
+
   bookAppointment: (
     doctorUsername: string,
     datetime_utc: string,
@@ -39,6 +41,7 @@ export const useFindDocStore = create(
   devtools<FindDocState>((set, get) => ({
     doctors: [],
     doctor: {} as DoctorProfile,
+    doctorSlots: {} as DoctorProfile,
     doctorUsername: "",
     purpose: "",
     searchParams: {},
@@ -78,12 +81,20 @@ export const useFindDocStore = create(
       set((state) => ({ searchParams: { ...state.searchParams, ...params } }));
     },
 
-    fetchDoctor: async (username: string, date: string, timezone: string) => {
+    fetchDoctorWithSlots: async (
+      username: string,
+      date: string,
+      timezone: string,
+    ) => {
+      let params = {};
+      if (date || timezone) {
+        params = { date, timezone };
+      }
       try {
         const response = await axios.get(`${SEARCH_DOCTORS_URL}/${username}`, {
-          params: { date, timezone },
+          params: { ...params },
         });
-        set({ doctor: response.data });
+        set({ doctorSlots: response.data });
       } catch (error) {
         console.error("Fetching doctor failed:", error);
       }

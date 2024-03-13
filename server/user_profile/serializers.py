@@ -8,6 +8,7 @@ import pytz
 from django.utils.timezone import make_aware
 from django.conf import settings
 from django.db import transaction
+from zoneinfo import ZoneInfo
 
 
 
@@ -119,11 +120,9 @@ class DoctorSerializer(serializers.ModelSerializer):
     average_rating = serializers.SerializerMethodField() 
     appointment_slots = serializers.SerializerMethodField()
     
-    
     class Meta:
         model = Doctor
         fields = '__all__'
-        
         
     def get_reviews(self, obj):
         return ReviewSerializer(obj.reviews.all()[:5], many=True).data
@@ -134,20 +133,45 @@ class DoctorSerializer(serializers.ModelSerializer):
     
     def get_appointment_slots(self, obj):
         request = self.context.get('request')
-        user_timezone = request.user.timezone if hasattr(request.user, 'timezone') else 'UTC'
-        tz = pytz.timezone(user_timezone) if isinstance(user_timezone, str) else user_timezone
+        
+        # Try to get 'date' and 'timezone' from query_params, fall back to defaults if not present
+        query_date = str(request.query_params.get('date'))
+        query_timezone = str(request.query_params.get('timezone'))
+        # print('query_date',query_date)
+        # print('query_timezone',query_timezone)
+        
+        # If timezone is provided in the query, use it; otherwise, use the user's timezone or UTC
+        if query_timezone:
+            try:
+                tz = pytz.timezone(query_timezone)
+            except pytz.UnknownTimeZoneError:
+                tz = pytz.timezone('UTC')  # Fallback to UTC if invalid timezone is provided
+        else:
+            user_timezone = request.user.timezone if hasattr(request.user, 'timezone') else 'UTC'
+            print('user_timezone',user_timezone)
+            # print writtens America/Costa_Rica
+            # and when I use it as string it works but when I put it as variable it does not work gives error
+            tz = pytz.timezone(user_timezone)
+            # tz = pytz.timezone('America/Costa_Rica')
 
-        # Use today's date in the user's timezone
-        today_user_tz = timezone.now().astimezone(tz).date()
 
+        print('query_date',query_date)
+        print('query_timezone',query_timezone)
+
+        # If date is provided in the query, use it; otherwise, use today's date in the user's timezone
+        if query_date:
+            try:
+                today_user_tz = datetime.strptime(query_date, '%Y-%m-%d').date()
+            except ValueError:
+                # Fallback to today if parsing fails
+                today_user_tz = timezone.now().astimezone(tz).date()
+        else:
+            today_user_tz = timezone.now().astimezone(tz).date()
+        
         slots_with_status = []
-        # Define working hours (8 AM to 8 PM)
         for hour in range(8, 20):
-            # Create naive datetime for the slot
             slot_naive_datetime = datetime.combine(today_user_tz, time(hour, 0))
-            # Make it timezone aware using the user's timezone
             slot_aware_datetime = make_aware(slot_naive_datetime, timezone=tz)
-            # Convert to UTC to match stored appointments
             slot_utc_datetime = slot_aware_datetime.astimezone(pytz.utc)
 
             is_booked = Appointment.objects.filter(

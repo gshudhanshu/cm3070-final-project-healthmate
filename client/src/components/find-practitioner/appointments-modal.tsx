@@ -78,8 +78,14 @@ const AppointmentModal = ({
   const [slots, setSlots] = useState<Slot[]>([] as Slot[]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const { fetchDoctor, doctorUsername, doctor, bookAppointment, purpose } =
-    useFindDocStore();
+  const {
+    fetchDoctorWithSlots,
+    doctorUsername,
+    // doctor,
+    doctorSlots,
+    bookAppointment,
+    purpose,
+  } = useFindDocStore();
 
   const selectSlot = (slot: SetStateAction<Slot>) => {
     setSelectedSlot(slot);
@@ -102,15 +108,15 @@ const AppointmentModal = ({
         const timezone = dayjs.tz.guess();
         const date = formatDate(selectedDate);
         console.log(timezone);
-        await fetchDoctor(doctorUsername, date, timezone);
+        await fetchDoctorWithSlots(doctorUsername, date, timezone);
         console.log("Fetching slots for", doctorUsername);
-        console.log("Doctor", doctor);
-        if (!doctor) {
+        console.log("Doctor", doctorSlots);
+        if (!doctorSlots) {
           alert("Doctor not found");
           return;
         }
 
-        setSlots(doctor.appointment_slots);
+        setSlots(doctorSlots?.appointment_slots || []);
       } catch (error) {
         console.error("Failed to fetch slots:", error);
         // Handle errors as appropriate for your application
@@ -134,7 +140,7 @@ const AppointmentModal = ({
     return <LoadingComponent />;
   }
 
-  if (!doctor) {
+  if (!doctorSlots) {
     return <ErrorComponent />;
   }
 
@@ -144,32 +150,32 @@ const AppointmentModal = ({
         <button>Edit Profile</button>
       </DialogTrigger> */}
 
-      <DialogContent className="gap-0 p-0 m-0 border-0">
-        <DialogHeader className="p-4 text-white rounded-t-lg bg-primary">
+      <DialogContent className="m-0 gap-0 border-0 p-0">
+        <DialogHeader className="rounded-t-lg bg-primary p-4 text-white">
           <DialogTitle className="text-center">Book an appointment</DialogTitle>
         </DialogHeader>
         {/* Doctor's Info */}
         <div className="text-center text-slate-600 dark:text-slate-400">
-          <div className="flex flex-col items-center justify-between p-3 text-center bg-slate-200">
-            <h2 className="w-full text-xl font-semibold text-center capitalize text-slate group">
-              <a href={`/doctors/${doctor.user.username}`}>
-                {doctor.user.first_name} {doctor.user.last_name}
+          <div className="flex flex-col items-center justify-between bg-slate-200 p-3 text-center">
+            <h2 className="text-slate group w-full text-center text-xl font-semibold capitalize">
+              <a href={`/doctors/${doctorSlots.user.username}`}>
+                {doctorSlots.user.first_name} {doctorSlots.user.last_name}
               </a>
-              <ArrowUpRightIcon className="inline w-4 h-4 ml-1 transition-all duration-100 rotate-45 group-hover:rotate-0" />
+              <ArrowUpRightIcon className="ml-1 inline h-4 w-4 rotate-45 transition-all duration-100 group-hover:rotate-0" />
             </h2>
             <p className="text-sm">
-              {doctor.specialties.map((j) => j.name).join(", ")}
+              {doctorSlots?.specialties?.map((j) => j.name).join(", ")}
             </p>
           </div>
         </div>
         <div className="px-5">
           {/* Date Navigation */}
-          <div className="flex items-center justify-between my-5">
+          <div className="my-5 flex items-center justify-between">
             <Button
               onClick={() => navigateDate(-1)}
               disabled={!isWithinNextWeek(addDays(selectedDate, -1))}
             >
-              <ChevronLeftIcon className="w-6 h-6" />
+              <ChevronLeftIcon className="h-6 w-6" />
             </Button>
             <span className="text-lg font-medium text-slate-600">
               {selectedDate.toLocaleDateString("en-US", {
@@ -182,16 +188,16 @@ const AppointmentModal = ({
               onClick={() => navigateDate(1)}
               disabled={!isWithinNextWeek(addDays(selectedDate, 1))}
             >
-              <ChevronRightIcon className="w-6 h-6" />
+              <ChevronRightIcon className="h-6 w-6" />
             </Button>
           </div>
 
           {/* Time Slots */}
-          <div className="grid grid-cols-3 gap-4 mt-4 ">
+          <div className="mt-4 grid grid-cols-3 gap-4 ">
             {isLoading ? (
               <LoadingComponent />
             ) : (
-              doctor.appointment_slots.map((slot, index) => (
+              doctorSlots?.appointment_slots?.map((slot, index) => (
                 <Button
                   key={index}
                   variant={
@@ -229,9 +235,9 @@ const AppointmentModal = ({
             />
           </div>
         </div>
-        <div className="grid items-center grid-cols-2 gap-2 p-5 text-center">
+        <div className="grid grid-cols-2 items-center gap-2 p-5 text-center">
           <div className="text-xl font-semibold text-primary">
-            Cost: {doctor.cost} {doctor.currency}
+            Cost: {doctorSlots.cost} {doctorSlots.currency}
           </div>
           <Button onClick={() => handleBookAppointment()}>
             Book Appointment
