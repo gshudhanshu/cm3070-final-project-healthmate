@@ -5,7 +5,7 @@ from appointment.models import Appointment
 from django.utils import timezone
 from datetime import datetime, time, timedelta
 import pytz
-from django.utils.timezone import make_aware
+from django.utils.timezone import make_aware, now
 from django.conf import settings
 from django.db import transaction
 from zoneinfo import ZoneInfo
@@ -133,59 +133,41 @@ class DoctorSerializer(serializers.ModelSerializer):
     
     def get_appointment_slots(self, obj):
         request = self.context.get('request')
-        
-        # Try to get 'date' and 'timezone' from query_params, fall back to defaults if not present
-        query_date = str(request.query_params.get('date'))
-        query_timezone = str(request.query_params.get('timezone'))
-        # print('query_date',query_date)
-        # print('query_timezone',query_timezone)
-        
-        # If timezone is provided in the query, use it; otherwise, use the user's timezone or UTC
-        if query_timezone:
-            try:
-                tz = pytz.timezone(query_timezone)
-            except pytz.UnknownTimeZoneError:
-                tz = pytz.timezone('UTC')  # Fallback to UTC if invalid timezone is provided
+        user_timezone_str = request.query_params.get('timezone', 'UTC')
+        user_tz = ZoneInfo(user_timezone_str)
+
+        requested_date_str = request.query_params.get('date')
+        if requested_date_str:
+            requested_date = datetime.strptime(requested_date_str, '%Y-%m-%d').date()
         else:
-            user_timezone = request.user.timezone if hasattr(request.user, 'timezone') else 'UTC'
-            print('user_timezone',user_timezone)
-            # print writtens America/Costa_Rica
-            # and when I use it as string it works but when I put it as variable it does not work gives error
-            tz = pytz.timezone(user_timezone)
-            # tz = pytz.timezone('America/Costa_Rica')
+            requested_date = datetime.now(user_tz).date()
 
-
-        print('query_date',query_date)
-        print('query_timezone',query_timezone)
-
-        # If date is provided in the query, use it; otherwise, use today's date in the user's timezone
-        if query_date:
-            try:
-                today_user_tz = datetime.strptime(query_date, '%Y-%m-%d').date()
-            except ValueError:
-                # Fallback to today if parsing fails
-                today_user_tz = timezone.now().astimezone(tz).date()
-        else:
-            today_user_tz = timezone.now().astimezone(tz).date()
-        
         slots_with_status = []
-        for hour in range(8, 20):
-            slot_naive_datetime = datetime.combine(today_user_tz, time(hour, 0))
-            slot_aware_datetime = make_aware(slot_naive_datetime, timezone=tz)
-            slot_utc_datetime = slot_aware_datetime.astimezone(pytz.utc)
+        # Adjusting the range to potentially include slots from the next day due to timezone difference
+        for day_offset in range(2):
+            current_date = requested_date + timedelta(days=day_offset)
+            for hour in range(24):  # Covering all hours to catch overlaps
+                slot_naive_datetime = datetime.combine(current_date, time(hour, 0))
+                slot_aware_datetime = make_aware(slot_naive_datetime, timezone=ZoneInfo('UTC'))
+                slot_user_tz_datetime = slot_aware_datetime.astimezone(user_tz)
 
-            is_booked = Appointment.objects.filter(
-                doctor=obj.user,
-                date=slot_utc_datetime.date(),
-                time=slot_utc_datetime.time()
-            ).exists()
+                # Filter out slots not relevant to the requested day in user's timezone
+                if slot_user_tz_datetime.date() != requested_date:
+                    continue
 
-            slots_with_status.append({
-                'date': slot_aware_datetime.strftime('%Y-%m-%d'),
-                'time': slot_aware_datetime.strftime('%H:%M'),
-                'status': 'booked' if is_booked else 'unbooked',
-                'datetime_utc': slot_utc_datetime.isoformat()
-            })
+                is_booked = Appointment.objects.filter(
+                    doctor=obj.user,
+                    date=slot_aware_datetime.date(),
+                    time=slot_aware_datetime.time()
+                ).exists()
+
+                slots_with_status.append({
+                    'date': slot_user_tz_datetime.strftime('%Y-%m-%d'),
+                    'time': slot_user_tz_datetime.strftime('%H:%M'),
+                    'status': 'booked' if is_booked else 'unbooked',
+                    'datetime_utc': slot_aware_datetime.isoformat(),
+                    'datetime_user_tz': slot_user_tz_datetime.isoformat(),
+                })
 
         return slots_with_status
 

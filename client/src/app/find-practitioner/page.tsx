@@ -24,6 +24,8 @@ import {
 import { StarIcon } from "@heroicons/react/24/solid";
 // import { Slider } from "@/components/ui/slider";
 import { Slider } from "@/components/ui/dual-slider";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 import {
   Pagination,
   PaginationContent,
@@ -404,7 +406,7 @@ export default function Page() {
   return (
     <>
       {/* Search  */}
-      <div className="py-8 bg-slate-100">
+      <div className="bg-slate-100 py-8">
         <div className="flex flex-wrap items-center justify-center gap-3">
           <h2 className="text-xl font-bold uppercase text-primary">
             Find doctor
@@ -433,15 +435,15 @@ export default function Page() {
             className="h-[2.875rem]  p-0 px-4 "
             onClick={(e) => searchDoctors()}
           >
-            <MagnifyingGlassIcon className="w-6 h-6" /> Find a doc
+            <MagnifyingGlassIcon className="h-6 w-6" /> Find a doc
           </Button>
         </div>
       </div>
-      <section className="container px-4 mx-auto text-slate-600 sm:px-6 lg:px-8 dark:text-slate-400">
+      <section className="container mx-auto px-4 text-slate-600 sm:px-6 lg:px-8 dark:text-slate-400">
         <div className="py-8">
           <div className="flex gap-8">
             {/* Filters Section  */}
-            <aside className="hidden w-full mb-6 max-w-48 md:block">
+            <aside className="mb-6 hidden w-full max-w-48 md:block">
               <div className="font-bold uppercase">Filters</div>
               <Accordion
                 type="multiple"
@@ -514,28 +516,39 @@ export default function Page() {
               <div className="space-y-4">
                 {/* Repeat this block for each doctor  */}
                 {doctors.map((doctor, idx) => (
-                  <div key={idx} className="p-4 bg-white rounded-md shadow">
+                  <div key={idx} className="rounded-md bg-white p-4 shadow">
                     <div className="flex flex-col items-start gap-6 md:flex-row">
                       {/* Image and rating */}
-                      <div className="flex flex-col items-center justify-center gap-2 max-w-20">
-                        <div className="flex items-center justify-center w-20 h-20 rounded-lg bg-primary">
-                          <Image
+                      <div className="flex max-w-20 flex-col items-center justify-center gap-2">
+                        <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-primary">
+                          {/* <Image
                             src={doctor.profile_pic || ""}
                             height={50}
                             width={50}
                             alt="doctor-image"
                             className="w-full h-full rounded-md bg-primary"
-                          />
+                          /> */}
+                          <Avatar className="h-20 w-20 rounded-md">
+                            <AvatarImage
+                              src={doctor.profile_pic || ""}
+                              alt={doctor.user.username}
+                            />
+                            <AvatarFallback className="rounded-md">
+                              {doctor.user.first_name.charAt(0) +
+                                doctor.user.last_name.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+
                           {/* Image */}
                         </div>
-                        <div className="flex items-center justify-center gap-1 p-1 px-3 m-0 text-sm font-bold rounded-lg bg-primary/10">
-                          <StarIcon className="w-5 h-5 text-primary" />{" "}
+                        <div className="m-0 flex items-center justify-center gap-1 rounded-lg bg-primary/10 p-1 px-3 text-sm font-bold">
+                          <StarIcon className="h-5 w-5 text-primary" />{" "}
                           {doctor.average_rating}
                         </div>
                       </div>
                       {/* Name, description, extra details */}
 
-                      <div className="flex flex-col w-full gap-2">
+                      <div className="flex w-full flex-col gap-2">
                         <div className="flex justify-between">
                           <h3 className="text-xl font-semibold capitalize">
                             {doctor.user.first_name +
@@ -545,25 +558,25 @@ export default function Page() {
                         </div>
                         <div className="flex flex-wrap gap-4">
                           <div className="flex items-center gap-1">
-                            <BuildingOfficeIcon className="w-5 h-5 p-0 m-0" />
+                            <BuildingOfficeIcon className="m-0 h-5 w-5 p-0" />
                             {`${doctor.hospital_address.city}, ${doctor.hospital_address.country}`}
                           </div>
                           <div className="flex items-center gap-1">
-                            <BriefcaseIcon className="w-5 h-5" />
+                            <BriefcaseIcon className="h-5 w-5" />
                             {`${doctor.specialties[0].name} + ${
                               doctor.specialties.length - 1
                             } more`}
                           </div>
                           <div className="flex items-center gap-1">
-                            <ClockIcon className="w-5 h-5" />
+                            <ClockIcon className="h-5 w-5" />
                             {doctor.availability}
                           </div>
                         </div>
-                        <p className="truncate line-clamp-2 text-wrap">
+                        <p className="line-clamp-2 truncate text-wrap">
                           {doctor.description}
                         </p>
                         {/* Appointments slots */}
-                        <div className="flex flex-col flex-wrap justify-between gap-4 mt-4 md:flex-row md:items-center">
+                        <div className="mt-4 flex flex-col flex-wrap justify-between gap-4 md:flex-row md:items-center">
                           <div className="flex flex-col gap-2 md:flex-row md:items-center">
                             <p className="font-bold">Today&apos;s slots</p>
                             <div className="grid grid-flow-col grid-rows-3 gap-2 gap-y-1 md:grid-rows-2">
