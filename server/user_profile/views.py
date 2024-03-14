@@ -24,6 +24,7 @@ class DoctorPagination(PageNumberPagination):
             'next_page': next_page,
             'current_page': self.page.number,
             'previous_page': previous_page,
+            'total_pages': self.page.paginator.num_pages,
             'count': self.page.paginator.count,
             'results': data
         })

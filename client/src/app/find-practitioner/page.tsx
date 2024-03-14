@@ -346,7 +346,7 @@ export default function Page() {
     doctors,
     searchParams,
     pagination,
-    fetchDoctor,
+    fetchDoctorWithSlots,
   } = useFindDocStore();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -559,12 +559,14 @@ export default function Page() {
                         <div className="flex flex-wrap gap-4">
                           <div className="flex items-center gap-1">
                             <BuildingOfficeIcon className="m-0 h-5 w-5 p-0" />
-                            {`${doctor.hospital_address.city}, ${doctor.hospital_address.country}`}
+                            {`${doctor?.hospital_address?.city || ""}, ${
+                              doctor?.hospital_address?.country || ""
+                            }`}
                           </div>
                           <div className="flex items-center gap-1">
                             <BriefcaseIcon className="h-5 w-5" />
-                            {`${doctor.specialties[0].name} + ${
-                              doctor.specialties.length - 1
+                            {`${doctor?.specialties[0]?.name || ""} + ${
+                              doctor?.specialties?.length - 1 || 0
                             } more`}
                           </div>
                           <div className="flex items-center gap-1">
@@ -580,7 +582,7 @@ export default function Page() {
                           <div className="flex flex-col gap-2 md:flex-row md:items-center">
                             <p className="font-bold">Today&apos;s slots</p>
                             <div className="grid grid-flow-col grid-rows-3 gap-2 gap-y-1 md:grid-rows-2">
-                              {doctor.appointment_slots.map((slot, idx) => (
+                              {doctor?.appointment_slots?.map((slot, idx) => (
                                 <span
                                   key={idx}
                                   className={`rounded-sm p-1 px-2 text-xs font-semibold ${
@@ -628,7 +630,7 @@ export default function Page() {
                     />
 
                     {Array.from(
-                      { length: pagination.count },
+                      { length: pagination.total_pages },
                       (_, i) => i + 1,
                     ).map((pageNum) => (
                       <PaginationLink
@@ -640,6 +642,7 @@ export default function Page() {
                         {pageNum}
                       </PaginationLink>
                     ))}
+
                     <PaginationNext
                       onClick={() =>
                         handlePageChange(

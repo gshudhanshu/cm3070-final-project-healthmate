@@ -18,6 +18,7 @@ interface FindDocState {
   searchParams: SearchParams;
   pagination: {
     count: number;
+    total_pages: number;
     next_page: number;
     previous_page: number;
     current_page: number;
@@ -50,6 +51,7 @@ export const useFindDocStore = create(
       next_page: 0,
       previous_page: 0,
       current_page: 1,
+      total_pages: 0,
     },
     searchDoctors: async () => {
       const { searchParams } = get();
@@ -71,6 +73,7 @@ export const useFindDocStore = create(
             next_page: response.data.next_page,
             previous_page: response.data.previous_page,
             current_page: response.data.current_page,
+            total_pages: response.data.total_pages,
           },
         });
       } catch (error) {
@@ -83,12 +86,12 @@ export const useFindDocStore = create(
 
     fetchDoctorWithSlots: async (
       username: string,
-      dateTime: string,
+      datetime: string,
       timezone: string,
     ) => {
       let params = {};
-      if (dateTime || timezone) {
-        params = { dateTime, timezone };
+      if (datetime || timezone) {
+        params = { datetime, timezone };
       }
       try {
         const response = await axios.get(`${SEARCH_DOCTORS_URL}/${username}`, {

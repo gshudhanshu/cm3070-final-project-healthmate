@@ -137,6 +137,7 @@ class DoctorSerializer(serializers.ModelSerializer):
         user_tz = ZoneInfo(user_timezone_str)
 
         datetime_str = request.query_params.get('datetime')
+        print('datetime_str',datetime_str)
         if datetime_str:
             requested_datetime_user_tz = datetime.fromisoformat(datetime_str)
         else:
@@ -144,10 +145,13 @@ class DoctorSerializer(serializers.ModelSerializer):
             requested_datetime_user_tz = make_aware(datetime.now(), timezone=user_tz)
 
         doctor_tz = ZoneInfo(str(obj.get_timezone()))
-        print('doctor_tz',doctor_tz)
         # ZoneInfo(obj.get_timezone())
         requested_datetime_doctor_tz = requested_datetime_user_tz.astimezone(doctor_tz)
         requested_date_doctor_tz = requested_datetime_doctor_tz.date()
+        
+        # Get current datetime in the user's timezone to filter out past slots
+        current_datetime_user_tz = datetime.now(tz=user_tz)
+
 
         slots_with_status = []
         start_hour = obj.availability_start.hour
@@ -159,6 +163,14 @@ class DoctorSerializer(serializers.ModelSerializer):
             slot_naive_datetime = datetime.combine(requested_date_doctor_tz, slot_time)
             slot_aware_datetime = make_aware(slot_naive_datetime, timezone=doctor_tz)
             slot_utc_datetime = slot_aware_datetime.astimezone(ZoneInfo('UTC'))
+            
+            # Convert the slot datetime back to the user's timezone for displaying
+            slot_user_tz_datetime = slot_utc_datetime.astimezone(user_tz)
+            
+            # Filter out slots that have already passed in the user's timezone
+            if slot_user_tz_datetime < current_datetime_user_tz:
+                continue            
+
 
             is_booked = Appointment.objects.filter(
                 doctor=obj.user,

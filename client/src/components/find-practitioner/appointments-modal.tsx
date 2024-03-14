@@ -18,13 +18,15 @@ import { DoctorProfile, Slot } from "@/types/user";
 import { useFindDocStore } from "@/store/useFindDocStore";
 import LoadingComponent from "@/components/common/loading";
 import ErrorComponent from "@/components/common/error";
+import { Input } from "@/components/ui/input";
 
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone.js";
 import utc from "dayjs/plugin/utc.js";
-import { Input } from "@/components/ui/input";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 dayjs.extend(utc);
 dayjs.extend(timezone);
+dayjs.extend(isSameOrAfter);
 
 // Mock data for available slots
 const availableSlots = [
@@ -48,9 +50,12 @@ const addDays = (date: Date, days: number): Date => {
 
 // Helper function to check if the date is within the next 7 days from today
 const isWithinNextWeek = (date: Date): boolean => {
-  const today = new Date();
-  const weekFromToday = addDays(today, 7);
-  return date >= today && date <= weekFromToday;
+  const today = dayjs().tz(localTimezone).startOf("day");
+  const weekFromToday = today.add(7, "day");
+  return (
+    dayjs(date).tz(localTimezone).isSameOrAfter(today) &&
+    dayjs(date).tz(localTimezone).isBefore(weekFromToday)
+  );
 };
 
 const isDateInPast = (date: Date): boolean => {
@@ -107,11 +112,8 @@ const AppointmentModal = ({
     const fetchSlots = async () => {
       try {
         const timezone = dayjs.tz.guess();
-        const dateTime = formatDateTime(selectedDate);
-        console.log(dateTime);
-        await fetchDoctorWithSlots(doctorUsername, dateTime, timezone);
-        console.log("Fetching slots for", doctorUsername);
-        console.log("Doctor", doctorSlots);
+        const datetime = formatDateTime(selectedDate);
+        await fetchDoctorWithSlots(doctorUsername, datetime, timezone);
         if (!doctorSlots) {
           alert("Doctor not found");
           return;
