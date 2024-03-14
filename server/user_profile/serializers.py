@@ -136,38 +136,46 @@ class DoctorSerializer(serializers.ModelSerializer):
         user_timezone_str = request.query_params.get('timezone', 'UTC')
         user_tz = ZoneInfo(user_timezone_str)
 
-        requested_date_str = request.query_params.get('date')
-        if requested_date_str:
-            requested_date = datetime.strptime(requested_date_str, '%Y-%m-%d').date()
+        datetime_str = request.query_params.get('datetime')
+        if datetime_str:
+            requested_datetime_user_tz = datetime.fromisoformat(datetime_str)
         else:
-            requested_date = datetime.now(user_tz).date()
+            user_tz = ZoneInfo(request.query_params.get('timezone', 'UTC'))
+            requested_datetime_user_tz = make_aware(datetime.now(), timezone=user_tz)
+
+        doctor_tz = ZoneInfo(str(obj.get_timezone()))
+        print('doctor_tz',doctor_tz)
+        # ZoneInfo(obj.get_timezone())
+        requested_datetime_doctor_tz = requested_datetime_user_tz.astimezone(doctor_tz)
+        requested_date_doctor_tz = requested_datetime_doctor_tz.date()
 
         slots_with_status = []
-        # Adjusting the range to potentially include slots from the next day due to timezone difference
-        for day_offset in range(2):
-            current_date = requested_date + timedelta(days=day_offset)
-            for hour in range(24):  # Covering all hours to catch overlaps
-                slot_naive_datetime = datetime.combine(current_date, time(hour, 0))
-                slot_aware_datetime = make_aware(slot_naive_datetime, timezone=ZoneInfo('UTC'))
-                slot_user_tz_datetime = slot_aware_datetime.astimezone(user_tz)
+        start_hour = obj.availability_start.hour
+        end_hour = obj.availability_end.hour
 
-                # Filter out slots not relevant to the requested day in user's timezone
-                if slot_user_tz_datetime.date() != requested_date:
-                    continue
+        # Generate slots for the requested day in the doctor's timezone
+        for hour in range(start_hour, end_hour):
+            slot_time = time(hour, 0)
+            slot_naive_datetime = datetime.combine(requested_date_doctor_tz, slot_time)
+            slot_aware_datetime = make_aware(slot_naive_datetime, timezone=doctor_tz)
+            slot_utc_datetime = slot_aware_datetime.astimezone(ZoneInfo('UTC'))
 
-                is_booked = Appointment.objects.filter(
-                    doctor=obj.user,
-                    date=slot_aware_datetime.date(),
-                    time=slot_aware_datetime.time()
-                ).exists()
+            is_booked = Appointment.objects.filter(
+                doctor=obj.user,
+                date=slot_utc_datetime.date(),
+                time=slot_utc_datetime.time()
+            ).exists()
 
-                slots_with_status.append({
-                    'date': slot_user_tz_datetime.strftime('%Y-%m-%d'),
-                    'time': slot_user_tz_datetime.strftime('%H:%M'),
-                    'status': 'booked' if is_booked else 'unbooked',
-                    'datetime_utc': slot_aware_datetime.isoformat(),
-                    'datetime_user_tz': slot_user_tz_datetime.isoformat(),
-                })
+            # Convert the slot datetime back to the user's timezone for displaying
+            slot_user_tz_datetime = slot_utc_datetime.astimezone(user_tz)
+
+            slots_with_status.append({
+                'date': slot_user_tz_datetime.strftime('%Y-%m-%d'),
+                'time': slot_user_tz_datetime.strftime('%H:%M'),
+                'status': 'booked' if is_booked else 'unbooked',
+                'datetime_utc': slot_utc_datetime.isoformat(),
+                'datetime_user_tz': slot_user_tz_datetime.isoformat(),
+            })
 
         return slots_with_status
 

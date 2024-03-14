@@ -60,8 +60,9 @@ const isDateInPast = (date: Date): boolean => {
 };
 
 // Helper function to format date as YYYY-MM-DD
-const formatDate = (date: Date): string => {
-  return date.toISOString().split("T")[0];
+const formatDateTime = (dateTime: Date): string => {
+  // return dateTime.toISOString();
+  return dayjs(dateTime).format();
 };
 
 const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -106,9 +107,9 @@ const AppointmentModal = ({
     const fetchSlots = async () => {
       try {
         const timezone = dayjs.tz.guess();
-        const date = formatDate(selectedDate);
-        console.log(timezone);
-        await fetchDoctorWithSlots(doctorUsername, date, timezone);
+        const dateTime = formatDateTime(selectedDate);
+        console.log(dateTime);
+        await fetchDoctorWithSlots(doctorUsername, dateTime, timezone);
         console.log("Fetching slots for", doctorUsername);
         console.log("Doctor", doctorSlots);
         if (!doctorSlots) {

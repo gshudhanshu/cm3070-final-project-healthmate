@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from datetime import datetime, timedelta, time
+
 User = get_user_model()
 
 
@@ -72,6 +74,8 @@ class Doctor(models.Model):
         ('evenings', 'Evenings')
     ]
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name='doctor_profile')
+    availability_start = models.TimeField(default=time(8, 0))
+    availability_end = models.TimeField(default=time(20, 0))
     phone = models.CharField(max_length=20, null=True, blank=True)
     hospital_address = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True, blank=True, related_name='doctors')
     specialties = models.ManyToManyField(Speciality, related_name='doctors', blank=True)
@@ -88,6 +92,10 @@ class Doctor(models.Model):
         total = sum(review.rating for review in self.reviews.all())
         count = self.reviews.count()
         return total / count if count > 0 else 0
+    
+    def get_timezone(self):
+        return self.user.timezone
+
 
     def __str__(self):
         return self.user.username

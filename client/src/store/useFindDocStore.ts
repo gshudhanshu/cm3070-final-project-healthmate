@@ -83,12 +83,12 @@ export const useFindDocStore = create(
 
     fetchDoctorWithSlots: async (
       username: string,
-      date: string,
+      dateTime: string,
       timezone: string,
     ) => {
       let params = {};
-      if (date || timezone) {
-        params = { date, timezone };
+      if (dateTime || timezone) {
+        params = { dateTime, timezone };
       }
       try {
         const response = await axios.get(`${SEARCH_DOCTORS_URL}/${username}`, {
