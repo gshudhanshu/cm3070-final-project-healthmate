@@ -10,8 +10,8 @@ interface DoctorProfileState {
   patientProfile: PatientProfile | null;
   isLoading: boolean;
   error: Error | null;
-  fetchDoctorProfile: (doctorUsername: string) => void;
-  fetchPatientProfile: (patientUsername: string) => void;
+  fetchDoctorProfile: (doctorUsername: string) => Promise<DoctorProfile>;
+  fetchPatientProfile: (patientUsername: string) => Promise<PatientProfile>;
   updateUserProfile: (
     username: string,
     account_type: string,
@@ -20,7 +20,7 @@ interface DoctorProfileState {
 }
 
 export const useUserProfileStore = create(
-  devtools<DoctorProfileState>((set) => ({
+  devtools<DoctorProfileState>((set, get) => ({
     doctorProfile: null,
     patientProfile: null,
     isLoading: true,
@@ -32,9 +32,11 @@ export const useUserProfileStore = create(
           `${API_URL}/user_profile/doctors/${doctorUsername}/`,
         );
         set({ doctorProfile: response.data, isLoading: false });
+        return response.data;
       } catch (error: any) {
         set({ error, isLoading: false });
       }
+      return undefined;
     },
 
     fetchPatientProfile: async (patientUsername) => {
@@ -44,6 +46,7 @@ export const useUserProfileStore = create(
           `${API_URL}/user_profile/patients/${patientUsername}/`,
         );
         set({ patientProfile: response.data, isLoading: false });
+        return response.data;
       } catch (error: any) {
         set({ error, isLoading: false });
       }
@@ -54,11 +57,11 @@ export const useUserProfileStore = create(
         const response = await axios.put(
           `${API_URL}/user_profile/patients/${username}/`,
           profileData,
-          // {
-          //   headers: {
-          //     "Content-Type": "multipart/form-data",
-          //   },
-          // },
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          },
         );
         return response.data;
       }
@@ -66,11 +69,11 @@ export const useUserProfileStore = create(
         const response = await axios.put(
           `${API_URL}/user_profile/doctors/${username}/`,
           profileData,
-          // {
-          //   headers: {
-          //     "Content-Type": "multipart/form-data",
-          //   },
-          // },
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          },
         );
         return response.data;
       }

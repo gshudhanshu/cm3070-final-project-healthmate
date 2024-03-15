@@ -7,10 +7,14 @@ from .permissions import IsOwnerOrReadOnly, IsDoctorOrReadOnly, IsReadOnlyOrIsNe
 from .filters import DoctorFilter
 from rest_framework import permissions
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from drf_nested_forms.parsers import NestedMultiPartParser, NestedJSONParser
+
 
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
+
+
 
 
 class DoctorPagination(PageNumberPagination):
@@ -88,7 +92,8 @@ class PatientViewSet(viewsets.ModelViewSet):
     serializer_class = PatientSerializer
     permission_classes = [IsOwnerOrReadOnly,IsDoctorOrReadOnly]
     lookup_field = 'user__username'
-    parser_classes = (MultiPartParser, FormParser, JSONParser)
+    # parser_classes = (MultiPartParser, FormParser, JSONParser)
+    parser_classes = (NestedMultiPartParser, FormParser)
 
 
     def get_queryset(self):
@@ -103,3 +108,12 @@ class PatientViewSet(viewsets.ModelViewSet):
             if hasattr(user, 'patient_profile'):
                 return Patient.objects.filter(user=user)
         return Patient.objects.none()
+    
+    def update (self, request, *args, **kwargs):
+        print(request.data)
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)

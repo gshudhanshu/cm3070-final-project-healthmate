@@ -28,6 +28,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useUserProfileStore } from "@/store/useUserProfileStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useEffect } from "react";
+import { DoctorProfile } from "@/types/user";
 // import { toast } from "@/components/ui/toast"
 
 const AddressSchema = z.object({
@@ -149,7 +150,9 @@ export function DoctorProfileForm() {
   useEffect(() => {
     if (!user) return;
     const loadProfile = async () => {
-      await fetchDoctorProfile(user?.username);
+      const doctorProfile: DoctorProfile = await fetchDoctorProfile(
+        user?.username,
+      );
       // Ensure doctorProfile data is available here
       // Then use reset to update form with async fetched values
       setFormDefaultValues({

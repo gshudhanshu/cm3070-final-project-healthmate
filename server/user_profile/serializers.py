@@ -14,6 +14,7 @@ from zoneinfo import ZoneInfo
 
 
 
+
 User = get_user_model()
 
 class AddressSerializer(serializers.ModelSerializer):
@@ -291,6 +292,7 @@ class PatientSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer()
     languages = PatientLanguageProficiencySerializer(source='patient_language_proficiencies', many=True, )
     address =  AddressSerializer()
+    profile_pic = serializers.ImageField(use_url=True, required=False, allow_null=True)
 
     class Meta:
         model = Patient
@@ -300,9 +302,18 @@ class PatientSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         # print("Validated data:", validated_data)
         # Extract nested data
+        
         user_data = validated_data.pop('user', None)
         languages_data = validated_data.pop('patient_language_proficiencies', [])
         address_data = validated_data.pop('address', None)
+        
+        print('profile_pic', validated_data)
+        
+        profile_pic = validated_data.get('profile_pic', None)
+        print('profile_pic',profile_pic)
+        
+        if profile_pic is not None:
+            instance.profile_pic = profile_pic
         
 
         # Update the User instance
@@ -339,7 +350,8 @@ class PatientSerializer(serializers.ModelSerializer):
         
         # Update the remaining direct fields on Patient
         for attr, value in validated_data.items():
-            setattr(instance, attr, value)
+            if attr != 'profile_pic':
+                setattr(instance, attr, value)
         instance.save()
 
         return instance

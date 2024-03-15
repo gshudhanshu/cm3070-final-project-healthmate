@@ -10,7 +10,7 @@ export default function Page() {
   const { user } = useAuthStore();
 
   return (
-    <section className="container my-8 mb-16">
+    <section className="container mb-8">
       {user?.account_type === "doctor" ? (
         <DoctorProfileForm />
       ) : (

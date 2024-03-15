@@ -33,10 +33,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 import { Textarea } from "@/components/ui/textarea";
 import { useUserProfileStore } from "@/store/useUserProfileStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useEffect } from "react";
+import { PatientProfile } from "@/types/user";
 // import { toast } from "@/components/ui/toast"
 
 const AddressSchema = z.object({
@@ -58,7 +61,6 @@ const ACCEPTED_IMAGE_MIME_TYPES = [
   "image/png",
   "image/webp",
 ];
-const ACCEPTED_IMAGE_TYPES = ["jpeg", "jpg", "png", "webp"];
 
 const profileFormSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
@@ -74,7 +76,20 @@ const profileFormSchema = z.object({
   languages: z.array(LanguageSchema).optional(),
   address: AddressSchema,
   timezone: z.string().optional(),
-  profile_pic: z.any(),
+  profile_pic: z
+    .any()
+    .refine((file) => file?.length == 1, { message: "Image is required." })
+    .refine(
+      (files) => {
+        return ACCEPTED_IMAGE_MIME_TYPES.includes(files?.[0]?.type);
+      },
+      {
+        message: ".jpg, .jpeg, .png, and .webp files are accepted.",
+      },
+    )
+    .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, {
+      message: `Max file size is 5MB.`,
+    }),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -82,7 +97,9 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 export function PatientProfileForm() {
   const { updateUserProfile, fetchPatientProfile, patientProfile } =
     useUserProfileStore();
+
   const { user } = useAuthStore();
+  const [previewUrl, setPreviewUrl] = useState("");
 
   const [formDefaultValues, setFormDefaultValues] = useState<
     Partial<ProfileFormValues>
@@ -102,6 +119,7 @@ export function PatientProfileForm() {
     defaultValues: formDefaultValues,
     mode: "onChange",
   });
+  const profilePicRef = form.register("profile_pic");
 
   const {
     fields: languageFields,
@@ -112,45 +130,52 @@ export function PatientProfileForm() {
     name: "languages",
   });
 
-  const { reset } = form;
-
   useEffect(() => {
-    if (!user) return;
-    const loadProfile = async () => {
-      await fetchPatientProfile(user?.username);
-      // Ensure doctorProfile data is available here
-      // Then use reset to update form with async fetched values
-      setFormDefaultValues({
-        ...formDefaultValues,
-        first_name: patientProfile?.user.first_name,
-        last_name: patientProfile?.user.last_name,
-        email: patientProfile?.user.email,
-        phone: patientProfile?.phone || "",
-        dob: patientProfile?.dob ? new Date(patientProfile?.dob) : undefined,
-        marital_status:
-          patientProfile?.marital_status as (typeof profileFormSchema.shape.marital_status._def.values)[number],
-        gender:
-          patientProfile?.gender as (typeof profileFormSchema.shape.gender._def.values)[number],
-        height: patientProfile?.height || undefined,
-        weight: patientProfile?.weight || undefined,
-        blood_group: patientProfile?.blood_group || "",
-        address: {
-          street: patientProfile?.address?.street || "",
-          city: patientProfile?.address?.city || "",
-          state: patientProfile?.address?.state || "",
-          postal_code: patientProfile?.address?.postal_code || "",
-          country: patientProfile?.address?.country || "",
-        },
-        languages: patientProfile?.languages || [{ name: "" }],
-        timezone: patientProfile?.user?.timezone || "UTC",
-      });
-    };
-    loadProfile();
-  }, [user, fetchPatientProfile]);
+    if (user?.username) {
+      const loadProfile = async () => {
+        const patientProfile = await fetchPatientProfile(user?.username);
+        // Ensure doctorProfile data is available here
+        // Then use reset to update form with async fetched values
+        setFormDefaultValues((prevValues) => ({
+          ...prevValues,
+          first_name: patientProfile?.user.first_name,
+          last_name: patientProfile?.user.last_name,
+          email: patientProfile?.user.email,
+          phone: patientProfile?.phone || "",
+          dob: patientProfile?.dob ? new Date(patientProfile?.dob) : undefined,
+          marital_status:
+            patientProfile?.marital_status as (typeof profileFormSchema.shape.marital_status._def.values)[number],
+          gender:
+            patientProfile?.gender as (typeof profileFormSchema.shape.gender._def.values)[number],
+          height: patientProfile?.height || undefined,
+          weight: patientProfile?.weight || undefined,
+          blood_group: patientProfile?.blood_group || "",
+          address: {
+            street: patientProfile?.address?.street || "",
+            city: patientProfile?.address?.city || "",
+            state: patientProfile?.address?.state || "",
+            postal_code: patientProfile?.address?.postal_code || "",
+            country: patientProfile?.address?.country || "",
+          },
+          languages: patientProfile?.languages || [{ name: "" }],
+          timezone: patientProfile?.user?.timezone || "UTC",
+        }));
+      };
+      loadProfile();
+    }
+  }, [user]);
 
   useEffect(() => {
     form.reset(formDefaultValues);
-  }, [formDefaultValues]);
+  }, [formDefaultValues, patientProfile]);
+
+  useEffect(() => {
+    if (form.watch("profile_pic")?.[0]) {
+      const file = form.watch("profile_pic")[0];
+      const fileUrl = URL.createObjectURL(file);
+      setPreviewUrl(fileUrl);
+    }
+  }, [form.watch("profile_pic")]);
 
   function onSubmit(data: ProfileFormValues) {
     if (!user) return;
@@ -173,12 +198,25 @@ export function PatientProfileForm() {
         height: data.height,
         weight: data.weight,
         blood_group: data.blood_group,
+        profile_pic: data.profile_pic[0] ? data.profile_pic[0] : undefined,
       };
       updateUserProfile(user.username, user.account_type, formattedData);
     } catch (error) {
       console.error("Error updating profile:", error);
     }
   }
+
+  // const handleProfilePicChange = (event: any) => {
+  //   const file = event.target.files[0];
+  //   if (file) {
+  //     form.setValue("profile_pic", file);
+  //     const reader = new FileReader();
+  //     reader.onload = () => {
+  //       setPreviewUrl(reader.result as string);
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
 
   return (
     <Form {...form}>
@@ -187,7 +225,10 @@ export function PatientProfileForm() {
           Edit your profile
         </h1>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {/* <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"> */}
+        {/* Personal Identification Information */}
+        <h2 className="text-xl font-semibold">Personal Information</h2>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <FormField
             control={form.control}
             name="first_name"
@@ -201,6 +242,7 @@ export function PatientProfileForm() {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="last_name"
@@ -214,21 +256,32 @@ export function PatientProfileForm() {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
-            name="email"
+            name="gender"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input placeholder="example@email.com" {...field} />
-                </FormControl>
+                <FormLabel>Gender</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  value={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
-
-          {/* Dob */}
 
           <FormField
             control={form.control}
@@ -272,75 +325,48 @@ export function PatientProfileForm() {
             )}
           />
 
-          {/* Marital status */}
+          <div className="flex items-end justify-center gap-3">
+            {/* Image preview */}
+            {patientProfile?.profile_pic && (
+              <Avatar className="h-16 w-16 rounded-full object-cover">
+                <AvatarImage
+                  src={previewUrl || patientProfile?.profile_pic}
+                  alt="Profile Preview"
+                />
+                <AvatarFallback>No Image</AvatarFallback>
+              </Avatar>
+            )}
 
-          <FormField
-            control={form.control}
-            name="marital_status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Marital status</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+            <FormField
+              control={form.control}
+              name="profile_pic"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Profile picture</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select availability" />
-                    </SelectTrigger>
+                    <Input
+                      type="file"
+                      {...profilePicRef}
+                      // onChange={handleProfilePicChange}
+                    />
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="single">Single</SelectItem>
-                    <SelectItem value="married">Married</SelectItem>
-                    <SelectItem value="divorced">Divorced</SelectItem>
-                    <SelectItem value="widowed">Widowed</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Height */}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+        {/* Contact Information */}
+        <h2 className="text-xl font-semibold">Contact Information</h2>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <FormField
             control={form.control}
-            name="height"
+            name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Height</FormLabel>
+                <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input placeholder="height" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Weight */}
-
-          <FormField
-            control={form.control}
-            name="weight"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Weight</FormLabel>
-                <FormControl>
-                  <Input placeholder="weight" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Blood group */}
-          <FormField
-            control={form.control}
-            name="blood_group"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Blood group</FormLabel>
-                <FormControl>
-                  <Input placeholder="blood group" {...field} />
+                  <Input placeholder="example@email.com" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -360,7 +386,11 @@ export function PatientProfileForm() {
               </FormItem>
             )}
           />
-          {/* Hospital address */}
+        </div>
+
+        {/* Hospital address */}
+        <h2 className="text-xl font-semibold">Hospital Address Details</h2>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           <FormField
             control={form.control}
             name="address.street"
@@ -426,15 +456,47 @@ export function PatientProfileForm() {
               </FormItem>
             )}
           />
+        </div>
+
+        {/* Medical or Personal History */}
+        <h2 className="text-xl font-semibold">Medical History</h2>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="marital_status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Marital status</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  value={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select availability" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="single">Single</SelectItem>
+                    <SelectItem value="married">Married</SelectItem>
+                    <SelectItem value="divorced">Divorced</SelectItem>
+                    <SelectItem value="widowed">Widowed</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}
-            name="timezone"
+            name="blood_group"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Timezone</FormLabel>
+                <FormLabel>Blood group</FormLabel>
                 <FormControl>
-                  <Input placeholder="timezone" {...field} />
+                  <Input placeholder="blood group" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -443,30 +505,37 @@ export function PatientProfileForm() {
 
           <FormField
             control={form.control}
-            name="gender"
+            name="height"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Gender</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select gender" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="male">Male</SelectItem>
-                    <SelectItem value="female">Female</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormLabel>Height</FormLabel>
+                <FormControl>
+                  <Input placeholder="height" {...field} />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          {/* Languages */}
+          <FormField
+            control={form.control}
+            name="weight"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Weight</FormLabel>
+                <FormControl>
+                  <Input placeholder="weight" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Additional Personal Details */}
+        {/* Languages */}
+        <h2 className="text-xl font-semibold">Additional Details</h2>
+        <div className="grid grid-cols-1 gap-4">
           <div>
             {languageFields.map((field, index) => (
               <div key={field.id} className="flex gap-6">
@@ -509,20 +578,22 @@ export function PatientProfileForm() {
               </Button>
             </div>
           </div>
-          <FormField
-            control={form.control}
-            name="profile_pic"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Profile picture</FormLabel>
-                <FormControl>
-                  <Input type="file" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </div>
+
+        <FormField
+          control={form.control}
+          name="timezone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Timezone</FormLabel>
+              <FormControl>
+                <Input placeholder="timezone" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <Button type="submit">Update profile</Button>
       </form>
     </Form>
