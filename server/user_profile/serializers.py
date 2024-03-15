@@ -120,6 +120,7 @@ class DoctorSerializer(serializers.ModelSerializer):
     hospital_address = AddressSerializer()
     average_rating = serializers.SerializerMethodField() 
     appointment_slots = serializers.SerializerMethodField()
+    profile_pic = serializers.ImageField(use_url=True, required=False, allow_null=True)
     
     class Meta:
         model = Doctor
@@ -195,10 +196,7 @@ class DoctorSerializer(serializers.ModelSerializer):
     
     def update(self, instance, validated_data):
         
-        print('validated_data',validated_data)
-        
         user_data = validated_data.pop('user', None)
-        print(user_data)
 
         if user_data:
             # Retrieve the User instance from the Doctor instance
@@ -218,13 +216,17 @@ class DoctorSerializer(serializers.ModelSerializer):
         specialties_data = validated_data.pop('specialties', [])
         qualifications_data = validated_data.pop('doctor_qualifications', [])
         address_data = validated_data.pop('hospital_address', None)
+        profile_pic = validated_data.get('profile_pic', None)
         
-        
+        if profile_pic is not None:
+            instance.profile_pic = profile_pic
+
 
         with transaction.atomic():
-            # Update the Doctor instance
+            # Update the remaining direct fields on Doctor
             for attr, value in validated_data.items():
-                setattr(instance, attr, value)
+                if attr != 'profile_pic':
+                    setattr(instance, attr, value)
             instance.save()
 
             # Languages
@@ -306,11 +308,7 @@ class PatientSerializer(serializers.ModelSerializer):
         user_data = validated_data.pop('user', None)
         languages_data = validated_data.pop('patient_language_proficiencies', [])
         address_data = validated_data.pop('address', None)
-        
-        print('profile_pic', validated_data)
-        
         profile_pic = validated_data.get('profile_pic', None)
-        print('profile_pic',profile_pic)
         
         if profile_pic is not None:
             instance.profile_pic = profile_pic

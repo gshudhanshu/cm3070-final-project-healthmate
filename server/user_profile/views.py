@@ -45,7 +45,8 @@ class DoctorViewSet(viewsets.ModelViewSet, filters.FilterSet):
     queryset = Doctor.objects.all()
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = DoctorFilter
-    parser_classes = (MultiPartParser, FormParser, JSONParser)
+    # parser_classes = (MultiPartParser, FormParser, JSONParser)
+    parser_classes = (NestedMultiPartParser, FormParser)
 
     def get_queryset(self):
         """

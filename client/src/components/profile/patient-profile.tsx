@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
+import { useToast } from "@/components/ui/use-toast";
+
 import { z } from "zod";
 import { CalendarIcon, CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
@@ -10,6 +12,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+
 import {
   Popover,
   PopoverContent,
@@ -78,17 +81,21 @@ const profileFormSchema = z.object({
   timezone: z.string().optional(),
   profile_pic: z
     .any()
-    .refine((file) => file?.length == 1, { message: "Image is required." })
+    .optional()
     .refine(
-      (files) => {
-        return ACCEPTED_IMAGE_MIME_TYPES.includes(files?.[0]?.type);
+      (file) => file === undefined || (Array.isArray(file) && file.length <= 1),
+      {
+        message: "Only one image can be selected.",
       },
+    )
+    .refine(
+      (files) => !files || ACCEPTED_IMAGE_MIME_TYPES.includes(files[0]?.type),
       {
         message: ".jpg, .jpeg, .png, and .webp files are accepted.",
       },
     )
-    .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, {
-      message: `Max file size is 5MB.`,
+    .refine((files) => !files || files[0]?.size <= MAX_FILE_SIZE, {
+      message: "Max file size is 5MB.",
     }),
 });
 
@@ -97,6 +104,7 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 export function PatientProfileForm() {
   const { updateUserProfile, fetchPatientProfile, patientProfile } =
     useUserProfileStore();
+  const { toast } = useToast();
 
   const { user } = useAuthStore();
   const [previewUrl, setPreviewUrl] = useState("");
@@ -201,8 +209,17 @@ export function PatientProfileForm() {
         profile_pic: data.profile_pic[0] ? data.profile_pic[0] : undefined,
       };
       updateUserProfile(user.username, user.account_type, formattedData);
+      toast({
+        title: "Profile updated",
+        description: "Your profile has been updated successfully",
+      });
     } catch (error) {
       console.error("Error updating profile:", error);
+      toast({
+        title: "Profile update failed",
+        description:
+          "An error occurred while updating your profile. Please try again.",
+      });
     }
   }
 
@@ -388,8 +405,8 @@ export function PatientProfileForm() {
           />
         </div>
 
-        {/* Hospital address */}
-        <h2 className="text-xl font-semibold">Hospital Address Details</h2>
+        {/* address */}
+        <h2 className="text-xl font-semibold">Address Details</h2>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           <FormField
             control={form.control}
@@ -533,7 +550,6 @@ export function PatientProfileForm() {
         </div>
 
         {/* Additional Personal Details */}
-        {/* Languages */}
         <h2 className="text-xl font-semibold">Additional Details</h2>
         <div className="grid grid-cols-1 gap-4">
           <div>

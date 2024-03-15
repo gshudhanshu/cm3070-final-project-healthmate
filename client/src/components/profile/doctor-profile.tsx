@@ -3,10 +3,12 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
+import { useToast } from "@/components/ui/use-toast";
 import { z } from "zod";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Form,
   FormControl,
@@ -39,12 +41,29 @@ const AddressSchema = z.object({
   country: z.string().min(1, "Country is required"),
 });
 
-const SpecialitySchema = z.object({
-  name: z.string(),
-});
+const SpecialitySchema = z
+  .object({
+    name: z.string(),
+    level: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.name && data.level) {
+        return ["native", "fluent", "conversational", "basic"].includes(
+          data.level,
+        );
+      }
+      return true;
+    },
+    {
+      message:
+        "Level is required if a language name is provided and must be 'native', 'fluent', 'conversational', or 'basic'.",
+    },
+  );
 
 const LanguageSchema = z.object({
   name: z.string(),
+  level: z.enum(["native", "fluent", "conversational", "basic"]),
 });
 
 const QualificationSchema = z.object({
@@ -52,14 +71,19 @@ const QualificationSchema = z.object({
   university: z.string(),
 });
 
-const MAX_FILE_SIZE = 1024 * 1024 * 5;
+const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_MIME_TYPES = [
   "image/jpeg",
   "image/jpg",
   "image/png",
   "image/webp",
 ];
-const ACCEPTED_IMAGE_TYPES = ["jpeg", "jpg", "png", "webp"];
+
+const createTimeArray = (): [string, ...string[]] =>
+  Array.from(
+    { length: 24 },
+    (_, hour) => `${hour.toString().padStart(2, "0")}:00:00`,
+  ) as [string, ...string[]];
 
 const profileFormSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
@@ -79,15 +103,25 @@ const profileFormSchema = z.object({
   currency: z.string().max(3, "Currency code must be 3 characters"),
   description: z.string(),
   availability: z.enum(["full-time", "part-time", "weekends", "evenings"]),
+  availability_end: z.enum(createTimeArray()),
+  availability_start: z.enum(createTimeArray()),
   profile_pic: z
     .any()
-    .refine((files) => {
-      return files?.[0]?.size <= MAX_FILE_SIZE;
-    }, `Max image size is 5MB.`)
+    .optional()
+    .refine((file) => file?.length == 1, {
+      message: "Image is required.",
+    })
     .refine(
-      (files) => ACCEPTED_IMAGE_MIME_TYPES.includes(files?.[0]?.type),
-      "Only .jpg, .jpeg, .png and .webp formats are supported.",
-    ),
+      (files) => {
+        return ACCEPTED_IMAGE_MIME_TYPES.includes(files?.[0]?.type);
+      },
+      {
+        message: ".jpg, .jpeg, .png, and .webp files are accepted.",
+      },
+    )
+    .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, {
+      message: `Max file size is 5MB.`,
+    }),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -95,7 +129,10 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 export function DoctorProfileForm() {
   const { updateUserProfile, fetchDoctorProfile, doctorProfile } =
     useUserProfileStore();
+  const { toast } = useToast();
+
   const { user } = useAuthStore();
+  const [previewUrl, setPreviewUrl] = useState("");
 
   const [formDefaultValues, setFormDefaultValues] = useState<
     Partial<ProfileFormValues>
@@ -109,7 +146,7 @@ export function DoctorProfileForm() {
     },
     specialties: [{ name: "" }],
     qualifications: [{ name: "", university: "" }],
-    languages: [{ name: "" }],
+    languages: [{ name: "", level: "native" }],
   });
 
   const form = useForm<ProfileFormValues>({
@@ -117,6 +154,8 @@ export function DoctorProfileForm() {
     defaultValues: formDefaultValues,
     mode: "onChange",
   });
+
+  const profilePicRef = form.register("profile_pic");
 
   const {
     fields: specialtyFields,
@@ -144,8 +183,6 @@ export function DoctorProfileForm() {
     control: form.control,
     name: "languages",
   });
-
-  const { reset } = form;
 
   useEffect(() => {
     if (!user) return;
@@ -180,7 +217,13 @@ export function DoctorProfileForm() {
         qualifications: doctorProfile?.qualifications || [
           { name: "", university: "" },
         ],
-        languages: doctorProfile?.languages || [{ name: "" }],
+        languages: doctorProfile?.languages?.map((lang) => ({
+          name: lang.name,
+          level:
+            lang.level as (typeof LanguageSchema.shape.level._def.values)[number],
+        })),
+        availability_start: doctorProfile?.availability_start || "",
+        availability_end: doctorProfile?.availability_end || "",
       });
     };
     loadProfile();
@@ -189,6 +232,14 @@ export function DoctorProfileForm() {
   useEffect(() => {
     form.reset(formDefaultValues);
   }, [formDefaultValues]);
+
+  useEffect(() => {
+    if (form.watch("profile_pic")?.[0]) {
+      const file = form.watch("profile_pic")[0];
+      const fileUrl = URL.createObjectURL(file);
+      setPreviewUrl(fileUrl);
+    }
+  }, [form.watch("profile_pic")]);
 
   function onSubmit(data: ProfileFormValues) {
     if (!user) return;
@@ -212,10 +263,20 @@ export function DoctorProfileForm() {
         description: data.description,
         availability: data.availability,
         phone: data.phone,
+        profile_pic: data.profile_pic[0] ? data.profile_pic[0] : undefined,
       };
       updateUserProfile(user.username, user.account_type, formattedData);
+      toast({
+        title: "Profile updated",
+        description: "Your profile has been updated successfully",
+      });
     } catch (error) {
       console.error("Error updating profile:", error);
+      toast({
+        title: "Profile update failed",
+        description:
+          "An error occurred while updating your profile. Please try again.",
+      });
     }
   }
 
@@ -226,7 +287,9 @@ export function DoctorProfileForm() {
           Edit your profile
         </h1>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {/* <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"> */}
+        <h2 className="text-xl font-semibold">Personal Information</h2>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <FormField
             control={form.control}
             name="first_name"
@@ -255,6 +318,58 @@ export function DoctorProfileForm() {
           />
           <FormField
             control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Tell us a little bit about yourself"
+                    className=""
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="flex items-end justify-center gap-3">
+            {/* Image preview */}
+            {doctorProfile?.profile_pic && (
+              <Avatar className="h-16 w-16 rounded-full object-cover">
+                <AvatarImage
+                  src={previewUrl || doctorProfile?.profile_pic}
+                  alt="Profile Preview"
+                />
+                <AvatarFallback>No Image</AvatarFallback>
+              </Avatar>
+            )}
+
+            <FormField
+              control={form.control}
+              name="profile_pic"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Profile picture</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="file"
+                      {...profilePicRef}
+                      // onChange={handleProfilePicChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+        {/* Contact Information */}
+        <h2 className="text-xl font-semibold">Contact Information</h2>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <FormField
+            control={form.control}
             name="email"
             render={({ field }) => (
               <FormItem>
@@ -279,7 +394,11 @@ export function DoctorProfileForm() {
               </FormItem>
             )}
           />
-          {/* Hospital address */}
+        </div>
+
+        {/* Hospital address */}
+        <h2 className="text-xl font-semibold">Hospital Address Details</h2>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           <FormField
             control={form.control}
             name="hospital_address.street"
@@ -345,6 +464,10 @@ export function DoctorProfileForm() {
               </FormItem>
             )}
           />
+        </div>
+        {/* Professional Information */}
+        <h2 className="text-xl font-semibold">Professional Information</h2>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <FormField
             control={form.control}
             name="experience"
@@ -358,7 +481,6 @@ export function DoctorProfileForm() {
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="cost"
@@ -372,7 +494,6 @@ export function DoctorProfileForm() {
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="currency"
@@ -381,19 +502,6 @@ export function DoctorProfileForm() {
                 <FormLabel>Currency</FormLabel>
                 <FormControl>
                   <Input placeholder="currency" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="timezone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Timezone</FormLabel>
-                <FormControl>
-                  <Input placeholder="timezone" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -409,6 +517,7 @@ export function DoctorProfileForm() {
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
+                  value={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -426,26 +535,84 @@ export function DoctorProfileForm() {
               </FormItem>
             )}
           />
-
+          {/* Start from dropdown time 00:00 to 24:00 */}
           <FormField
             control={form.control}
-            name="description"
+            name="availability_start"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Description</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Tell us a little bit about yourself"
-                    className=""
-                    {...field}
-                  />
-                </FormControl>
+                <FormLabel>Start Time</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  value={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select start time" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {createTimeArray().map((time) => (
+                      <SelectItem key={time} value={time}>
+                        {time}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          {/* Qualifications */}
+          {/* End time dropdown */}
+          <FormField
+            control={form.control}
+            name="availability_end"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>End Time</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  value={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select end time" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {createTimeArray().map((time) => (
+                      <SelectItem key={time} value={time}>
+                        {time}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="timezone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Timezone</FormLabel>
+                <FormControl>
+                  <Input placeholder="timezone" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Qualifications */}
+        <h2 className="text-xl font-semibold">Qualifications</h2>
+        <div className="grid grid-cols-1 gap-4">
           <div>
             {qualificationFields.map((field, index) => (
               <div key={field.id} className="flex gap-6">
@@ -483,12 +650,11 @@ export function DoctorProfileForm() {
                 />
               </div>
             ))}
-            <div className="flex gap-6">
+            <div className="mt-2 flex flex-wrap gap-3 sm:gap-6">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                className="mt-2"
                 onClick={() =>
                   appendQualification({ name: "", university: "" })
                 }
@@ -499,7 +665,6 @@ export function DoctorProfileForm() {
                 type="button"
                 variant="outline"
                 size="sm"
-                className="mt-2"
                 onClick={() =>
                   removeQualification(qualificationFields.length - 1)
                 }
@@ -508,7 +673,11 @@ export function DoctorProfileForm() {
               </Button>
             </div>
           </div>
-          {/* Speciality */}
+        </div>
+
+        {/* Qualifications */}
+        <h2 className="text-xl font-semibold">Specialties</h2>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             {specialtyFields.map((field, index) => (
               <div key={field.id} className="flex gap-6">
@@ -530,12 +699,11 @@ export function DoctorProfileForm() {
                 />
               </div>
             ))}
-            <div className="flex gap-6">
+            <div className="mt-2 flex flex-wrap gap-3 sm:gap-6">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                className="mt-2"
                 onClick={() => appendSpecialty({ name: "" })}
               >
                 Add Speciality
@@ -544,17 +712,20 @@ export function DoctorProfileForm() {
                 type="button"
                 variant="outline"
                 size="sm"
-                className="mt-2"
                 onClick={() => removeSpecialty(specialtyFields.length - 1)}
               >
                 Remove Speciality
               </Button>
             </div>
           </div>
-          {/* Languages */}
+        </div>
+
+        {/* Additional Personal Details */}
+        <h2 className="text-xl font-semibold">Additional Details</h2>
+        <div className="grid grid-cols-1 gap-4">
           <div>
             {languageFields.map((field, index) => (
-              <div key={field.id} className="flex gap-6">
+              <div key={field.id} className="flex gap-3 sm:gap-6">
                 <FormField
                   control={form.control}
                   key={field.id}
@@ -571,15 +742,46 @@ export function DoctorProfileForm() {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name={`languages.${index}.level`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={cn(index !== 0 && "sr-only")}>
+                        Level
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select level" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {LanguageSchema.shape.level._def.values.map(
+                            (level) => (
+                              <SelectItem key={level} value={level}>
+                                {level}
+                              </SelectItem>
+                            ),
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             ))}
-            <div className="flex gap-6">
+            <div className="mt-2 flex flex-wrap gap-3 sm:gap-6">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                className="mt-2"
-                onClick={() => appendLanguage({ name: "" })}
+                onClick={() => appendLanguage({ name: "", level: "native" })}
               >
                 Add Language
               </Button>
@@ -587,27 +789,14 @@ export function DoctorProfileForm() {
                 type="button"
                 variant="outline"
                 size="sm"
-                className="mt-2"
                 onClick={() => removeLanguage(languageFields.length - 1)}
               >
                 Remove Speciality
               </Button>
             </div>
           </div>
-          <FormField
-            control={form.control}
-            name="profile_pic"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Profile picture</FormLabel>
-                <FormControl>
-                  <Input type="file" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </div>
+
         <Button type="submit">Update profile</Button>
       </form>
     </Form>

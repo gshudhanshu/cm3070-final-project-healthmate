@@ -58,6 +58,8 @@ export interface DoctorProfile {
   languages?: Language[];
   reviews?: Review[];
   average_rating?: number;
+  availability_start: string | null;
+  availability_end: string | null;
 }
 
 export interface PatientProfile {
