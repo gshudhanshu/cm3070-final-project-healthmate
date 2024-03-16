@@ -791,7 +791,7 @@ export function DoctorProfileForm() {
                 size="sm"
                 onClick={() => removeLanguage(languageFields.length - 1)}
               >
-                Remove Speciality
+                Remove
               </Button>
             </div>
           </div>

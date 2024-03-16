@@ -19,7 +19,7 @@ export default function AppointmentHistory() {
         {medicalRecord?.appointments.toReversed().map((appointment, idx) => (
           <div
             key={idx}
-            className="flex flex-col gap-2 rounded-lg bg-slate-100 p-4"
+            className="flex flex-col gap-2 rounded-lg bg-slate-100 p-4 dark:bg-slate-800"
           >
             <p className="text-md font-medium">
               <span key={idx} className="mr-1">

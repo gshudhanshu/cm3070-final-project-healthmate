@@ -8,7 +8,10 @@ export default function ActiveMedicines() {
       <h4 className="my-4 text-lg font-semibold">Active Medicines</h4>
       <div className="flex flex-col gap-4">
         {medicalRecord?.medicines.toReversed().map((medicine, idx) => (
-          <div key={idx} className="rounded-lg bg-slate-100 p-4">
+          <div
+            key={idx}
+            className="rounded-lg bg-slate-100 p-4 dark:bg-slate-800"
+          >
             <p className="mb-3 text-lg font-medium">
               {medicine.name} {medicine.dosage}
             </p>
