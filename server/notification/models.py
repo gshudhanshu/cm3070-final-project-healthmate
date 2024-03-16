@@ -10,7 +10,6 @@ class Notification(models.Model):
         ('call', 'Call'),
         ('appointment', 'Appointment'),
         ('alert', 'Alert'),
-        # ... other types of notifications
     )
 
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
