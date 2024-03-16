@@ -82,9 +82,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         data = json.loads(text_data)
-        
-        print(f"***Received message of type {data.get('action')}")
-                
+                        
         if data.get('action') == 'chat_message':
             await self.handle_chat_message(data)
         elif data.get('action') == 'call_message':
@@ -223,7 +221,6 @@ class CallConsumer(AsyncWebsocketConsumer):
         # Check the type of message
         message_type = data.get('action')
         self.conversation_id = data.get('conversationId')
-        print(f"***Received message of type {message_type}")
         
         if message_type == 'webrtc_offer':
             await self.handle_webrtc_offer(data)

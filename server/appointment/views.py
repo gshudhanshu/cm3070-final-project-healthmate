@@ -8,6 +8,8 @@ from datetime import timedelta, time
 from django.utils import timezone
 import pytz
 from dateutil.parser import parse
+from django.contrib.auth.models import AnonymousUser
+
 
 
 from django.contrib.auth import get_user_model
@@ -27,11 +29,10 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         Restricts the returned appointments to those associated with the given user,
         either as a patient or as a doctor.
         """
+        
         queryset = super().get_queryset()
         user = self.request.user
-        
-        print(user.__dict__)
-        
+                
         # Check if the user has a doctor profile
         if hasattr(user, 'doctor_profile'):
             # User is a doctor, return appointments for this doctor

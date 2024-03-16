@@ -15,6 +15,7 @@ from django.utils import timezone
 
 
 
+
 class ConversationViewSet(viewsets.ModelViewSet):
     serializer_class = ConversationSerializer
     permission_classes = [IsAuthenticated]
@@ -24,6 +25,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
         where the current user is either the patient or the doctor.
         """
         user = self.request.user
+
         return Conversation.objects.filter(models.Q(patient=user) | models.Q(doctor=user))
 
 
@@ -34,7 +36,9 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     
     def get_queryset(self):
+               
         user = self.request.user
+
         conversation_id = self.kwargs.get('conversation_id')
 
         if not conversation_id:
@@ -115,6 +119,7 @@ class CallViewSet(viewsets.ModelViewSet):
         where the current user is either the caller or the receiver.
         """
         user = self.request.user
+
         return Call.objects.filter(models.Q(caller=user) | models.Q(receiver=user))
     
     def create(self, request, *args, **kwargs):
