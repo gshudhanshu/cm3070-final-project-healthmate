@@ -20,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useMessagesStore } from "@/store/useMessageStore";
 import { useMedicalRecordsStore } from "@/store/useMedicalRecordStore";
+import { toast } from "../ui/use-toast";
 
 // Define Zod schema for form validation
 const medicalRecordSchema = z.object({
@@ -105,24 +106,19 @@ export default function MedicalRecordForm() {
       data.medicines?.length === 0 &&
       data.diagnoses?.length === 0
     ) {
-      alert("Please add at least one disorder, medicine, or diagnosis.");
+      toast({
+        title: "No data to submit",
+        description: "Please add at least one disorder, medicine or diagnosis",
+        variant: "destructive",
+      });
       return;
     }
-    // Submit data to your API
-    try {
-      // const response = await axios.post({`${API_URL}/api/medical-records/`}, data);
-      // console.log(response.data);
-      addMedicalRecord(data);
-      alert("Medical record added successfully!");
-    } catch (error) {
-      console.error("Failed to add medical record:", error);
-      alert("Failed to add medical record.");
-    }
+    addMedicalRecord(data);
   };
 
   if (!selectedConversation) {
     return (
-      <div className="mx-auto mt-8 max-w-md rounded-md bg-white p-4 shadow-md">
+      <div className="mx-auto mt-8 max-w-md rounded-md bg-white p-4 shadow-md dark:bg-slate-800">
         <h2 className="mb-4 text-xl font-semibold">
           Please select a conversation
         </h2>
@@ -130,14 +126,10 @@ export default function MedicalRecordForm() {
     );
   }
 
-  console.log(formState.errors);
-
-  console.log(selectedConversation);
-
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="mx-auto mt-8 max-w-md rounded-md bg-white p-4 shadow-md"
+      className="mx-3 mt-8 rounded-md bg-white p-4 shadow-md md:ml-0 md:mr-6 dark:bg-slate-800"
     >
       <h2 className="mb-4 text-xl font-semibold">Add New Medical Record</h2>
       <Input
@@ -174,14 +166,6 @@ export default function MedicalRecordForm() {
               {formState.errors.disorders?.[index]?.first_noticed?.message}
             </div>
             <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                onClick={() => removeDisorder(index)}
-                variant={"destructive"}
-                className="w-fit"
-              >
-                Remove
-              </Button>
               {index === disorderFields.length - 1 && (
                 <Button
                   type="button"
@@ -196,6 +180,14 @@ export default function MedicalRecordForm() {
                   Add Disorder
                 </Button>
               )}
+              <Button
+                type="button"
+                onClick={() => removeDisorder(index)}
+                variant={"destructive"}
+                className="w-fit"
+              >
+                Remove
+              </Button>
             </div>
           </div>
         ))}
@@ -249,14 +241,6 @@ export default function MedicalRecordForm() {
             </div>
 
             <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                onClick={() => removeMedicine(index)}
-                variant={"destructive"}
-                className="w-fit"
-              >
-                Remove
-              </Button>
               {index === removeMedicine.length - 1 && (
                 <Button
                   type="button"
@@ -272,6 +256,14 @@ export default function MedicalRecordForm() {
                   Add Medicine
                 </Button>
               )}
+              <Button
+                type="button"
+                onClick={() => removeMedicine(index)}
+                variant={"destructive"}
+                className="w-fit"
+              >
+                Remove
+              </Button>
             </div>
           </div>
         ))}
@@ -322,14 +314,6 @@ export default function MedicalRecordForm() {
             </div>
 
             <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                onClick={() => removeDiagnosis(index)}
-                variant={"destructive"}
-                className="w-fit"
-              >
-                Remove
-              </Button>
               {index === diagnosisFields.length - 1 && (
                 <Button
                   type="button"
@@ -340,6 +324,14 @@ export default function MedicalRecordForm() {
                   Add Diagnosis
                 </Button>
               )}
+              <Button
+                type="button"
+                onClick={() => removeDiagnosis(index)}
+                variant={"destructive"}
+                className="w-fit"
+              >
+                Remove
+              </Button>
             </div>
           </div>
         ))}

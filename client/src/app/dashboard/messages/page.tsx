@@ -11,6 +11,28 @@ import { useMedicalRecordsStore } from "@/store/useMedicalRecordStore";
 import MedicalRecordPage from "@/app/dashboard/medical-records/page";
 import AddNewRecord from "@/components/medical-records/add-new-record";
 
+function TabComponent({ isMobile }: { isMobile: boolean }) {
+  return (
+    <Tabs defaultValue="messages" className=" w-full">
+      <TabsList className="mt-6">
+        <TabsTrigger value="messages">Messages</TabsTrigger>
+        <TabsTrigger value="medical-records">Medical Records</TabsTrigger>
+        <TabsTrigger value="add-new-medical-record">Add New Record</TabsTrigger>
+      </TabsList>
+      <TabsContent value="messages">
+        {isMobile && <MessageThread className="w-full pb-10 pr-6" />}
+        {!isMobile && <MessageThread className="pb-10 pr-6" />}
+      </TabsContent>
+      <TabsContent value="medical-records">
+        <MedicalRecordPage isDoctorFetching={true} />
+      </TabsContent>
+      <TabsContent value="add-new-medical-record">
+        <AddNewRecord />
+      </TabsContent>
+    </Tabs>
+  );
+}
+
 const MessagesPage: React.FC = () => {
   const { isSidebarVisible, toggleSidebar } = useMessagesStore();
   const size = useWindowSize();
@@ -24,29 +46,12 @@ const MessagesPage: React.FC = () => {
         isSidebarVisible ? (
           <Sidebar className="w-full px-6 pb-6" />
         ) : (
-          <MessageThread className="w-full pb-10 pr-6" />
+          <TabComponent isMobile />
         )
       ) : (
         <>
           <Sidebar className="flex-shrink px-6 pb-6" />
-          <Tabs defaultValue="messages" className="w-full">
-            <TabsList className="mt-6">
-              <TabsTrigger value="messages">Messages</TabsTrigger>
-              <TabsTrigger value="medical-records">Medical Records</TabsTrigger>
-              <TabsTrigger value="add-new-medical-record">
-                Add New Record
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="messages">
-              <MessageThread className="pb-10 pr-6" />
-            </TabsContent>
-            <TabsContent value="medical-records">
-              <MedicalRecordPage isDoctorFetching={true} />
-            </TabsContent>
-            <TabsContent value="add-new-medical-record">
-              <AddNewRecord />
-            </TabsContent>
-          </Tabs>
+          <TabComponent isMobile />
         </>
       )}
     </div>

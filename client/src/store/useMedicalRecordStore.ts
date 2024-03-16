@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import axios from "axios";
 import { MedicalRecord } from "@/types/medicalRecord";
+import { toast } from "@/components/ui/use-toast";
 
 const API_URL = process.env.API_URL;
 const MEDICAL_RECORDS_URL = `${API_URL}/medical_records`;
@@ -55,8 +56,16 @@ export const useMedicalRecordsStore = create(
         // set((state) => ({
         //   medicalRecord: response.data,
         // }));
-      } catch (error) {
-        console.error("Adding medical record failed:", error);
+        toast({
+          title: "Medical record added",
+          description: "New medical record has been added",
+        });
+      } catch (error: any) {
+        toast({
+          title: "Failed to add medical record",
+          description: error.message,
+          variant: "destructive",
+        });
       }
     },
     updateMedicalRecord: async (recordId, recordData) => {

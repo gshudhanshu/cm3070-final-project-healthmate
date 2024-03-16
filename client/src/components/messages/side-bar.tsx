@@ -30,14 +30,15 @@ const Sidebar = ({ className }: { className?: string }) => {
 
   const filteredConversations = conversations.filter((conversation) => {
     const accountType =
-      user && user.account_type !== "patient" ? "doctor" : "patient";
+      user && user.account_type === "patient" ? "doctor" : "patient";
+
     const fullName =
       `${conversation[accountType]?.first_name} ${conversation[accountType]?.last_name}`.toLowerCase();
     return fullName.includes(searchTerm.toLowerCase());
   });
 
   return (
-    <aside className={cn("bg-slate-100 p-4", className)}>
+    <aside className={cn("bg-slate-100 p-4 dark:bg-slate-800", className)}>
       <h2 className="mb-6 text-3xl font-medium">Messages</h2>
       <div className="mb-4">
         <Input
@@ -47,11 +48,11 @@ const Sidebar = ({ className }: { className?: string }) => {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
-      <ScrollArea className="h-[60vh] max-h-[60vh] [&>div>div]:!block">
+      <ScrollArea className="h-[70vh] max-h-[70vh] [&>div>div]:!block">
         {filteredConversations.map((conversation) => (
           <div
             key={conversation.id}
-            className="flex items-center gap-2 p-2 hover:bg-slate-200"
+            className="flex cursor-pointer items-center gap-2 p-2 hover:bg-slate-200 dark:hover:bg-slate-600"
             onClick={() => selectConversation(conversation)}
           >
             <Avatar className="flex-shrink-0 rounded-lg">
@@ -66,21 +67,21 @@ const Sidebar = ({ className }: { className?: string }) => {
                   ""}
               </AvatarFallback>
             </Avatar>
-            <div className="flex flex-col w-full min-w-0">
-              <div className="flex justify-between w-full min-w-0 gap-3">
-                <p className="font-medium truncate">
+            <div className="flex w-full min-w-0 flex-col">
+              <div className="flex w-full min-w-0 justify-between gap-3">
+                <p className="truncate font-medium">
                   {getOppositeParticipant(conversation)?.first_name +
                     " " +
                     getOppositeParticipant(conversation)?.last_name}
                 </p>
-                <p className="block text-xs text-slate-500">
+                <p className="block text-xs text-slate-500 dark:text-slate-400">
                   {conversation.last_message &&
                     dayjs(conversation.last_message.timestamp).format(
                       "ddd, MMM D",
                     )}
                 </p>
               </div>
-              <p className="text-sm truncate max-w-80 text-slate-500">
+              <p className="max-w-80 truncate text-sm text-slate-500 dark:text-slate-400">
                 {conversation.last_message?.text}
               </p>
             </div>
