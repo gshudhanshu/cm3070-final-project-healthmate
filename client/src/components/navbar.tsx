@@ -19,7 +19,7 @@ const navItems = [
   { href: "/", label: "Home" },
   { href: "/find-practitioner", label: "Find Practitioner" },
   { href: "/dashboard", label: "Dashboard", auth: true },
-  // { href: "/contact-us", label: "Contact Us" },
+  { href: "/contact-us", label: "Contact Us" },
   // { href: "/resources", label: "Resources" },
 ];
 

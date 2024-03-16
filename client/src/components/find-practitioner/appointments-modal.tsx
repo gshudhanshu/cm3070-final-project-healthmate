@@ -104,7 +104,6 @@ const AppointmentModal = ({
     }
     console.log("Booking appointment for", selectedSlot.datetime_utc);
     bookAppointment(doctorUsername, selectedSlot.datetime_utc, purpose);
-    alert("Appointment booked successfully");
   };
 
   useEffect(() => {
@@ -118,7 +117,6 @@ const AppointmentModal = ({
           alert("Doctor not found");
           return;
         }
-
         setSlots(doctorSlots?.appointment_slots || []);
       } catch (error) {
         console.error("Failed to fetch slots:", error);
@@ -158,8 +156,8 @@ const AppointmentModal = ({
           <DialogTitle className="text-center">Book an appointment</DialogTitle>
         </DialogHeader>
         {/* Doctor's Info */}
-        <div className="text-center text-slate-600 dark:text-slate-400">
-          <div className="flex flex-col items-center justify-between bg-slate-200 p-3 text-center">
+        <div className="text-center text-slate-600 dark:text-slate-200  ">
+          <div className="flex flex-col items-center justify-between bg-slate-200 p-3 text-center dark:bg-slate-800">
             <h2 className="text-slate group w-full text-center text-xl font-semibold capitalize">
               <a href={`/doctors/${doctorSlots.user.username}`}>
                 {doctorSlots.user.first_name} {doctorSlots.user.last_name}
@@ -180,7 +178,7 @@ const AppointmentModal = ({
             >
               <ChevronLeftIcon className="h-6 w-6" />
             </Button>
-            <span className="text-lg font-medium text-slate-600">
+            <span className="text-lg font-medium text-slate-600 dark:text-slate-200">
               {selectedDate.toLocaleDateString("en-US", {
                 weekday: "long",
                 month: "long",
@@ -231,6 +229,7 @@ const AppointmentModal = ({
             <Input
               type="text"
               name="purpose"
+              placeholder="Reason for appointment"
               value={purpose}
               onChange={(event) =>
                 useFindDocStore.setState({ purpose: event.target.value })

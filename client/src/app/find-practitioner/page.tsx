@@ -6,6 +6,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import { Badge } from "@/components/ui/badge";
+
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -406,7 +413,7 @@ export default function Page() {
   return (
     <>
       {/* Search  */}
-      <div className="bg-slate-100 py-8">
+      <div className="bg-slate-100 py-8 dark:bg-slate-700">
         <div className="flex flex-wrap items-center justify-center gap-3">
           <h2 className="text-xl font-bold uppercase text-primary">
             Find doctor
@@ -516,7 +523,10 @@ export default function Page() {
               <div className="space-y-4">
                 {/* Repeat this block for each doctor  */}
                 {doctors.map((doctor, idx) => (
-                  <div key={idx} className="rounded-md bg-white p-4 shadow">
+                  <div
+                    key={idx}
+                    className="rounded-md bg-slate-100 p-4 shadow dark:bg-slate-800 "
+                  >
                     <div className="flex flex-col items-start gap-6 md:flex-row">
                       {/* Image and rating */}
                       <div className="flex max-w-20 flex-col items-center justify-center gap-2">
@@ -565,9 +575,33 @@ export default function Page() {
                           </div>
                           <div className="flex items-center gap-1">
                             <BriefcaseIcon className="h-5 w-5" />
-                            {`${doctor?.specialties[0]?.name || ""} + ${
-                              doctor?.specialties?.length - 1 || 0
-                            } more`}
+                            {
+                              <HoverCard key={idx}>
+                                <HoverCardTrigger>
+                                  <Badge>
+                                    {doctor?.specialties &&
+                                      doctor?.specialties.length > 0 &&
+                                      `${doctor?.specialties[0].name || ""}${
+                                        doctor?.specialties.length > 1
+                                          ? ` + ${
+                                              doctor?.specialties.length - 1
+                                            } more`
+                                          : ""
+                                      }`}
+                                  </Badge>
+                                </HoverCardTrigger>
+                                <HoverCardContent>
+                                  <p>
+                                    {doctor?.specialties &&
+                                      doctor?.specialties.map(
+                                        (speciality, idx) => (
+                                          <p key={idx}>{speciality?.name}</p>
+                                        ),
+                                      )}
+                                  </p>
+                                </HoverCardContent>
+                              </HoverCard>
+                            }
                           </div>
                           <div className="flex items-center gap-1">
                             <ClockIcon className="h-5 w-5" />

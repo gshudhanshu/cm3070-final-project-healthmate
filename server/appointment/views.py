@@ -51,12 +51,20 @@ class AppointmentViewSet(viewsets.ModelViewSet):
 
         # Convert datetime_utc to aware datetime object
         datetime_aware = parse(datetime_utc_str)
-
+        
         # Find doctor by username
         try:
             doctor = User.objects.get(username=doctor_username)
+            print(doctor.__dict__)
+            if(doctor.account_type != 'patient'):
+                print(doctor.account_type)
+                return Response({'error': 'User is not a patient'}, status=status.HTTP_400_BAD_REQUEST)
+            
         except User.DoesNotExist:
             return Response({'error': 'Doctor not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        
+        
 
         conversation = Conversation.objects.create(
             patient=request.user,

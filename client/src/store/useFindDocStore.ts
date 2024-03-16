@@ -5,6 +5,7 @@ import axios from "axios";
 import { DoctorProfile } from "@/types/user";
 
 import { SearchParams } from "@/types/findDoc";
+import { toast } from "@/components/ui/use-toast";
 
 const API_URL = process.env.API_URL;
 const SEARCH_DOCTORS_URL = `${API_URL}/user_profile/doctors`;
@@ -97,6 +98,7 @@ export const useFindDocStore = create(
         const response = await axios.get(`${SEARCH_DOCTORS_URL}/${username}`, {
           params: { ...params },
         });
+
         set({ doctorSlots: response.data });
       } catch (error) {
         console.error("Fetching doctor failed:", error);
@@ -116,9 +118,25 @@ export const useFindDocStore = create(
         if (response.status === 201) {
           console.log("Appointment booked successfully:", response.data);
           set({ purpose: "" });
-        } else console.error("Booking appointment failed:", response);
-      } catch (error) {
+          toast({
+            title: "Appointment booked successfully",
+            description: "Please come on time for your appointment.",
+          });
+        } else {
+          toast({
+            title: "Booking appointment failed",
+            description: response?.data || "",
+            variant: "destructive",
+          });
+        }
+      } catch (error: any) {
         console.error("Booking appointment failed:", error);
+        toast({
+          title: "Booking appointment failed",
+          description:
+            error?.message + ". " + error?.response?.data?.error || "",
+          variant: "destructive",
+        });
       }
     },
   })),
