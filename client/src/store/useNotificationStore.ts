@@ -3,6 +3,7 @@ import { devtools } from "zustand/middleware";
 import axios from "axios";
 
 import { Notification } from "@/types/notification";
+import { toast } from "@/components/ui/use-toast";
 
 interface NotificationState {
   notifications: Notification[];
@@ -60,7 +61,7 @@ export const useNotificationStore = create(
         const token = localStorage.getItem("token");
         if (!token) throw new Error("No token found");
         await axios.patch(
-          `${NOTIFICATIONS_URL}`,
+          `${NOTIFICATIONS_URL}mark_all_as_read/`,
           { is_read: true },
           { headers: { Authorization: `Bearer ${token}` } },
         );
@@ -73,7 +74,11 @@ export const useNotificationStore = create(
         }));
       } catch (error) {
         console.error("Marking all notifications as read failed:", error);
-        // Handle error
+        toast({
+          title: "Error",
+          description: "Failed to mark all notifications as read",
+          variant: "destructive",
+        });
       }
     },
   })),

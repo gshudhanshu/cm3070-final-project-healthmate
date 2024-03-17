@@ -2,7 +2,10 @@ from rest_framework import viewsets
 from .models import Notification
 from .serializers import NotificationSerializer
 from rest_framework.permissions import IsAuthenticated
-from django.contrib.auth.models import AnonymousUser
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import status
+
 
 
 class NotificationViewSet(viewsets.ModelViewSet):
@@ -19,7 +22,15 @@ class NotificationViewSet(viewsets.ModelViewSet):
         by filtering against a `username` query parameter in the URL.
         """
         user = self.request.user
-        if isinstance(user, AnonymousUser):
-            # Handle the anonymous user case
-            return Notification.objects.none()  # or handle as appropriate
         return Notification.objects.filter(recipient=user)
+
+
+    @action(detail=False, methods=['patch'], permission_classes=[IsAuthenticated])
+    def mark_all_as_read(self, request):
+        """
+        A custom action to mark all notifications as read for the authenticated user.
+        """
+        user = request.user
+        notifications = Notification.objects.filter(recipient=user, is_read=False)
+        notifications.update(is_read=True)
+        return Response({'status': 'notifications marked as read'}, status=status.HTTP_200_OK)

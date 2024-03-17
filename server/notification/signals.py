@@ -29,7 +29,7 @@ def create_call_notification(sender, instance, created, **kwargs):
             recipient=instance.receiver,
             sender=instance.caller,
             notification_type='call',
-            text=f'New call from {instance.caller.username}'
+            text=f'New call from {instance.caller.first_name} {instance.caller.last_name}'
         )
         
 
@@ -41,5 +41,5 @@ def create_appointment_notification(sender, instance, created, **kwargs):
             recipient=instance.doctor,
             sender=instance.patient,
             notification_type='appointment',
-            text=f'New appointment from {instance.patient.username}'
+            text=f'New appointment from {instance.patient.first_name} {instance.patient.last_name}'
         )
