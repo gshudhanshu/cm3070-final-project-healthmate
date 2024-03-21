@@ -23,7 +23,7 @@ const ActivateAccount = ({
   }, [uid, token]);
 
   return (
-    <h2 className="text-bold mx-auto p-8 text-center text-xl">
+    <h2 className="p-8 mx-auto text-xl text-center text-bold">
       Account is activated
     </h2>
   );

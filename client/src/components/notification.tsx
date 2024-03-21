@@ -45,16 +45,16 @@ export function Notification() {
         >
           <BellIcon className="h-[1.2rem]  w-[1.2rem] transition-all dark:rotate-0 dark:scale-100 dark:text-slate-200" />
           {notifications.length > 0 && (
-            <span className="absolute right-1 top-1 flex h-2 w-2 rounded-full bg-primary px-1 text-xs font-semibold text-white"></span>
+            <span className="absolute flex w-2 h-2 px-1 text-xs font-semibold text-white rounded-full right-1 top-1 bg-primary"></span>
           )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="m-0 flex w-80 flex-col gap-1"
+        className="flex flex-col gap-1 m-0 w-80"
         align="end"
         forceMount
       >
-        <ScrollArea className="h-80 w-full rounded-md border">
+        <ScrollArea className="w-full border rounded-md h-80">
           <DropdownMenuLabel className="flex items-center justify-between px-3 py-3">
             <h4 className="font-semibold tracking-tight">Notifications</h4>
 
@@ -96,7 +96,7 @@ export function Notification() {
                   markAsRead(notification.id);
                 }}
               >
-                <EyeIcon className="h-4 w-4" />
+                <EyeIcon className="w-4 h-4" />
               </Button>
             </DropdownMenuItem>
           ))}
