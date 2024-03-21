@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "jest"
+    "test": "jest --watchAll"
   },
   "dependencies": {
     "@heroicons/react": "^2.1.1",
@@ -49,6 +49,7 @@
     "socket.io-client": "^4.7.4",
     "tailwind-merge": "^2.2.0",
     "tailwindcss-animate": "^1.0.7",
+    "ts-jest": "^29.1.2",
     "use-broadcast-ts": "^1.4.4",
     "vaul": "^0.8.7",
     "zod": "^3.22.4",
