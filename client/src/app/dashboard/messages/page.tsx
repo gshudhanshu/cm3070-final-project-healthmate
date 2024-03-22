@@ -13,7 +13,7 @@ import AddNewRecord from "@/components/medical-records/add-new-record";
 
 function TabComponent({ isMobile }: { isMobile: boolean }) {
   return (
-    <Tabs defaultValue="messages" className=" w-full">
+    <Tabs defaultValue="messages" className="w-full ">
       <TabsList className="mt-6">
         <TabsTrigger value="messages">Messages</TabsTrigger>
         <TabsTrigger value="medical-records">Medical Records</TabsTrigger>

@@ -494,6 +494,7 @@ export default function Page() {
                         <div>
                           <Slider
                             className="h-5"
+                            data-testid="slider-handle"
                             min={filter.start || 0}
                             max={filter.end || 500}
                             step={filter.step || 1}
@@ -661,6 +662,7 @@ export default function Page() {
                     <PaginationPrevious
                       onClick={() => handlePageChange(pagination.previous_page)}
                       className="cursor-pointer"
+                      data-testid="pagination-previous"
                     />
 
                     {Array.from(

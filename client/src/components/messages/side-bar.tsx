@@ -1,3 +1,4 @@
+"use client";
 // components/Sidebar.tsx
 import React, { useEffect, useState } from "react";
 import { useMessagesStore } from "@/store/useMessageStore";

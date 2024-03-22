@@ -237,7 +237,11 @@ export function PatientProfileForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-8"
+        data-testid="patient-profile-form"
+      >
         <h1 className="py-8 text-center text-3xl font-medium">
           Edit your profile
         </h1>
