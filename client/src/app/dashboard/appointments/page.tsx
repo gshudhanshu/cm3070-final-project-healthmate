@@ -64,8 +64,8 @@ const AppointmentsPage: React.FC = () => {
   if (!appointments) return <LoadingComponent />;
 
   return (
-    <section className="container px-0 mb-8 space-y-4">
-      <h1 className="py-8 text-3xl font-medium text-center">Appointments</h1>
+    <section className="container mb-8 space-y-4 px-0">
+      <h1 className="py-8 text-center text-3xl font-medium">Appointments</h1>
       <Tabs defaultValue="today" className="!mt-0 w-full">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger className="text-xs sm:text-sm" value="today">
@@ -77,7 +77,11 @@ const AppointmentsPage: React.FC = () => {
           <TabsTrigger className="text-xs sm:text-sm" value="history">
             History
           </TabsTrigger>
-          <TabsTrigger className="text-xs sm:text-sm" value="all">
+          <TabsTrigger
+            className="text-xs sm:text-sm"
+            value="all"
+            data-testid="all-tab-button"
+          >
             All
           </TabsTrigger>
         </TabsList>
