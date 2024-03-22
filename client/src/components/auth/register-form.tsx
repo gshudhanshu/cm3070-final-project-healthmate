@@ -252,7 +252,7 @@ export default function RegisterForm({
             </FormDescription>
             <FormDescription>
               <Link
-                href="/auth/forgot-password"
+                href="/auth/forget-password"
                 className="text-primary hover:underline"
               >
                 Forgot Password?

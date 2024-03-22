@@ -175,7 +175,7 @@ export default function LoginForm({
             </FormDescription>
             <FormDescription>
               <Link
-                href="/auth/forgot-password"
+                href="/auth/forget-password"
                 className="text-primary hover:underline"
               >
                 Forgot Password?
