@@ -95,6 +95,7 @@ export function Notification() {
                 onClick={() => {
                   markAsRead(notification.id);
                 }}
+                data-testid="mark-as-read-button"
               >
                 <EyeIcon className="w-4 h-4" />
               </Button>

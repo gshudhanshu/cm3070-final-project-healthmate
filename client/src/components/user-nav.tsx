@@ -20,9 +20,16 @@ export function UserNav() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="dark:hover:bg-slate-700">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src="/avatars/01.png" alt="@shadcn" />
-            <AvatarFallback>SC</AvatarFallback>
+          <Avatar className="w-8 h-8">
+            <AvatarImage
+              src="/avatars/01.png"
+              alt={user?.username || "username"}
+            />
+            <AvatarFallback>
+              {/* first character of first name and first character of last name */}
+              {user?.first_name?.charAt(0) || "F"}
+              {user?.last_name?.charAt(0) || "L"}
+            </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -41,13 +48,13 @@ export function UserNav() {
         <DropdownMenuGroup>
           <DropdownMenuItem>
             Profile
-            <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+            {/* <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut> */}
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => logout()}>
           Log out
-          <DropdownMenuShortcut>⇧⌘O</DropdownMenuShortcut>
+          {/* <DropdownMenuShortcut>⇧⌘O</DropdownMenuShortcut> */}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -11,6 +11,7 @@ const PlusBox = ({
         "flex h-16 w-16 items-center justify-center rounded-lg bg-primary p-4 text-xl font-bold text-slate-800 dark:text-slate-100",
         className,
       )}
+      data-testid="plus-box"
     >
       <svg
         width="26"

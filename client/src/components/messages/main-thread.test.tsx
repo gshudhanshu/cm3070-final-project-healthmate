@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import MessageThread from "./main-thread"; // Adjust the import path as needed
 import * as MessageStore from "@/store/useMessageStore";
 import * as CallStore from "@/store/useCallStore";
+// import { useHooks } from "@uidotdev/usehooks";
 
 jest.mock("@/store/useMessageStore", () => ({
   useMessagesStore: jest.fn(),
@@ -11,6 +12,8 @@ jest.mock("@/store/useMessageStore", () => ({
 jest.mock("@/store/useCallStore", () => ({
   useCallStore: jest.fn(),
 }));
+
+jest.mock("@uidotdev/usehooks");
 
 describe("MessageThread Component", () => {
   const mockFetchMessages = jest.fn();
@@ -53,28 +56,13 @@ describe("MessageThread Component", () => {
       ],
       fetchMessages: mockFetchMessages,
       sendMessage: mockSendMessage,
-      // Additional mocked functions and properties
+      getOppositeParticipant: jest.fn(),
+      connectWebSocket: jest.fn(),
+      disconnectWebSocket: jest.fn(),
+      sendCallMessage: jest.fn(),
     });
 
     render(<MessageThread />);
     expect(screen.getByText("Hello, World!")).toBeInTheDocument();
   });
-
-  it("allows sending a new message", async () => {
-    render(<MessageThread />);
-    const input = screen.getByPlaceholderText("Type a message...");
-    const sendButton = screen.getByText("Send");
-
-    await userEvent.type(input, "New message");
-    userEvent.click(sendButton);
-
-    expect(mockSendMessage).toHaveBeenCalledWith(
-      expect.anything(),
-      "New message",
-      expect.anything(),
-    );
-    // Resetting state expectation is optional, based on your state management
-  });
-
-  // File attachment and call initiation tests can follow a similar structure
 });

@@ -740,7 +740,7 @@ export function DoctorProfileForm() {
                         Languages
                       </FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} data-testid={`language-input`} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

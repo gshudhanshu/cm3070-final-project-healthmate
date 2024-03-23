@@ -4,7 +4,6 @@ import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useToast } from "@/components/ui/use-toast";
-
 import { z } from "zod";
 import { CalendarIcon, CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
@@ -223,18 +222,6 @@ export function PatientProfileForm() {
     }
   }
 
-  // const handleProfilePicChange = (event: any) => {
-  //   const file = event.target.files[0];
-  //   if (file) {
-  //     form.setValue("profile_pic", file);
-  //     const reader = new FileReader();
-  //     reader.onload = () => {
-  //       setPreviewUrl(reader.result as string);
-  //     };
-  //     reader.readAsDataURL(file);
-  //   }
-  // };
-
   return (
     <Form {...form}>
       <form
@@ -242,7 +229,7 @@ export function PatientProfileForm() {
         className="space-y-8"
         data-testid="patient-profile-form"
       >
-        <h1 className="py-8 text-center text-3xl font-medium">
+        <h1 className="py-8 text-3xl font-medium text-center">
           Edit your profile
         </h1>
 
@@ -325,7 +312,7 @@ export function PatientProfileForm() {
                         ) : (
                           <span>Pick a date</span>
                         )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        <CalendarIcon className="w-4 h-4 ml-auto opacity-50" />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
@@ -349,7 +336,7 @@ export function PatientProfileForm() {
           <div className="flex items-end justify-center gap-3">
             {/* Image preview */}
             {patientProfile?.profile_pic && (
-              <Avatar className="h-16 w-16 rounded-full object-cover">
+              <Avatar className="object-cover w-16 h-16 rounded-full">
                 <AvatarImage
                   src={previewUrl || patientProfile?.profile_pic}
                   alt="Profile Preview"
@@ -569,7 +556,7 @@ export function PatientProfileForm() {
                         Languages
                       </FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} data-testid="language-input" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
