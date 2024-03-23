@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { DoctorProfile } from "@/types/user";
 import React from "react";
 import { Button } from "../ui/button";

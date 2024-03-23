@@ -214,6 +214,7 @@ const AppointmentModal = ({
                   disabled={
                     slot.status === "booked" || isDateInPast(selectedDate)
                   }
+                  data-testid="slot-button"
                 >
                   {dayjs(slot.datetime_utc)
                     .tz(localTimezone, true)

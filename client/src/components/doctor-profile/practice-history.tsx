@@ -27,6 +27,7 @@ export default function PracticeHistory() {
                     {[...Array(5)].map((_, i) => (
                       <StarIcon
                         key={i}
+                        data-testid="star-icon"
                         className={`h-5 w-5 ${
                           i < review.rating ? "text-primary" : "text-gray-300"
                         }`}
