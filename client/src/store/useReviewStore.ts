@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { Review } from "@/types/review";
 import { devtools } from "zustand/middleware";
+import axios from "axios";
 
 const API_URL = process.env.API_URL;
 
@@ -43,8 +44,9 @@ export const useReviewStore = create(
           `${API_URL}/user_profile/doctors/${doctorUsername}/reviews/?page=${
             get().page
           }`;
-        const response = await fetch(url);
-        const data = await response.json();
+        // const response = await fetch(url);
+        const response = await axios.get(url);
+        const data = await response.data;
 
         get().appendReviews(data.results, data.next);
 
