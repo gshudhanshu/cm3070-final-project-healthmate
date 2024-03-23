@@ -12,9 +12,7 @@ export default function ActiveMedicines() {
             key={idx}
             className="rounded-lg bg-slate-100 p-4 dark:bg-slate-800"
           >
-            <p className="mb-3 text-lg font-medium">
-              {medicine.name} {medicine.dosage}
-            </p>
+            <p className="mb-3 text-lg font-medium">{medicine.name}</p>
             <p>
               <span className="font-medium">Dosage:</span> {medicine.dosage}
             </p>
