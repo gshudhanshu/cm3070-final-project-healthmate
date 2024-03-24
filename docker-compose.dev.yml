@@ -9,7 +9,7 @@ services:
     tty: true
     working_dir: /src
     ports:
-      - '8000:8000'
+      - '8001:8000'
     volumes:
       - ./server:/src
       - run_vol:/var/run
