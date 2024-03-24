@@ -56,17 +56,13 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         # Find doctor by username
         try:
             doctor = User.objects.get(username=doctor_username)
-            print(doctor.__dict__)
-            if(doctor.account_type != 'patient'):
-                print(doctor.account_type)
+            if(request.user.account_type != 'patient'):
                 return Response({'error': 'User is not a patient'}, status=status.HTTP_400_BAD_REQUEST)
             
         except User.DoesNotExist:
             return Response({'error': 'Doctor not found'}, status=status.HTTP_404_NOT_FOUND)
         
         
-        
-
         conversation = Conversation.objects.create(
             patient=request.user,
             doctor=doctor,

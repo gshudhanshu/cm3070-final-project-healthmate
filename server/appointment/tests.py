@@ -46,7 +46,7 @@ class AppointmentViewSetTestCase(APITestCase):
         }
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Appointment.objects.count(), 2)  # Assuming the initial appointment plus the new one
+        self.assertEqual(Appointment.objects.count(), 2)
         self.assertEqual(response.data['purpose'], 'New Checkup')
 
     def test_retrieve_appointment_detail(self):
@@ -85,4 +85,4 @@ class AppointmentSerializerTestCase(APITestCase):
         self.assertEqual(data['purpose'], 'Checkup')
         self.assertTrue('patient' in data)
         self.assertTrue('doctor' in data)
-        self.assertTrue('conversation' in data)        
+        self.assertTrue('conversation' in data)
