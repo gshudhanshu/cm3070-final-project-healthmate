@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 export default function Hero() {
   return (
     <section className="container mx-auto px-4 text-slate-600 sm:px-6 lg:px-8 dark:text-slate-400 ">
@@ -16,10 +17,10 @@ export default function Hero() {
           </p>
           <div className="flex flex-col justify-center gap-4 sm:flex-row">
             <Button variant="default" size="lg">
-              Find a Practitioner
+              <Link href="/find-practitioner">Find a Practitioner</Link>
             </Button>
             <Button variant="secondary" size="lg">
-              Join Our Community
+              <Link href="/auth/register">Join Our Community</Link>
             </Button>
           </div>
         </div>

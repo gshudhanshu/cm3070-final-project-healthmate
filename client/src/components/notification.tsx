@@ -38,16 +38,16 @@ export function Notification() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        {/* <Button
+        <Button
           variant="ghost"
           size="icon"
           className="relative dark:hover:bg-slate-700"
         >
           <BellIcon className="h-[1.2rem]  w-[1.2rem] transition-all dark:rotate-0 dark:scale-100 dark:text-slate-200" />
           {notifications.filter((n) => !n.is_read).length > 0 && (
-            <span className="absolute flex w-2 h-2 px-1 text-xs font-semibold text-white rounded-full right-1 top-1 bg-primary"></span>
+            <span className="absolute right-1 top-1 flex h-2 w-2 rounded-full bg-primary px-1 text-xs font-semibold text-white"></span>
           )}
-        </Button> */}
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         className="m-0 flex w-80 flex-col gap-1"
