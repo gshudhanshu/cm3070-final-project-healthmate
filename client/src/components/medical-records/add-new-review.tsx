@@ -1,5 +1,5 @@
 // Import necessary libraries
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -38,7 +38,8 @@ const reviewFormSchema = z.object({
 type ReviewFormValues = z.infer<typeof reviewFormSchema>;
 
 export default function ReviewForm() {
-  const { addReview, fetchReviewsByConversationId } = useReviewStore();
+  const { addReview, fetchReviewsByConversationId, reviewByConversationId } =
+    useReviewStore();
   const { selectedConversation } = useMessagesStore();
 
   const {
@@ -68,6 +69,13 @@ export default function ReviewForm() {
     }
   }, [selectedConversation, form]);
 
+  useEffect(() => {
+    if (reviewByConversationId) {
+      form.setValue("comment", reviewByConversationId.comment || "");
+      form.setValue("rating", reviewByConversationId.rating || 1);
+    }
+  }, [reviewByConversationId, form]);
+
   const onSubmit = async (data: ReviewFormValues) => {
     console.log("Submitting review:", data);
     addReview(data);
@@ -76,6 +84,8 @@ export default function ReviewForm() {
   if (!selectedConversation) {
     return <ErrorComponent message="Please select a conversation" />;
   }
+
+  console.log("reviewByConversationId", reviewByConversationId);
 
   return (
     <Form {...form}>

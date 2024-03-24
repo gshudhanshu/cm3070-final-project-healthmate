@@ -96,9 +96,16 @@ export const useReviewStore = create(
         );
         const data = await response.data;
 
-        set({ reviewByConversationId: data.results, isLoading: false });
+        set({ reviewByConversationId: data, isLoading: false });
       } catch (error: any) {
         console.error("Failed to fetch reviews:", error);
+        set({
+          reviewByConversationId: {
+            conversation_id: conversationId,
+            rating: 1,
+            comment: "",
+          },
+        });
         set({ error, isLoading: false });
       }
     },

@@ -104,7 +104,7 @@ class ReviewViewSet(mixins.CreateModelMixin,
         """
         Retrieve a single review.
         """
-        conversation_id = kwargs.get('conversation_id')
+        conversation_id = kwargs.get('pk')
         review = get_object_or_404(Review, conversation_id=conversation_id)
         serializer = self.get_serializer(review)
         return Response(serializer.data)
@@ -142,11 +142,12 @@ class ReviewViewSet(mixins.CreateModelMixin,
         patient = get_object_or_404(Patient, user=self.request.user)
         conversation_id = serializer.validated_data['conversation_id']
         conversation = get_object_or_404(Conversation, id=conversation_id)
+        doctor = Doctor.objects.get(user=conversation.doctor)
         
         review, created = Review.objects.update_or_create(
             conversation=conversation, 
             patient=patient,
-            defaults=serializer.validated_data
+            defaults={'doctor': doctor, **serializer.validated_data}
         )
         
         # Serialize the review instance to return full data
