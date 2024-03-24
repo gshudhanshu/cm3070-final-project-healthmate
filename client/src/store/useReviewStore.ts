@@ -10,12 +10,14 @@ interface ReviewState {
   isLoading: boolean;
   error: Error | null;
   reviews: Review[];
+
   page: number;
   nextPage: string | null;
   appendReviews: (newReviews: Review[], nextPage: string | null) => void;
   fetchReviews: (doctorUsername: string) => void;
   addReview: (review: Review) => void;
   fetchReviewsByConversationId: (conversationId: number) => void;
+  reviewByConversationId: Review | null;
 }
 
 export const useReviewStore = create(
@@ -25,6 +27,7 @@ export const useReviewStore = create(
     reviews: [],
     page: 1,
     nextPage: null,
+    reviewByConversationId: null,
     appendReviews: (newReviews: Review[], nextPage: string | null) => {
       set((state) => ({
         reviews: [...(state.reviews || []), ...newReviews],
@@ -69,6 +72,7 @@ export const useReviewStore = create(
         set((state) => ({
           reviews: [data, ...state.reviews],
         }));
+        set({ reviewByConversationId: data });
         toast({
           title: "Review added",
           description: "Your review has been added successfully.",
@@ -88,11 +92,11 @@ export const useReviewStore = create(
 
       try {
         const response = await axios.get(
-          `${API_URL}/reviews/${conversationId}`,
+          `${API_URL}/user_profile/reviews/${conversationId}`,
         );
         const data = await response.data;
 
-        set({ reviews: data.results, isLoading: false });
+        set({ reviewByConversationId: data.results, isLoading: false });
       } catch (error: any) {
         console.error("Failed to fetch reviews:", error);
         set({ error, isLoading: false });

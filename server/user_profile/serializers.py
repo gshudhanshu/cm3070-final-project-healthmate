@@ -361,26 +361,32 @@ class PatientSerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     patient_name = serializers.ReadOnlyField(source='patient.user.get_full_name')
+    conversation_id = serializers.IntegerField()
 
     class Meta:
         model = Review
         fields = ['id', 'patient_name', 'rating', 'comment', 'date_created', "conversation_id"]
         
     def create(self, validated_data):
+        print(validated_data)
         conversation_id = validated_data.pop('conversation_id')
         conversation = Conversation.objects.get(id=conversation_id)
 
         # Check if a review already exists for this conversation
         if Review.objects.filter(conversation=conversation).exists():
-            raise serializers.ValidationError('A review for this conversation already exists.')
+            raise serializers.ValidationError({
+                'error': 'A review already exists for this conversation.'
+            })
 
         # Ensure that the conversation's doctor is indeed a Doctor instance
         try:
             doctor = Doctor.objects.get(user=conversation.doctor)
         except Doctor.DoesNotExist:
-            raise serializers.ValidationError('The specified doctor does not exist.')
+            raise serializers.ValidationError({
+                'error': 'The specified doctor does not exist.'
+            })
 
-        patient = self.context['request'].user.patient
+        patient = Patient.objects.get(user=self.context['request'].user)
 
         # Create the Review instance
         review = Review.objects.create(

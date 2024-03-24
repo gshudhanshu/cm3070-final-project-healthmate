@@ -1,5 +1,5 @@
 // Import necessary libraries
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -27,19 +27,18 @@ import {
 } from "@/components/ui/form";
 import { useReviewStore } from "@/store/useReviewStore";
 import { useMessagesStore } from "@/store/useMessageStore";
-import { parse } from "path";
 
 // Define Zod schema for form validation
 const reviewFormSchema = z.object({
   comment: z.string().min(1, "Please enter a comment"),
   rating: z.coerce.number().min(1).max(5, "Rating must be between 1 and 5"),
-  conversation_id: z.coerce.number().optional(),
+  conversation_id: z.coerce.number(),
 });
 
 type ReviewFormValues = z.infer<typeof reviewFormSchema>;
 
 export default function ReviewForm() {
-  const { addReview } = useReviewStore();
+  const { addReview, fetchReviewsByConversationId } = useReviewStore();
   const { selectedConversation } = useMessagesStore();
 
   const {
@@ -62,6 +61,13 @@ export default function ReviewForm() {
     mode: "onChange",
   });
 
+  useEffect(() => {
+    if (selectedConversation && selectedConversation.id) {
+      form.setValue("conversation_id", Number(selectedConversation.id));
+      fetchReviewsByConversationId(selectedConversation.id);
+    }
+  }, [selectedConversation, form]);
+
   const onSubmit = async (data: ReviewFormValues) => {
     console.log("Submitting review:", data);
     addReview(data);
@@ -71,8 +77,6 @@ export default function ReviewForm() {
     return <ErrorComponent message="Please select a conversation" />;
   }
 
-  console.log(form.formState.errors);
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-4">
@@ -81,16 +85,11 @@ export default function ReviewForm() {
         <FormField
           control={form.control}
           name="conversation_id"
-          disabled
           render={({ field }) => (
             <FormItem>
               <FormLabel>Conversation Id</FormLabel>
               <FormControl>
-                <Input
-                  placeholder="Doe"
-                  {...field}
-                  value={selectedConversation.id || ""}
-                />
+                <Input placeholder="Conversation id" {...field} disabled />
               </FormControl>
               <FormMessage />
             </FormItem>

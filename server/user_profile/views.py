@@ -2,11 +2,13 @@ from django.forms import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from django_filters import rest_framework as filters
+
+from conversation.models import Conversation
 from .models import Doctor, Patient, Review
 from .serializers import DoctorSerializer, PatientSerializer, ReviewSerializer
 from .permissions import IsOwnerOrReadOnly, IsDoctorOrReadOnly, IsReadOnlyOrIsNew
 from .filters import DoctorFilter
-from rest_framework import permissions, status
+from rest_framework import permissions, status, mixins 
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from drf_nested_forms.parsers import NestedMultiPartParser, NestedJSONParser
 
@@ -88,7 +90,9 @@ class DoctorReviewsAPIView(ListCreateAPIView):
         except Doctor.DoesNotExist:
             return Review.objects.none() 
         
-class ReviewViewSet(viewsets.GenericViewSet):
+class ReviewViewSet(mixins.CreateModelMixin,
+                    mixins.RetrieveModelMixin,
+                    viewsets.GenericViewSet):
     """
     A viewset that provides 'retrieve' and 'create' actions.
     """
@@ -105,21 +109,56 @@ class ReviewViewSet(viewsets.GenericViewSet):
         serializer = self.get_serializer(review)
         return Response(serializer.data)
 
+    # def perform_create(self, serializer):
+    #     serializer.save()
+
+    # def perform_create(self, serializer):
+    #     patient = get_object_or_404(Patient, user=self.request.user)
+    #     conversation_id = serializer.validated_data.get('conversation_id')
+    #     conversation = get_object_or_404(Conversation, id=conversation_id)
+
+    #     # Attempt to retrieve an existing review for the conversation
+    #     review, created = Review.objects.update_or_create(
+    #         conversation=conversation,
+    #         patient=patient,
+    #         defaults=serializer.validated_data
+    #     )
+
+    #     if created:
+    #         # If a new review was created, set the HTTP status code to 201 (Created)
+    #         self.request.method = 'POST'
+    #         self.request.status_code = status.HTTP_201_CREATED
+    #     else:
+    #         # If an existing review was updated, set the HTTP status code to 200 (OK)
+    #         self.request.method = 'PATCH'  # or 'PUT', depending on your use case
+    #         self.request.status_code = status.HTTP_200_OK
+    
     def create(self, request, *args, **kwargs):
-        """
-        Create a new review.
-        """
+        # Use the existing serializer to validate the request data
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+        # Custom logic to either create or update
+        patient = get_object_or_404(Patient, user=self.request.user)
+        conversation_id = serializer.validated_data['conversation_id']
+        conversation = get_object_or_404(Conversation, id=conversation_id)
+        
+        review, created = Review.objects.update_or_create(
+            conversation=conversation, 
+            patient=patient,
+            defaults=serializer.validated_data
+        )
+        
+        # Serialize the review instance to return full data
+        review_serializer = self.get_serializer(review)
+        headers = self.get_success_headers(review_serializer.data)
+        
+        return Response(review_serializer.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK, headers=headers)
 
     def perform_create(self, serializer):
-        # Custom logic here. E.g., setting the patient or checking if the review is allowed
-        print(self.request.data)
-        patient = Patient.objects.get(user=self.request.user)
-        serializer.save(patient=patient)
+        # This method is overridden by the create method above
+        pass
+
 
 
 class PatientViewSet(viewsets.ModelViewSet):
