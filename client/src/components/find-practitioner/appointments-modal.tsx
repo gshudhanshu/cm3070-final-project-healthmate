@@ -24,6 +24,7 @@ import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone.js";
 import utc from "dayjs/plugin/utc.js";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import { toast } from "../ui/use-toast";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(isSameOrAfter);
@@ -99,32 +100,37 @@ const AppointmentModal = ({
 
   const handleBookAppointment = () => {
     if (selectedSlot.status == "booked") {
-      alert("This slot is already booked");
+      toast({
+        title: "Appointment booked successfully",
+        description: "Please come on time for your appointment.",
+      });
       return;
     }
-    console.log("Booking appointment for", selectedSlot.datetime_utc);
+    console.log("Booking appointment for", selectedSlot);
     bookAppointment(doctorUsername, selectedSlot.datetime_utc, purpose);
+    selectedSlot.status = "booked";
+    fetchSlots();
+  };
+
+  const fetchSlots = async () => {
+    try {
+      const timezone = dayjs.tz.guess();
+      const datetime = formatDateTime(selectedDate);
+      await fetchDoctorWithSlots(doctorUsername, datetime, timezone);
+      if (!doctorSlots) {
+        alert("Doctor not found");
+        return;
+      }
+      setSlots(doctorSlots?.appointment_slots || []);
+    } catch (error) {
+      console.error("Failed to fetch slots:", error);
+      // Handle errors as appropriate for your application
+    }
+    setIsLoading(false);
   };
 
   useEffect(() => {
     console.log("Fetching slots for", doctorUsername);
-    const fetchSlots = async () => {
-      try {
-        const timezone = dayjs.tz.guess();
-        const datetime = formatDateTime(selectedDate);
-        await fetchDoctorWithSlots(doctorUsername, datetime, timezone);
-        if (!doctorSlots) {
-          alert("Doctor not found");
-          return;
-        }
-        setSlots(doctorSlots?.appointment_slots || []);
-      } catch (error) {
-        console.error("Failed to fetch slots:", error);
-        // Handle errors as appropriate for your application
-      }
-      setIsLoading(false);
-    };
-
     // if (isWithinNextWeek(selectedDate)) {
     fetchSlots();
     // }
@@ -156,7 +162,7 @@ const AppointmentModal = ({
           <DialogTitle className="text-center">Book an appointment</DialogTitle>
         </DialogHeader>
         {/* Doctor's Info */}
-        <div className="text-center text-slate-600 dark:text-slate-200  ">
+        <div className="text-center text-slate-600 dark:text-slate-200 ">
           <div className="flex flex-col items-center justify-between bg-slate-200 p-3 text-center dark:bg-slate-800">
             <h2 className="text-slate group w-full text-center text-xl font-semibold capitalize">
               <a href={`/doctors/${doctorSlots.user.username}`}>

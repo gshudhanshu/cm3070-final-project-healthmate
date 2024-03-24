@@ -81,20 +81,19 @@ const profileFormSchema = z.object({
   profile_pic: z
     .any()
     .optional()
+    .refine((file) => file?.length == 1, {
+      message: "Image is required.",
+    })
     .refine(
-      (file) => file === undefined || (Array.isArray(file) && file.length <= 1),
-      {
-        message: "Only one image can be selected.",
+      (files) => {
+        return ACCEPTED_IMAGE_MIME_TYPES.includes(files?.[0]?.type);
       },
-    )
-    .refine(
-      (files) => !files || ACCEPTED_IMAGE_MIME_TYPES.includes(files[0]?.type),
       {
         message: ".jpg, .jpeg, .png, and .webp files are accepted.",
       },
     )
-    .refine((files) => !files || files[0]?.size <= MAX_FILE_SIZE, {
-      message: "Max file size is 5MB.",
+    .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, {
+      message: `Max file size is 5MB.`,
     }),
 });
 
@@ -229,7 +228,7 @@ export function PatientProfileForm() {
         className="space-y-8"
         data-testid="patient-profile-form"
       >
-        <h1 className="py-8 text-3xl font-medium text-center">
+        <h1 className="py-8 text-center text-3xl font-medium">
           Edit your profile
         </h1>
 
@@ -312,7 +311,7 @@ export function PatientProfileForm() {
                         ) : (
                           <span>Pick a date</span>
                         )}
-                        <CalendarIcon className="w-4 h-4 ml-auto opacity-50" />
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
@@ -336,7 +335,7 @@ export function PatientProfileForm() {
           <div className="flex items-end justify-center gap-3">
             {/* Image preview */}
             {patientProfile?.profile_pic && (
-              <Avatar className="object-cover w-16 h-16 rounded-full">
+              <Avatar className="h-16 w-16 rounded-full object-cover">
                 <AvatarImage
                   src={previewUrl || patientProfile?.profile_pic}
                   alt="Profile Preview"

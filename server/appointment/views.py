@@ -62,6 +62,10 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         except User.DoesNotExist:
             return Response({'error': 'Doctor not found'}, status=status.HTTP_404_NOT_FOUND)
         
+        if Appointment.objects.filter(datetime_utc=datetime_aware, doctor=doctor).exists():
+            return Response({'error': 'An appointment at this time already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        
         
         conversation = Conversation.objects.create(
             patient=request.user,
