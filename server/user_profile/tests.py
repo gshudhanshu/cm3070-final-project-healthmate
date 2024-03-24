@@ -30,7 +30,7 @@ class DoctorViewSetTestCase(APITestCase):
         self.assertIn('next_page', response.data)
         self.assertIn('previous_page', response.data)
         self.assertIn('results', response.data)
-        self.assertEqual(len(response.data['results']), 1) 
+        self.assertEqual(len(response.data['results']), 2) 
 
     def test_doctor_retrieve(self):
         url = reverse('doctor-detail', kwargs={'user__username': self.user1.username}) 
