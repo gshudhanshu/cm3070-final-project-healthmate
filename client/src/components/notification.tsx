@@ -30,6 +30,7 @@ export function Notification() {
   const { fetchNotifications, notifications, markAsRead, markAsReadAll } =
     useNotificationStore();
   const { user } = useAuthStore();
+
   useEffect(() => {
     if (!user) return;
     fetchNotifications();

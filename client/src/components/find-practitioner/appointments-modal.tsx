@@ -101,8 +101,9 @@ const AppointmentModal = ({
   const handleBookAppointment = () => {
     if (selectedSlot.status == "booked") {
       toast({
-        title: "Appointment booked successfully",
-        description: "Please come on time for your appointment.",
+        variant: "destructive",
+        title: "Error",
+        description: "This slot is already booked",
       });
       return;
     }

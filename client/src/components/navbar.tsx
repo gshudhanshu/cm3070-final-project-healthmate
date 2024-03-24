@@ -12,6 +12,7 @@ import { Notification } from "@/components/notification";
 import { DashboardNav } from "@/components/dashboard-nav";
 
 import { useAuthStore } from "@/store/useAuthStore";
+import LoadingComponent from "./common/loading";
 
 // Define navigation items
 const navItems = [
@@ -50,7 +51,7 @@ export function MainNav({
   className,
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
-  const { user, fetchUser } = useAuthStore();
+  const { user, fetchUser, isLoading } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -62,7 +63,7 @@ export function MainNav({
   const isDashboardRoute = pathname.startsWith("/dashboard");
 
   useEffect(() => {
-    if (!user && isDashboardRoute) {
+    if (!isLoading && !user && isDashboardRoute) {
       router.push("/auth/login");
     }
   }, [user]);

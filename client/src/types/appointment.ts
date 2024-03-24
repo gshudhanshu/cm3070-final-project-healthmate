@@ -7,6 +7,7 @@ export interface Appointment {
   patient: User;
   date: string;
   time: string;
+  datetime_utc: string;
   purpose?: string;
   conversation: Conversation;
 }

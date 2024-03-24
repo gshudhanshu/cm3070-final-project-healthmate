@@ -10,6 +10,7 @@ const USER_URL = `${API_URL}/auth/users/me/`;
 interface AuthState {
   user: User | null;
   token: string | null;
+  isLoading: boolean;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
   fetchUser: () => Promise<void>;
@@ -25,6 +26,7 @@ export const useAuthStore = create(
   devtools<AuthState>((set, get) => ({
     user: null,
     token: token,
+    isLoading: false,
     login: async (username, password) => {
       try {
         const response = await axios.post(`${LOGIN_URL}`, {
@@ -44,16 +46,17 @@ export const useAuthStore = create(
       }
     },
     fetchUser: async () => {
+      set({ isLoading: true });
       try {
         const response = await axios.get(`${USER_URL}`, {
           headers: {
             Authorization: `Bearer ${get().token}`,
           },
         });
-        set({ user: response.data });
+        set({ user: response.data, isLoading: false });
       } catch (error) {
         console.error("Fetching user failed:", error);
-        // Handle error
+        set({ user: null, token: null, isLoading: false });
       }
     },
     logout: () => {
