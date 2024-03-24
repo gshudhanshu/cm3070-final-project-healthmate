@@ -7,6 +7,7 @@ import axios from "axios";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import ErrorComponent from "@/components/common/error";
 
 import {
   Form,
@@ -117,13 +118,7 @@ export default function MedicalRecordForm() {
   };
 
   if (!selectedConversation) {
-    return (
-      <div className="mx-auto mt-8 max-w-md rounded-md bg-white p-4 shadow-md dark:bg-slate-800">
-        <h2 className="mb-4 text-xl font-semibold">
-          Please select a conversation
-        </h2>
-      </div>
-    );
+    return <ErrorComponent message="Please select a conversation" />;
   }
 
   return (

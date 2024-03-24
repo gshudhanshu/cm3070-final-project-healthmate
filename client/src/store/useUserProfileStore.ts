@@ -13,7 +13,7 @@ interface DoctorProfileState {
   error: Error | null;
   fetchDoctorProfile: (
     doctorUsername: string,
-    otherDoctor: boolean,
+    otherDoctor?: boolean,
   ) => Promise<DoctorProfile>;
   fetchPatientProfile: (patientUsername: string) => Promise<PatientProfile>;
   updateUserProfile: (
@@ -30,7 +30,7 @@ export const useUserProfileStore = create(
     patientProfile: null,
     isLoading: true,
     error: null,
-    fetchDoctorProfile: async (doctorUsername, otherDoctor) => {
+    fetchDoctorProfile: async (doctorUsername, otherDoctor = false) => {
       set({ isLoading: true });
       try {
         const response = await axios.get(

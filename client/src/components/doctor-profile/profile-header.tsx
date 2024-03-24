@@ -5,6 +5,9 @@ import { Button } from "../ui/button";
 import Image from "next/image";
 import { BuildingOffice2Icon } from "@heroicons/react/24/outline";
 import { cn } from "@/lib/utils";
+import AppointmentModal from "@/components/find-practitioner/appointments-modal";
+import { useFindDocStore } from "@/store/useFindDocStore";
+import { useState } from "react";
 
 export default function ProfileHeader({
   doctor,
@@ -13,6 +16,12 @@ export default function ProfileHeader({
   doctor: DoctorProfile;
   className?: string;
 }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const openModalWithDoctor = (doctorUsername: string) => {
+    useFindDocStore.setState({ doctorUsername });
+    setIsModalOpen(true);
+  };
+
   return (
     <section
       className={cn(
@@ -42,8 +51,16 @@ export default function ProfileHeader({
       </div>
       <div className="flex w-full flex-wrap items-center justify-between gap-2 sm:w-auto sm:flex-col">
         <p className="font-bold text-primary">Cost: {doctor.cost}</p>
-        <Button>Book Appointment</Button>
+        <Button onClick={() => openModalWithDoctor(doctor.user.username)}>
+          Book Appointment
+        </Button>
       </div>
+      {isModalOpen && (
+        <AppointmentModal
+          isModalOpen={isModalOpen}
+          closeModal={() => setIsModalOpen(false)}
+        />
+      )}
     </section>
   );
 }

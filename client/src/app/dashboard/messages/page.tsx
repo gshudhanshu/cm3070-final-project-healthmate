@@ -7,17 +7,27 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { useMessagesStore } from "@/store/useMessageStore";
 import { useMedicalRecordsStore } from "@/store/useMedicalRecordStore";
+import { useAuthStore } from "@/store/useAuthStore";
 
 import MedicalRecordPage from "@/app/dashboard/medical-records/page";
 import AddNewRecord from "@/components/medical-records/add-new-record";
+import AddNewReview from "@/components/medical-records/add-new-review";
 
 function TabComponent({ isMobile }: { isMobile: boolean }) {
+  const { user } = useAuthStore();
   return (
     <Tabs defaultValue="messages" className="w-full ">
       <TabsList className="mt-6">
         <TabsTrigger value="messages">Messages</TabsTrigger>
         <TabsTrigger value="medical-records">Medical Records</TabsTrigger>
-        <TabsTrigger value="add-new-medical-record">Add New Record</TabsTrigger>
+        {user?.account_type === "doctor" && (
+          <TabsTrigger value="add-new-medical-record">
+            Add New Record
+          </TabsTrigger>
+        )}
+        {user?.account_type === "patient" && (
+          <TabsTrigger value="add-new-review">Add New Review</TabsTrigger>
+        )}
       </TabsList>
       <TabsContent value="messages">
         {isMobile && <MessageThread className="w-full pb-10 pr-6" />}
@@ -28,6 +38,9 @@ function TabComponent({ isMobile }: { isMobile: boolean }) {
       </TabsContent>
       <TabsContent value="add-new-medical-record">
         <AddNewRecord />
+      </TabsContent>
+      <TabsContent value="add-new-review">
+        <AddNewReview />
       </TabsContent>
     </Tabs>
   );

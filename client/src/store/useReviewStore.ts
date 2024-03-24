@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { Review } from "@/types/review";
 import { devtools } from "zustand/middleware";
 import axios from "axios";
+import { toast } from "@/components/ui/use-toast";
 
 const API_URL = process.env.API_URL;
 
@@ -13,6 +14,8 @@ interface ReviewState {
   nextPage: string | null;
   appendReviews: (newReviews: Review[], nextPage: string | null) => void;
   fetchReviews: (doctorUsername: string) => void;
+  addReview: (review: Review) => void;
+  fetchReviewsByConversationId: (conversationId: number) => void;
 }
 
 export const useReviewStore = create(
@@ -51,6 +54,45 @@ export const useReviewStore = create(
         get().appendReviews(data.results, data.next);
 
         set({ isLoading: false });
+      } catch (error: any) {
+        console.error("Failed to fetch reviews:", error);
+        set({ error, isLoading: false });
+      }
+    },
+    addReview: async (review: Review) => {
+      try {
+        const response = await axios.post(
+          `${API_URL}/user_profile/reviews/`,
+          review,
+        );
+        const data = await response.data;
+        set((state) => ({
+          reviews: [data, ...state.reviews],
+        }));
+        toast({
+          title: "Review added",
+          description: "Your review has been added successfully.",
+        });
+      } catch (error: any) {
+        console.error("Failed to add review:", error);
+        toast({
+          title: "Failed to add review",
+          description: "An error occurred while adding your review.",
+          variant: "destructive",
+        });
+        set({ error });
+      }
+    },
+    fetchReviewsByConversationId: async (conversationId: number) => {
+      set({ isLoading: true });
+
+      try {
+        const response = await axios.get(
+          `${API_URL}/reviews/${conversationId}`,
+        );
+        const data = await response.data;
+
+        set({ reviews: data.results, isLoading: false });
       } catch (error: any) {
         console.error("Failed to fetch reviews:", error);
         set({ error, isLoading: false });

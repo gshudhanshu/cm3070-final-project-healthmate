@@ -13,8 +13,8 @@ const ErrorComponent: React.FC<ErrorComponentProps> = ({
   onRetry,
 }) => {
   return (
-    <div className="flex h-screen flex-col items-center justify-center">
-      <p className="mb-4">{message}</p>
+    <div className="flex h-[40rem] max-h-screen items-center justify-center">
+      <h2 className="mb-4 text-2xl">{message}</h2>
       {onRetry && <Button onClick={onRetry}>Retry</Button>}
     </div>
   );

@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from datetime import datetime, timedelta, time
+from conversation.models import Conversation
 
 User = get_user_model()
 
@@ -143,7 +144,8 @@ class Review(models.Model):
     patient = models.ForeignKey(Patient, related_name='reviews', on_delete=models.CASCADE)
     rating = models.IntegerField(choices=[(i, str(i)) for i in range(1, 6)])  # 1 to 5 rating
     comment = models.TextField()
+    conversation = models.OneToOneField(Conversation, on_delete=models.CASCADE, null=True, blank=True)
     date_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Review by {self.patient.user.username} for {self.doctor.user.username}"
+        return f"{self.rating} Star review by {self.patient.user.username} for {self.doctor.user.username}"

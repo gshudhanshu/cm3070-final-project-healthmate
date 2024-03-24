@@ -1,5 +1,8 @@
+from django.forms import ValidationError
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+
+from conversation.models import Conversation
 from .models import Doctor, Patient, Language, DoctorLanguageProficiency,PatientLanguageProficiency, Review, Speciality, Qualification, DoctorQualification, Address
 from appointment.models import Appointment
 from django.utils import timezone
@@ -361,7 +364,35 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = ['id', 'patient_name', 'rating', 'comment', 'date_created']
+        fields = ['id', 'patient_name', 'rating', 'comment', 'date_created', "conversation_id"]
+        
+    def create(self, validated_data):
+        conversation_id = validated_data.pop('conversation_id')
+        conversation = Conversation.objects.get(id=conversation_id)
+
+        # Check if a review already exists for this conversation
+        if Review.objects.filter(conversation=conversation).exists():
+            raise serializers.ValidationError('A review for this conversation already exists.')
+
+        # Ensure that the conversation's doctor is indeed a Doctor instance
+        try:
+            doctor = Doctor.objects.get(user=conversation.doctor)
+        except Doctor.DoesNotExist:
+            raise serializers.ValidationError('The specified doctor does not exist.')
+
+        patient = self.context['request'].user.patient
+
+        # Create the Review instance
+        review = Review.objects.create(
+            doctor=doctor,
+            patient=patient,
+            conversation=conversation,
+            **validated_data
+        )
+
+        return review
+
+    
 
 
 class SimpleProfileSerializer(serializers.ModelSerializer):

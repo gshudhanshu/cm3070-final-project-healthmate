@@ -1,3 +1,4 @@
+from django.forms import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from django_filters import rest_framework as filters
@@ -5,12 +6,12 @@ from .models import Doctor, Patient, Review
 from .serializers import DoctorSerializer, PatientSerializer, ReviewSerializer
 from .permissions import IsOwnerOrReadOnly, IsDoctorOrReadOnly, IsReadOnlyOrIsNew
 from .filters import DoctorFilter
-from rest_framework import permissions
+from rest_framework import permissions, status
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from drf_nested_forms.parsers import NestedMultiPartParser, NestedJSONParser
 
 
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, ListCreateAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
@@ -72,10 +73,12 @@ class DoctorViewSet(viewsets.ModelViewSet, filters.FilterSet):
 class ReviewPagination(PageNumberPagination):
     page_size = 10
 
-class DoctorReviewsAPIView(ListAPIView):
+class DoctorReviewsAPIView(ListCreateAPIView):
+
     serializer_class = ReviewSerializer
     pagination_class = ReviewPagination
     permission_classes = [IsReadOnlyOrIsNew]
+    # permissions_classes = [IsAuthenticated]
 
     def get_queryset(self):
         username = self.kwargs['username']
@@ -83,7 +86,40 @@ class DoctorReviewsAPIView(ListAPIView):
             doctor = Doctor.objects.get(user__username=username)
             return Review.objects.filter(doctor=doctor).order_by('-date_created')
         except Doctor.DoesNotExist:
-            return Review.objects.none()  # Return an empty queryset
+            return Review.objects.none() 
+        
+class ReviewViewSet(viewsets.GenericViewSet):
+    """
+    A viewset that provides 'retrieve' and 'create' actions.
+    """
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve a single review.
+        """
+        conversation_id = kwargs.get('conversation_id')
+        review = get_object_or_404(Review, conversation_id=conversation_id)
+        serializer = self.get_serializer(review)
+        return Response(serializer.data)
+
+    def create(self, request, *args, **kwargs):
+        """
+        Create a new review.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        # Custom logic here. E.g., setting the patient or checking if the review is allowed
+        print(self.request.data)
+        patient = Patient.objects.get(user=self.request.user)
+        serializer.save(patient=patient)
 
 
 class PatientViewSet(viewsets.ModelViewSet):

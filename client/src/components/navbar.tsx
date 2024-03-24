@@ -50,7 +50,7 @@ export function MainNav({
   className,
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
-  const { user } = useAuthStore();
+  const { user, fetchUser } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -61,11 +61,11 @@ export function MainNav({
   const pathname = usePathname();
   const isDashboardRoute = pathname.startsWith("/dashboard");
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!user && isDashboardRoute) {
       router.push("/auth/login");
     }
-  }, [user, router]);
+  }, [user]);
 
   return (
     <nav
