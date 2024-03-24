@@ -2,12 +2,31 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { UserNav } from "./user-nav"; // Adjust the import path as needed
 import * as AuthStore from "@/store/useAuthStore";
+import { useRouter, usePathname } from "next/navigation";
 
 jest.mock("@/store/useAuthStore", () => ({
   useAuthStore: jest.fn(),
 }));
 
+jest.mock("next/navigation", () => ({
+  useRouter: jest.fn(),
+  permanentRedirect: jest.fn(),
+}));
+
+const mockUseRouter = {
+  push: jest.fn(),
+  replace: jest.fn(),
+  pathname: "/",
+};
+
+// const mockUsePathname = jest.fn(() => "/");
+
 describe("UserNav Component", () => {
+  beforeEach(() => {
+    jest.mocked(useRouter).mockReturnValue(mockUseRouter);
+    // jest.mocked(usePathname).mockReturnValue(mockUsePathname());
+  });
+
   const mockLogout = jest.fn();
   const mockUser = {
     first_name: "John",

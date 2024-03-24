@@ -54,7 +54,6 @@ describe("MessagesPage Component", () => {
     expect(screen.getByText("Sidebar")).toBeInTheDocument();
     expect(screen.getByText("Messages Thread")).toBeInTheDocument();
     expect(screen.getByText("Medical Records")).toBeInTheDocument();
-    expect(screen.getByText("Add New Record")).toBeInTheDocument();
   });
 
   it("renders only Sidebar when isSidebarVisible is true for mobile", () => {

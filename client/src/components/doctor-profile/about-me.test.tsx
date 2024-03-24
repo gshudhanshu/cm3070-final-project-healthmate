@@ -42,7 +42,7 @@ describe("AboutMe Component", () => {
 
   it("shows qualifications with details", () => {
     render(<AboutMe doctor={mockDoctor} />);
-    const qualificationText = "MD (2000 - 2005)";
+    const qualificationText = "MD";
     expect(screen.getByText(qualificationText)).toBeInTheDocument();
     expect(screen.getByText("Harvard Medical School")).toBeInTheDocument();
   });

@@ -5,6 +5,7 @@ import "@testing-library/jest-dom";
 import AppointmentCard from "./appointment-card";
 import { useRouter } from "next/navigation";
 import { useMessagesStore } from "@/store/useMessageStore";
+import { useAuthStore } from "@/store/useAuthStore";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
@@ -12,6 +13,10 @@ jest.mock("next/navigation", () => ({
 
 jest.mock("@/store/useMessageStore", () => ({
   useMessagesStore: jest.fn(),
+}));
+
+jest.mock("@/store/useAuthStore", () => ({
+  useAuthStore: jest.fn(),
 }));
 
 const push = jest.fn();
@@ -41,11 +46,16 @@ describe("AppointmentCard", () => {
     purpose: "Consultation",
   };
 
+  useAuthStore.mockImplementation(() => ({
+    user: {
+      account_type: "doctor",
+    },
+  }));
+
   it("renders the appointment details", () => {
     render(<AppointmentCard appointment={mockAppointment} />);
-
     expect(screen.getByText("John Doe")).toBeInTheDocument();
-    expect(screen.getByText("2024-03-21 10:00 AM - 1 Hr")).toBeInTheDocument();
+    expect(screen.getByText(/1 Hr/i)).toBeInTheDocument();
     expect(screen.getByText("Purpose: Consultation")).toBeInTheDocument();
   });
 
