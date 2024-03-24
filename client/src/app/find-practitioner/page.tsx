@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   Accordion,
   AccordionContent,
@@ -561,11 +562,13 @@ export default function Page() {
 
                       <div className="flex w-full flex-col gap-2">
                         <div className="flex justify-between">
-                          <h3 className="text-xl font-semibold capitalize">
-                            {doctor.user.first_name +
-                              " " +
-                              doctor.user.last_name}
-                          </h3>
+                          <Link href={`/doctors/${doctor.user.username}`}>
+                            <h3 className="text-xl font-semibold capitalize">
+                              {doctor.user.first_name +
+                                " " +
+                                doctor.user.last_name}
+                            </h3>
+                          </Link>
                         </div>
                         <div className="flex flex-wrap gap-4">
                           <div className="flex items-center gap-1">

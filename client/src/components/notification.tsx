@@ -38,23 +38,23 @@ export function Notification() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
+        {/* <Button
           variant="ghost"
           size="icon"
           className="relative dark:hover:bg-slate-700"
         >
           <BellIcon className="h-[1.2rem]  w-[1.2rem] transition-all dark:rotate-0 dark:scale-100 dark:text-slate-200" />
-          {notifications.length > 0 && (
+          {notifications.filter((n) => !n.is_read).length > 0 && (
             <span className="absolute flex w-2 h-2 px-1 text-xs font-semibold text-white rounded-full right-1 top-1 bg-primary"></span>
           )}
-        </Button>
+        </Button> */}
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="flex flex-col gap-1 m-0 w-80"
+        className="m-0 flex w-80 flex-col gap-1"
         align="end"
         forceMount
       >
-        <ScrollArea className="w-full border rounded-md h-80">
+        <ScrollArea className="h-80 w-full rounded-md border">
           <DropdownMenuLabel className="flex items-center justify-between px-3 py-3">
             <h4 className="font-semibold tracking-tight">Notifications</h4>
 
@@ -97,7 +97,7 @@ export function Notification() {
                 }}
                 data-testid="mark-as-read-button"
               >
-                <EyeIcon className="w-4 h-4" />
+                <EyeIcon className="h-4 w-4" />
               </Button>
             </DropdownMenuItem>
           ))}

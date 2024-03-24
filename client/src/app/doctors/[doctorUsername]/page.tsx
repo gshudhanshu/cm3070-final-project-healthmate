@@ -16,31 +16,36 @@ export default function Page({
   params: { doctorUsername: string };
 }) {
   const { doctorUsername } = params;
-
-  const { doctorProfile, fetchDoctorProfile, isLoading, error } =
+  const { otherDoctorProfile, fetchDoctorProfile, isLoading, error } =
     useUserProfileStore();
 
   useEffect(() => {
     if (doctorUsername) {
-      fetchDoctorProfile(doctorUsername);
+      fetchDoctorProfile(doctorUsername, true);
     }
-  }, []);
+  }, [doctorUsername]);
 
   if (isLoading) return <LoadingComponent />;
   if (error) return <ErrorComponent message={error.message} />;
 
-  return doctorProfile ? (
+  console.log("otherDoctorProfile", otherDoctorProfile);
+  console.log("error", error);
+
+  return otherDoctorProfile ? (
     <div className="container mx-auto my-10 flex flex-col gap-10">
-      <ProfileHeader doctor={doctorProfile} />
+      <ProfileHeader doctor={otherDoctorProfile} />
       <div className="flex flex-col gap-10 sm:flex-row">
-        <AboutMe doctor={doctorProfile} className="w-full max-w-60 flex-grow" />
+        <AboutMe
+          doctor={otherDoctorProfile}
+          className="w-full max-w-60 flex-grow"
+        />
         <div className="flex flex-col gap-6">
           <section className="description">
             <div className="whitespace-pre-line">
-              {doctorProfile.description || "No description provided"}
+              {otherDoctorProfile.description || "No description provided"}
             </div>
           </section>
-          <ReviewsSection doctor={doctorProfile} />
+          <ReviewsSection doctor={otherDoctorProfile} />
         </div>
       </div>
     </div>

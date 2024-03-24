@@ -131,7 +131,7 @@ const MessageThread = ({ className }: { className?: string }) => {
           <div className="flex flex-col gap-4 p-4">
             {messages.map((message, idx) =>
               message.type == "message" ? (
-                <div key={idx}>
+                <div key={`message-${idx}`}>
                   <div className="flex items-start gap-3">
                     <Avatar>
                       <AvatarImage
@@ -156,13 +156,12 @@ const MessageThread = ({ className }: { className?: string }) => {
                       <p className="mt-1">{message.text}</p>
                     </div>
                   </div>
-                  {message.attachments.map((attachment, index) => (
+                  {message.attachments.map((attachment, idx) => (
                     <div
-                      key={index}
-                      className="flex items-center gap-2 rounded-md  p-2 "
+                      key={idx}
+                      className="flex items-center gap-2 rounded-md p-2 "
                     >
                       <a
-                        key={index}
                         href={`${attachment.file_url}`}
                         download={attachment.file_name}
                         target="_blank"
@@ -179,6 +178,7 @@ const MessageThread = ({ className }: { className?: string }) => {
               ) : (
                 message.type == "call" && (
                   <a
+                    key={`call-${idx}`}
                     href={`/dashboard/messages/call?callId=${message.id}&conversationId${selectedConversation?.id}`}
                     onClick={(e) => {
                       e.preventDefault();

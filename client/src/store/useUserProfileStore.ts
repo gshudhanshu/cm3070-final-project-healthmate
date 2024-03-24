@@ -7,10 +7,14 @@ const API_URL = process.env.API_URL;
 
 interface DoctorProfileState {
   doctorProfile: DoctorProfile | null;
+  otherDoctorProfile: DoctorProfile | null;
   patientProfile: PatientProfile | null;
   isLoading: boolean;
   error: Error | null;
-  fetchDoctorProfile: (doctorUsername: string) => Promise<DoctorProfile>;
+  fetchDoctorProfile: (
+    doctorUsername: string,
+    otherDoctor: boolean,
+  ) => Promise<DoctorProfile>;
   fetchPatientProfile: (patientUsername: string) => Promise<PatientProfile>;
   updateUserProfile: (
     username: string,
@@ -22,21 +26,27 @@ interface DoctorProfileState {
 export const useUserProfileStore = create(
   devtools<DoctorProfileState>((set, get) => ({
     doctorProfile: null,
+    otherDoctorProfile: null,
     patientProfile: null,
     isLoading: true,
     error: null,
-    fetchDoctorProfile: async (doctorUsername) => {
+    fetchDoctorProfile: async (doctorUsername, otherDoctor) => {
       set({ isLoading: true });
       try {
         const response = await axios.get(
           `${API_URL}/user_profile/doctors/${doctorUsername}/`,
         );
-        set({ doctorProfile: response.data, isLoading: false });
+        if (otherDoctor) {
+          set({ otherDoctorProfile: response.data, isLoading: false });
+        } else {
+          set({ doctorProfile: response.data, isLoading: false });
+        }
+        console.log("doctorProfile", response.data);
         return response.data;
       } catch (error: any) {
         set({ error, isLoading: false });
       }
-      return undefined;
+      // return undefined;
     },
 
     fetchPatientProfile: async (patientUsername) => {

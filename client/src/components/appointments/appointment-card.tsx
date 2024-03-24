@@ -32,7 +32,6 @@ export default function AppointmentCard({
   };
 
   if (!appointment) return null;
-  console.log(appointment);
   return (
     <Card key={appointment.id} className={cn("", className)}>
       <CardHeader>

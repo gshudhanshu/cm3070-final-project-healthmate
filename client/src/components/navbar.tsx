@@ -1,6 +1,5 @@
 "use client";
-
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useLayoutEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -61,6 +60,12 @@ export function MainNav({
   const router = useRouter();
   const pathname = usePathname();
   const isDashboardRoute = pathname.startsWith("/dashboard");
+
+  useLayoutEffect(() => {
+    if (!user && isDashboardRoute) {
+      router.push("/auth/login");
+    }
+  }, [user, router]);
 
   return (
     <nav

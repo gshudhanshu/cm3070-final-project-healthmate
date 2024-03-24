@@ -46,8 +46,9 @@ export default function AboutMe({
           {doctor?.qualifications?.map((qualification, index) => (
             <div className="" key={qualification.name}>
               <dd className="mt-1 flex items-center gap-1 text-sm font-bold sm:col-span-2 sm:mt-0">
-                {qualification.name} ({qualification.start_year} -{" "}
-                {qualification.finish_year})
+                {qualification.name}
+                {/* ({qualification.start_year} -{" "} */}
+                {/* {qualification.finish_year}) */}
               </dd>
               <dd>
                 <p className="text-sm">{qualification.university}</p>

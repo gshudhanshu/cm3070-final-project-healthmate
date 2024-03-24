@@ -1,5 +1,7 @@
+"use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,21 +14,42 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { useAuthStore } from "@/store/useAuthStore";
+import { useUserProfileStore } from "@/store/useUserProfileStore";
+import { useEffect } from "react";
 
 export function UserNav() {
+  const router = useRouter();
   const { user, logout } = useAuthStore();
+  const {
+    patientProfile,
+    doctorProfile,
+
+    fetchPatientProfile,
+    fetchDoctorProfile,
+  } = useUserProfileStore();
+
+  useEffect(() => {
+    if (user?.username) {
+      user.account_type === "doctor"
+        ? fetchDoctorProfile(user?.username)
+        : fetchPatientProfile(user?.username);
+    }
+  }, []);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="dark:hover:bg-slate-700">
-          <Avatar className="w-8 h-8">
+          <Avatar className="h-8 w-8">
             <AvatarImage
-              src="/avatars/01.png"
+              src={
+                (user?.account_type === "doctor"
+                  ? doctorProfile?.profile_pic
+                  : patientProfile?.profile_pic) || ""
+              }
               alt={user?.username || "username"}
             />
             <AvatarFallback>
-              {/* first character of first name and first character of last name */}
               {user?.first_name?.charAt(0) || "F"}
               {user?.last_name?.charAt(0) || "L"}
             </AvatarFallback>
@@ -46,13 +69,18 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => router.push("/dashboard/profile")}>
             Profile
             {/* <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut> */}
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => logout()}>
+        <DropdownMenuItem
+          onClick={() => {
+            logout();
+            router.push("/auth/login");
+          }}
+        >
           Log out
           {/* <DropdownMenuShortcut>⇧⌘O</DropdownMenuShortcut> */}
         </DropdownMenuItem>
