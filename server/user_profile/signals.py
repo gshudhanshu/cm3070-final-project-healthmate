@@ -7,7 +7,9 @@ User = get_user_model()
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
-    print(instance.account_type)
+    """
+    Signal receiver function to create a profile for a new user.
+    """
     if created:
         if instance.account_type == 'doctor':
             Doctor.objects.create(user=instance)
@@ -16,6 +18,9 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
+    """
+    Signal receiver function to save the profile of a user after it's been updated.
+    """    
     if hasattr(instance, 'doctor_profile'):
         instance.doctor_profile.save()
     elif hasattr(instance, 'patient_profile'):

@@ -5,24 +5,37 @@ from appointment.serializers import AppointmentSerializer
 from appointment.models import Appointment
 
 class DisorderSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Disorder model.
+    """    
     class Meta:
         model = Disorder
         fields = '__all__'
         extra_kwargs = {'medical_record': {'required': False}}
 
 class MedicineSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Medicine model.
+    """    
     class Meta:
         model = Medicine
         fields = '__all__'
         extra_kwargs = {'medical_record': {'required': False}}
 
 class DiagnosisSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Diagnosis model.
+    """    
     class Meta:
         model = Diagnosis
         fields = '__all__'
         extra_kwargs = {'medical_record': {'required': False}}
 
 class MedicalRecordSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the MedicalRecord model.
+    """
+    
     disorders = DisorderSerializer(many=True, read_only=True)
     medicines = MedicineSerializer(many=True, read_only=True)
     diagnosis = DiagnosisSerializer(many=True, read_only=True)
@@ -34,14 +47,19 @@ class MedicalRecordSerializer(serializers.ModelSerializer):
         fields = '__all__'
     
     def get_appointments(self, instance):
-        # Assuming that `instance` is a `MedicalRecord` instance
-        patient = instance.patient.user  # Assuming `patient` is a `CustomUser` instance
+        """
+        Method to get all appointments associated with the patient of the medical record.
+        """
+        
+        patient = instance.patient.user 
         appointments = Appointment.objects.filter(patient=patient)
         return AppointmentSerializer(appointments, many=True).data
 
 
 class MedicalRecordCreateSerializer(serializers.ModelSerializer):
-    # Assuming you have already defined nested serializers for Disorder, Medicine, and Diagnosis
+    """
+    Serializer for creating a new MedicalRecord instance.
+    """
     disorders = DisorderSerializer(many=True, allow_null=True, required=False)
     medicines = MedicineSerializer(many=True, allow_null=True, required=False)
     diagnoses = DiagnosisSerializer(many=True, allow_null=True, required=False)
@@ -51,7 +69,9 @@ class MedicalRecordCreateSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        # Assume that the validated_data dictionary includes keys for the nested objects
+        """
+        Custom create method to handle nested objects creation.
+        """
         disorders_data = validated_data.pop('disorders', [])
         medicines_data = validated_data.pop('medicines', [])
         diagnoses_data = validated_data.pop('diagnoses', [])

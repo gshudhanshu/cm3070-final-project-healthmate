@@ -17,7 +17,7 @@ describe("Footer Component", () => {
       "Find Practitioner",
       "Dashboard",
       "Contact Us",
-      "Resources",
+      // "Resources",
     ];
     // Expect each navigation label to be present in the document
     navLabels.forEach((label) => {

@@ -15,14 +15,16 @@ from django.utils import timezone
 
 
 
-
 class ConversationViewSet(viewsets.ModelViewSet):
+    """
+    A viewset for viewing and editing conversation instances.
+    """
+    
     serializer_class = ConversationSerializer
     permission_classes = [IsAuthenticated]
     def get_queryset(self):
         """
-        This view should return a list of all conversations
-        where the current user is either the patient or the doctor.
+        This view should return a list of all conversations where the current user is either the patient or the doctor.
         """
         user = self.request.user
 
@@ -30,12 +32,19 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
 
 class MessageViewSet(viewsets.ModelViewSet):
+    """
+    A viewset for viewing and creating messages within a conversation.
+    """
+    
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     
     def get_queryset(self):
+        """
+        This view should return a combined list of messages and calls within a conversation, sorted by timestamp.
+        """        
                
         user = self.request.user
 
@@ -64,6 +73,9 @@ class MessageViewSet(viewsets.ModelViewSet):
         return combined
     
     def list(self, request, *args, **kwargs):
+        """
+        Retrieve a list of messages within a conversation, along with any associated calls.
+        """        
         queryset = self.get_queryset()  # This returns combined Message and Call instances
 
         # Serialize each object with the appropriate serializer
@@ -81,15 +93,20 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     
     def perform_create(self, serializer):
+        """
+        Create a new message within a conversation.
+        """        
         user = self.request.user
         conversation_id = self.kwargs.get('conversation_id')
 
+        # Ensure the user is part of the conversation
         if not Conversation.objects.filter(
                 models.Q(patient=user) | models.Q(doctor=user),
                 id=conversation_id
             ).exists():
             raise ValidationError("You do not have permission to add a message to this conversation.")
 
+        # Save the message with the current user as the sender
         message = serializer.save(sender=user, conversation=Conversation.objects.get(id=conversation_id))
         attachments_data = self.request.FILES
         for file in attachments_data.getlist('file'):
@@ -97,9 +114,17 @@ class MessageViewSet(viewsets.ModelViewSet):
           
 
 class FileUploadView(APIView):
+    """
+    API endpoint for uploading files as attachments.
+    """
+    
     parser_classes = (MultiPartParser, FormParser)
 
     def post(self, request, format=None):
+        """
+        Upload a file as an attachment.
+        """
+        
         file_serializer = AttachmentSerializer(data=request.data)
         if file_serializer.is_valid():
             file_serializer.save()
@@ -109,20 +134,27 @@ class FileUploadView(APIView):
 
 
 class CallViewSet(viewsets.ModelViewSet):
+    """
+    A viewset for viewing and editing call instances.
+    """
+    
     serializer_class = CallSerializer
     queryset = Call.objects.all()
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
         """
-        This view should return a list of all calls
-        where the current user is either the caller or the receiver.
+        This view should return a list of all calls where the current user is either the caller or the receiver.
         """
         user = self.request.user
 
         return Call.objects.filter(models.Q(caller=user) | models.Q(receiver=user))
     
     def create(self, request, *args, **kwargs):
+        """
+        Create a new call instance.
+        """
+        
         conversation_id = request.data.get('conversationId')
         # Get the conversation instance
         conversation = get_object_or_404(Conversation, id=conversation_id)
@@ -145,7 +177,7 @@ class CallViewSet(viewsets.ModelViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         """
-        Updates call status, such as marking it as 'completed' or 'missed'.
+        Partially update a call instance, such as marking it as 'completed' or 'missed'.
         """
         call = self.get_object()
         serializer = self.get_serializer(call, data=request.data, partial=True)

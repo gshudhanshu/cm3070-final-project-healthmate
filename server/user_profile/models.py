@@ -7,6 +7,10 @@ User = get_user_model()
 
 
 class Address(models.Model):
+    """
+    Model to represent an address.
+    """
+    
     street = models.CharField(max_length=255)
     city = models.CharField(max_length=100)
     state = models.CharField(max_length=100)
@@ -18,6 +22,10 @@ class Address(models.Model):
 
 
 class Speciality(models.Model):
+    """
+    Model to represent a medical speciality.
+    """
+    
     name = models.CharField(max_length=100)
 
     def __str__(self):
@@ -25,12 +33,20 @@ class Speciality(models.Model):
 
 
 class Language(models.Model):
+    """
+    Model to represent a language.
+    """
+    
     name = models.CharField(max_length=100)
 
     def __str__(self):
         return self.name
 
 class DoctorLanguageProficiency(models.Model):
+    """
+    Model to represent a doctor's proficiency in a language.
+    """
+    
     PROFICIENCY_LEVELS = [
         ('native', 'Native'),
         ('fluent', 'Fluent'),
@@ -45,6 +61,10 @@ class DoctorLanguageProficiency(models.Model):
         return f"{self.language.name} ({self.get_level_display()})"
 
 class PatientLanguageProficiency(models.Model):
+    """
+    Model to represent a patient's proficiency in a language.
+    """
+    
     PROFICIENCY_LEVELS = [
         ('native', 'Native'),
         ('fluent', 'Fluent'),
@@ -60,6 +80,10 @@ class PatientLanguageProficiency(models.Model):
 
 
 class Qualification(models.Model):
+    """
+    Model to represent a qualification.
+    """
+    
     name = models.CharField(max_length=100)
     university = models.CharField(max_length=200)
 
@@ -68,6 +92,9 @@ class Qualification(models.Model):
     
 
 class Doctor(models.Model):
+    """
+    Model to represent a doctor.
+    """
     AVAILABILITY_CHOICES = [
         ('full-time', 'Full time'),
         ('part-time', 'Part time'),
@@ -90,11 +117,19 @@ class Doctor(models.Model):
     availability = models.CharField(max_length=10, choices=AVAILABILITY_CHOICES, null=True, blank=True)
 
     def average_rating(self):
+        """
+        Calculate the average rating of the doctor based on reviews.
+        """
+        
         total = sum(review.rating for review in self.reviews.all())
         count = self.reviews.count()
         return total / count if count > 0 else 0
     
     def get_timezone(self):
+        """
+        Get the timezone of the doctor.
+        """
+        
         return self.user.timezone
 
 
@@ -103,6 +138,9 @@ class Doctor(models.Model):
     
     
 class DoctorQualification(models.Model):
+    """
+    Model to represent a doctor's qualification.
+    """    
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='doctor_qualifications')
     qualification = models.ForeignKey(Qualification, on_delete=models.CASCADE, related_name='doctor_entries')
     start_year = models.IntegerField(null = True, blank = True)
@@ -113,6 +151,10 @@ class DoctorQualification(models.Model):
     
 
 class Patient(models.Model):
+    """
+    Model to represent a patient.
+    """
+    
     MARITAL_STATUS_CHOICES = [
         ('single', 'Single'),
         ('married', 'Married'),
@@ -140,6 +182,10 @@ class Patient(models.Model):
         return self.user.username
 
 class Review(models.Model):
+    """
+    Model to represent a review.
+    """
+    
     doctor = models.ForeignKey(Doctor, related_name='reviews', on_delete=models.CASCADE)
     patient = models.ForeignKey(Patient, related_name='reviews', on_delete=models.CASCADE)
     rating = models.IntegerField(choices=[(i, str(i)) for i in range(1, 6)])  # 1 to 5 rating

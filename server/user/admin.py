@@ -44,4 +44,5 @@ class CustomUserAdmin(BaseUserAdmin):
     filter_horizontal = ('groups', 'user_permissions',)
 
 
+# Register the CustomUser model with the CustomUserAdmin
 admin.site.register(CustomUser, CustomUserAdmin)

@@ -18,12 +18,18 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
 
-
-
 class DoctorPagination(PageNumberPagination):
+    """
+    Pagination class for DoctorViewSet.
+    """
+    
     page_size = 10
     
     def get_paginated_response(self, data):
+        """
+        Custom paginated response format.
+        """
+        
         next_page = self.page.number + 1 if self.page.has_next() else None
         previous_page = self.page.number - 1 if self.page.has_previous() else None
 
@@ -73,9 +79,16 @@ class DoctorViewSet(viewsets.ModelViewSet, filters.FilterSet):
 
 
 class ReviewPagination(PageNumberPagination):
+    """
+    Pagination class for DoctorReviewsAPIView.
+    """
+    
     page_size = 10
 
 class DoctorReviewsAPIView(ListCreateAPIView):
+    """
+    View to list and create reviews for a doctor.
+    """    
 
     serializer_class = ReviewSerializer
     pagination_class = ReviewPagination
@@ -83,6 +96,10 @@ class DoctorReviewsAPIView(ListCreateAPIView):
     # permissions_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        """
+        Custom queryset to filter reviews for a specific doctor.
+        """
+        
         username = self.kwargs['username']
         try:
             doctor = Doctor.objects.get(user__username=username)
@@ -94,7 +111,7 @@ class ReviewViewSet(mixins.CreateModelMixin,
                     mixins.RetrieveModelMixin,
                     viewsets.GenericViewSet):
     """
-    A viewset that provides 'retrieve' and 'create' actions.
+    A viewset that provides 'retrieve' and 'create' actions for reviews.
     """
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
@@ -109,31 +126,12 @@ class ReviewViewSet(mixins.CreateModelMixin,
         serializer = self.get_serializer(review)
         return Response(serializer.data)
 
-    # def perform_create(self, serializer):
-    #     serializer.save()
-
-    # def perform_create(self, serializer):
-    #     patient = get_object_or_404(Patient, user=self.request.user)
-    #     conversation_id = serializer.validated_data.get('conversation_id')
-    #     conversation = get_object_or_404(Conversation, id=conversation_id)
-
-    #     # Attempt to retrieve an existing review for the conversation
-    #     review, created = Review.objects.update_or_create(
-    #         conversation=conversation,
-    #         patient=patient,
-    #         defaults=serializer.validated_data
-    #     )
-
-    #     if created:
-    #         # If a new review was created, set the HTTP status code to 201 (Created)
-    #         self.request.method = 'POST'
-    #         self.request.status_code = status.HTTP_201_CREATED
-    #     else:
-    #         # If an existing review was updated, set the HTTP status code to 200 (OK)
-    #         self.request.method = 'PATCH'  # or 'PUT', depending on your use case
-    #         self.request.status_code = status.HTTP_200_OK
     
     def create(self, request, *args, **kwargs):
+        """
+        Create or update a review.
+        """
+        
         # Use the existing serializer to validate the request data
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -187,7 +185,9 @@ class PatientViewSet(viewsets.ModelViewSet):
         return Patient.objects.none()
     
     def update (self, request, *args, **kwargs):
-        print(request.data)
+        """
+        Custom update method for PatientViewSet.
+        """
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)

@@ -1,14 +1,18 @@
+//@ts-nocheck
 import "@testing-library/jest-dom";
 import "resize-observer-polyfill";
 
+// Mock the global to reverse an array
 if (!Array.prototype.toReversed) {
   Array.prototype.toReversed = function () {
     return this.slice().reverse();
   };
 }
 
+// Mock the global to scroll an element into view
 window.HTMLElement.prototype.scrollIntoView = jest.fn();
 
+// Mock the ResizeObserver constructor
 ResizeObserver = class MockResizeObserver {
   constructor(callback) {
     this.callback = callback;
@@ -33,8 +37,7 @@ ResizeObserver = class MockResizeObserver {
     this.observations.clear();
   }
 
-  // Optionally, you can implement a trigger method to manually trigger the callback
-  // This can be useful for testing how your component reacts to resize events
+  // Trigger method to manually trigger the callback
   trigger() {
     this.callback(
       [...this.observations.entries()].map(([target]) => ({

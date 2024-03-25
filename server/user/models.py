@@ -34,6 +34,10 @@ class CustomUserManager(BaseUserManager):
 
 # Create your models here.
 class CustomUser(AbstractUser):
+    """
+    Custom User model with additional fields.
+    """
+    # User account types
     user_type = {
         "patient": "Patient",
         "doctor": "Doctor",

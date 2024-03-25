@@ -5,6 +5,9 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class Conversation(models.Model):
+    """
+    Model representing a conversation between a patient and a doctor.
+    """
     patient = models.ForeignKey(User, on_delete=models.CASCADE,
                                 related_name='doctor_conversations')
     doctor = models.ForeignKey(User, on_delete=models.CASCADE,
@@ -35,6 +38,9 @@ class Conversation(models.Model):
 
 
 class Message(models.Model):
+    """
+    Model representing a message within a conversation.
+    """    
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(User, on_delete=models.CASCADE,
                                related_name='sent_messages')
@@ -45,6 +51,9 @@ class Message(models.Model):
         return f"Message from {self.sender} at {self.timestamp}"
 
 class Attachment(models.Model):
+    """
+    Model representing an attachment linked to a message.
+    """    
     message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='attachments', null=True, blank=True)
     file = models.FileField(upload_to='attachments/')
     
@@ -64,6 +73,9 @@ class Attachment(models.Model):
         return self.file.url
 
 class Call(models.Model):
+    """
+    Model representing a call between two users.
+    """    
     CALL_TYPES = [
         ('video', 'Video Call'),
         ('audio', 'Audio Call'),

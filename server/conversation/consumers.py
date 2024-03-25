@@ -19,6 +19,9 @@ class ConsumerUtilities:
     @staticmethod
     @database_sync_to_async
     def get_user_from_token(token):
+        """
+        Retrieve user from JWT token.
+        """
         if not token:
             return None
         try:
@@ -31,6 +34,9 @@ class ConsumerUtilities:
 
     @staticmethod
     def get_token_from_query_string(query_string):
+        """
+        Extract token from query string.
+        """        
         token = None
         for param in query_string.split('&'):
             if 'token=' in param:
@@ -41,14 +47,15 @@ class ConsumerUtilities:
     # Helper method to serialize the user
     @staticmethod
     def serialize_user(self, user):
+        """
+        Serialize user data.
+        """        
         profile_pic_url = None
         if user.account_type == 'patient':
             profile_pic_url = Patient.objects.get(user=user).profile_pic.url if Patient.objects.get(user=user).profile_pic else None
         elif user.account_type == 'doctor':
             profile_pic_url = Doctor.objects.get(user=user).profile_pic.url if Doctor.objects.get(user=user).profile_pic else None
             
-        print(f"***Profile pic URL: {profile_pic_url}")
-
         return {
             'id': user.id, 'username': user.username,
             'first_name': user.first_name, 'last_name': user.last_name,
@@ -58,12 +65,18 @@ class ConsumerUtilities:
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
+    """
+    Websocket consumer for handling chat messages.
+    """    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.room_group_name = None  # Initialize with None
         self.conversation_id = None
 
     async def connect(self):
+        """
+        Connect to websocket.
+        """        
         token = ConsumerUtilities.get_token_from_query_string(self.scope['query_string'].decode('utf-8'))
         self.user = await ConsumerUtilities.get_user_from_token(token)
         if not self.user:
@@ -78,9 +91,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
+        """
+        Disconnect from websocket.
+        """        
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     async def receive(self, text_data):
+        """
+        Receive data from websocket.
+        """        
         data = json.loads(text_data)
                         
         if data.get('action') == 'chat_message':
@@ -90,16 +109,25 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     # Receive message from room group
     async def chat_message(self, event):
+        """
+        Receive chat message from room group.
+        """        
         message = event['message']
         await self.send(text_data=json.dumps({'message': message, 'type': 'new_message'}))
         
     async def call_message(self, event):
+        """
+        Receive call message from room group.
+        """        
         print(event)
         call = event['call']
         await self.send(text_data=json.dumps({'call': call, 'type': 'new_call'}))
         
     
     async def handle_chat_message(self, data):
+        """
+        Handle incoming chat messages.
+        """        
         # Extract chat message data
         text = data.get('text', '')
         sender_id = data.get('sender', None)
@@ -137,7 +165,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             
             
     async def handle_call_message(self, data):
-        print(data)
+        """
+        Handle incoming call messages.
+        """        
         call = data.get('callData', {})
         await self.channel_layer.group_send(
             self.room_group_name,
@@ -152,6 +182,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
     # Helper method to save message
     @database_sync_to_async
     def save_message(self, sender_id, text):
+        """
+        Save chat message to database.
+        """        
         if sender_id:
             sender = User.objects.get(id=sender_id)
             conversation = Conversation.objects.get(id=self.conversation_id)
@@ -165,15 +198,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
     # Helper method to save attachments
     @database_sync_to_async
     def save_attachment(self, message, attachment):
+        """
+        Save attachment to database.
+        """        
         if message:
             return Attachment.objects.create(
                 message=message,
-                file=attachment['content']  # Assuming 'content' is the file data
+                file=attachment['content'] 
             )
         
 
     @database_sync_to_async
     def link_attachments_to_message(self, message, attachments):
+        """
+        Link attachments to message.
+        """        
         for attachment_to_link in attachments:
             print(attachment_to_link)
             try:
@@ -185,20 +224,28 @@ class ChatConsumer(AsyncWebsocketConsumer):
             
     @database_sync_to_async
     def get_attachments(self, message):
+        """
+        Retrieve attachments for message.
+        """        
         # Fetch and serialize attachment data
         attachments = Attachment.objects.filter(message=message)
         return AttachmentSerializer(attachments, many=True, read_only=True).data
     
-        
 
 
 class CallConsumer(AsyncWebsocketConsumer):
+    """
+    Websocket consumer for handling call messages.
+    """    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.room_group_name = None  # Initialize with None
         self.conversation_id = None
 
     async def connect(self):
+        """
+        Connect to websocket.
+        """        
         token = ConsumerUtilities.get_token_from_query_string(self.scope['query_string'].decode('utf-8'))
         self.user = await ConsumerUtilities.get_user_from_token(token)
         if not self.user:
@@ -213,9 +260,15 @@ class CallConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
+        """
+        Disconnect from websocket.
+        """        
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     async def receive(self, text_data):
+        """
+        Receive data from websocket.
+        """
         data = json.loads(text_data)
         
         # Check the type of message
@@ -231,6 +284,10 @@ class CallConsumer(AsyncWebsocketConsumer):
 
         
     async def handle_webrtc_offer(self, data):
+        """
+        Handle WebRTC offer.
+        """
+        
         offer = data.get('offer')
         await self.channel_layer.group_send(
             self.room_group_name,
@@ -244,6 +301,9 @@ class CallConsumer(AsyncWebsocketConsumer):
         )
 
     async def handle_webrtc_answer(self, data):
+        """
+        Handle WebRTC answer.
+        """        
         answer = data.get('answer')
         await self.channel_layer.group_send(
             self.room_group_name,
@@ -256,6 +316,10 @@ class CallConsumer(AsyncWebsocketConsumer):
         )
 
     async def handle_webrtc_ice_candidate(self, data):
+        """
+        Handle WebRTC ICE candidate.
+        """
+        
         candidate = data.get('candidate')
         await self.channel_layer.group_send(
             self.room_group_name,
@@ -268,6 +332,10 @@ class CallConsumer(AsyncWebsocketConsumer):
         )
 
     async def webrtc_offer_message(self, event):
+        """
+        Send WebRTC offer message.
+        """
+
         await self.notify_chat_about_call()
         if self.channel_name != event['sender_channel_name']:
             await self.send(text_data=json.dumps({
@@ -277,6 +345,10 @@ class CallConsumer(AsyncWebsocketConsumer):
             }))
 
     async def webrtc_answer_message(self, event):
+        """
+        Send WebRTC answer message.
+        """
+
         if self.channel_name != event['sender_channel_name']:
             await self.send(text_data=json.dumps({
                 'type': 'webrtc_answer',
@@ -285,6 +357,10 @@ class CallConsumer(AsyncWebsocketConsumer):
             }))
 
     async def webrtc_ice_candidate_message(self, event):
+        """
+        Send WebRTC ICE candidate message.
+        """
+
         if self.channel_name != event['sender_channel_name']:
             await self.send(text_data=json.dumps({
                 'type': 'webrtc_ice_candidate',
@@ -295,7 +371,9 @@ class CallConsumer(AsyncWebsocketConsumer):
     
     @database_sync_to_async
     def notify_chat_about_call(self):
-        # Assuming you have a way to get the related conversation ID for the call
+        """
+        Notify chat about incoming call.
+        """
         conversation_id = self.conversation_id
         print(f"***Notifying chat about call in conversation {conversation_id}")
         user_details = ConsumerUtilities.serialize_user(self, self.user)

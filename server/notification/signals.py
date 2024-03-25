@@ -6,8 +6,11 @@ from .models import Notification
 
 @receiver(post_save, sender=Message)
 def create_message_notification(sender, instance, created, **kwargs):
-    print('message signal')
+    """
+    Signal to create a notification when a new message is created.
+    """    
     conversation = instance.conversation
+    # Determine the recipient based on the conversation    
     if instance.sender == conversation.patient:
         recipient = conversation.doctor
     else:
@@ -23,7 +26,9 @@ def create_message_notification(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=Call)
 def create_call_notification(sender, instance, created, **kwargs):
-    print('call signal')
+    """
+    Signal to create a notification when a new call is created.
+    """    
     if created:
         Notification.objects.create(
             recipient=instance.receiver,
@@ -35,7 +40,9 @@ def create_call_notification(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=Appointment)
 def create_appointment_notification(sender, instance, created, **kwargs):
-    print('appointment signal')
+    """
+    Signal to create a notification when a new appointment is created.
+    """
     if created:
         Notification.objects.create(
             recipient=instance.doctor,

@@ -11,17 +11,23 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 
 
-
-
+# Get the User model
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
 class MedicalRecordViewSet(viewsets.ModelViewSet):
+    """
+    A viewset for handling MedicalRecord instances.
+    """
+    
     serializer_class = MedicalRecordSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
+        """
+        Retrieve the MedicalRecord instance based on the user's role and provided query parameters.
+        """        
         user = self.request.user
         username = self.request.query_params.get('username', None)
         conversation_id = self.request.query_params.get('conversation_id', None)
@@ -62,8 +68,9 @@ class MedicalRecordViewSet(viewsets.ModelViewSet):
     
     @transaction.atomic
     def create(self, request, *args, **kwargs):
-
-        
+        """
+        Create a new MedicalRecord instance.
+        """
         request.data['patient'] = request.data.get('patient_id')
         
         serializer = MedicalRecordCreateSerializer(data=request.data)

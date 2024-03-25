@@ -13,19 +13,22 @@ from django.conf import settings
 from django.db import transaction
 from zoneinfo import ZoneInfo
 
-
-
-
-
-
+# Get the User model
 User = get_user_model()
 
 class AddressSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Address model.
+    """    
     class Meta:
         model = Address
         fields = '__all__'
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    """
+    Serializer for User profile.
+    """
+    
     timezone = serializers.ChoiceField(choices=pytz.all_timezones)
     class Meta:
         model = User
@@ -38,6 +41,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     
     def update(self, instance, validated_data):
+        """
+        Custom update method for User profile.
+        """        
         # remove the username and email from the validated data
         instance.username = validated_data.get('username', instance.username)
         instance.first_name = validated_data.get('first_name', instance.first_name)
@@ -50,6 +56,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
         
         
 class DoctorLanguageProficiencySerializer(serializers.ModelSerializer):
+    """
+    Serializer for Doctor's language proficiency.
+    """    
     name = serializers.CharField(source='language.name')
     
     class Meta:
@@ -57,34 +66,13 @@ class DoctorLanguageProficiencySerializer(serializers.ModelSerializer):
         fields = ['id','name', 'level']
         extra_kwargs = {'id': {'read_only': False, 'required': False}}
         
-    # def create(self, validated_data):
-    #     # Get or create the Language instance based on the name
-    #     language_name = validated_data.pop('name')
-    #     language, _ = Language.objects.get_or_create(name=language_name)
-        
-    #     # Create the DoctorLanguageProficiency instance
-    #     proficiency_instance = DoctorLanguageProficiency.objects.create(
-    #         language=language, **validated_data)
-        
-    #     return proficiency_instance
-
-    # def update(self, instance, validated_data):
-    #     # Assuming language names can be updated,
-    #     # you'd handle that here similarly to 'create'
-    #     language_name = validated_data.pop('name', None)
-    #     if language_name:
-    #         language, _ = Language.objects.get_or_create(name=language_name)
-    #         instance.language = language
-            
-    #     # Update other fields as normal
-    #     for attr, value in validated_data.items():
-    #         setattr(instance, attr, value)
-    #     instance.save()
-
-    #     return instance
 
         
 class PatientLanguageProficiencySerializer(serializers.ModelSerializer):
+    """
+    Serializer for Patient's language proficiency.
+    """
+    
     name = serializers.CharField(source='language.name')
     
     class Meta:
@@ -95,6 +83,10 @@ class PatientLanguageProficiencySerializer(serializers.ModelSerializer):
   
         
 class SpecialitySerializer(serializers.ModelSerializer):
+    """
+    Serializer for Speciality model.
+    """
+    
     class Meta:
         model = Speciality
         fields = '__all__'
@@ -105,6 +97,9 @@ class SpecialitySerializer(serializers.ModelSerializer):
 #         fields = '__all__' 
         
 class DoctorQualificationSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Doctor's qualifications.
+    """    
     name = serializers.CharField(source='qualification.name')
     university = serializers.CharField(source='qualification.university')
 
@@ -115,6 +110,9 @@ class DoctorQualificationSerializer(serializers.ModelSerializer):
         
 
 class DoctorSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Doctor model.
+    """    
     user = UserProfileSerializer()
     specialties = SpecialitySerializer(many=True,)
     languages = DoctorLanguageProficiencySerializer(source='doctor_language_proficiencies', many=True, )
@@ -137,18 +135,24 @@ class DoctorSerializer(serializers.ModelSerializer):
     
     
     def get_appointment_slots(self, obj):
+        """
+        Get available appointment slots for the doctor.
+        """        
         request = self.context.get('request')
         user_timezone_str = request.query_params.get('timezone', 'UTC')
         user_tz = ZoneInfo(user_timezone_str)
 
+
         datetime_str = request.query_params.get('datetime')
-        print('datetime_str',datetime_str)
+        
+        # Get the requested datetime in the user's timezone or the current datetime
         if datetime_str:
             requested_datetime_user_tz = datetime.fromisoformat(datetime_str)
         else:
             user_tz = ZoneInfo(request.query_params.get('timezone', 'UTC'))
             requested_datetime_user_tz = make_aware(datetime.now(), timezone=user_tz)
 
+        # Get the doctor's timezone
         doctor_tz = ZoneInfo(str(obj.get_timezone()))
         # ZoneInfo(obj.get_timezone())
         requested_datetime_doctor_tz = requested_datetime_user_tz.astimezone(doctor_tz)
@@ -157,8 +161,8 @@ class DoctorSerializer(serializers.ModelSerializer):
         # Get current datetime in the user's timezone to filter out past slots
         current_datetime_user_tz = datetime.now(tz=user_tz)
 
-
         slots_with_status = []
+        # Get the doctor's availability hours
         start_hour = obj.availability_start.hour
         end_hour = obj.availability_end.hour
 
@@ -198,6 +202,9 @@ class DoctorSerializer(serializers.ModelSerializer):
 
     
     def update(self, instance, validated_data):
+        """
+        Custom update method for Doctor model.
+        """        
         
         user_data = validated_data.pop('user', None)
 
@@ -205,9 +212,9 @@ class DoctorSerializer(serializers.ModelSerializer):
             # Retrieve the User instance from the Doctor instance
             user_instance = instance.user
             
-            # Skip updating 'username' and 'email' by popping them out of user_data
-            user_data.pop('username', None)  # Remove 'username' to prevent its update
-            user_data.pop('email', None)  # Remove 'email' to prevent its update
+            # Update the User instance with the validated data
+            user_data.pop('username', None)  
+            user_data.pop('email', None)
             
             # Manually update the User instance with the remaining data
             for attr, value in user_data.items():
@@ -247,6 +254,9 @@ class DoctorSerializer(serializers.ModelSerializer):
         return instance
 
     def update_languages(self, doctor, languages_data):
+        """
+        Update the languages for a doctor.
+        """
         doctor.doctor_language_proficiencies.all().delete()
         for language_data in languages_data:
             # Accessing the nested 'name' correctly
@@ -264,12 +274,19 @@ class DoctorSerializer(serializers.ModelSerializer):
             )
 
     def update_specialties(self, doctor, specialties_data):
+        """
+        Update the specialties for a doctor.
+        """
         doctor.specialties.clear()
         for specialty_data in specialties_data:
             specialty, _ = Speciality.objects.get_or_create(name=specialty_data['name'])
             doctor.specialties.add(specialty)
 
     def update_qualifications(self, doctor, qualifications_data):
+        """
+        Update the qualifications for a doctor.
+        """
+        
         DoctorQualification.objects.filter(doctor=doctor).delete()
         for qualification_data in qualifications_data:
             qualification, _ = Qualification.objects.get_or_create(
@@ -284,16 +301,19 @@ class DoctorSerializer(serializers.ModelSerializer):
             )
 
     def update_address(self, doctor, address_data):
-        
+        """
+        Update the address for a doctor.
+        """
         if address_data:
             address_id = doctor.hospital_address_id
             Address.objects.filter(id=address_id).update(**address_data)
 
-
-
         
 
 class PatientSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Patient model.
+    """    
     user = UserProfileSerializer()
     languages = PatientLanguageProficiencySerializer(source='patient_language_proficiencies', many=True, )
     address =  AddressSerializer()
@@ -305,7 +325,10 @@ class PatientSerializer(serializers.ModelSerializer):
         # fields = ['languages', 'address', 'user']
         
     def update(self, instance, validated_data):
-        # print("Validated data:", validated_data)
+        """
+        Custom update method for Patient model.
+        """
+
         # Extract nested data
         
         user_data = validated_data.pop('user', None)
@@ -338,7 +361,7 @@ class PatientSerializer(serializers.ModelSerializer):
             if not language_name:
                 # Handle the case where language name is missing or structure is unexpected
                 print("Language name missing or data structure is incorrect.")
-                continue  # Skip this iteration
+                continue  
 
             language, _ = Language.objects.get_or_create(name=language_name)
             PatientLanguageProficiency.objects.create(
@@ -360,6 +383,10 @@ class PatientSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Review model.
+    """
+    
     patient_name = serializers.ReadOnlyField(source='patient.user.get_full_name')
     conversation_id = serializers.IntegerField()
 
@@ -368,7 +395,10 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = ['id', 'patient_name', 'rating', 'comment', 'date_created', "conversation_id"]
         
     def create(self, validated_data):
-        print(validated_data)
+        """
+        Custom create method for Review model.
+        """
+        
         conversation_id = validated_data.pop('conversation_id')
         conversation = Conversation.objects.get(id=conversation_id)
 
@@ -402,6 +432,9 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class SimpleProfileSerializer(serializers.ModelSerializer):
+    """
+    Serializer for a simplified User profile.
+    """
     profile_pic = serializers.SerializerMethodField()
     username = serializers.CharField(source='user.username')
     first_name = serializers.CharField(source='user.first_name')
@@ -420,11 +453,18 @@ class SimpleProfileSerializer(serializers.ModelSerializer):
     #     return obj.profile_pic.url if obj.profile_pic else None
     
     def get_profile_pic(self, obj):
+        """
+        Method to get the profile picture of the user.
+        """
+        
         return f"{settings.BASE_URL}{obj.profile_pic.url}" if obj.profile_pic else None
     
     
 
 class SimpleDoctorProfileSerializer(serializers.ModelSerializer):
+    """
+    Serializer for a simplified Doctor profile.
+    """    
     user = UserProfileSerializer(read_only=True)
     specialties = SpecialitySerializer(many=True, read_only=True)
     qualifications = DoctorQualificationSerializer(source='doctor_qualifications', many=True, read_only=True)
@@ -436,5 +476,9 @@ class SimpleDoctorProfileSerializer(serializers.ModelSerializer):
         fields = '__all__'
             
     def get_average_rating(self, obj):
+        """
+        Method to get the average rating of the doctor.
+        """
+        
         return obj.average_rating()
     

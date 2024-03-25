@@ -8,6 +8,10 @@ from user.serializers import UserSerializer
 from user_profile.serializers import DoctorSerializer, PatientSerializer, SimpleProfileSerializer
 
 class AttachmentSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Attachment model.
+    """
+    
     file_name = serializers.SerializerMethodField()
     file_size = serializers.SerializerMethodField()
     file_extension = serializers.SerializerMethodField()
@@ -46,11 +50,12 @@ class AttachmentSerializer(serializers.ModelSerializer):
             return f"{settings.BASE_URL}{obj.file.url}"
         return None
     
-    
-    
 
 
 class ConversationSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Conversation model.
+    """    
     patient = serializers.SerializerMethodField()
     doctor = serializers.SerializerMethodField()
     last_message = serializers.SerializerMethodField()
@@ -73,6 +78,9 @@ class ConversationSerializer(serializers.ModelSerializer):
 
 
 class MessageSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Message model.
+    """    
     sender = serializers.SerializerMethodField()
     type = serializers.SerializerMethodField(method_name='get_type')
     attachments = AttachmentSerializer(many=True, read_only=True,)
@@ -94,6 +102,9 @@ class MessageSerializer(serializers.ModelSerializer):
 
 
 class CallSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Call model.
+    """    
     type = serializers.SerializerMethodField(method_name='get_type')
     caller = serializers.SerializerMethodField()
     receiver = serializers.SerializerMethodField()

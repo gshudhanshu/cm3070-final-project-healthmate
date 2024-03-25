@@ -1,13 +1,21 @@
 from django_filters import rest_framework as filters, Filter, BaseInFilter, CharFilter, NumberFilter
 from django.db.models import Q
-from .models import Doctor,Speciality,Qualification
+from .models import Doctor, Speciality, Qualification
 
 
 class ListFilter(BaseInFilter, CharFilter):
+    """
+    Filter for lists.
+    """
+    
     pass
 
 
 class DoctorFilter(filters.FilterSet):
+    """
+    Filter set for Doctor model.
+    """
+    
     doctor_name = filters.CharFilter(method='filter_doctor_name')
     location = filters.CharFilter(method='filter_location')
     experience = filters.RangeFilter()
@@ -18,7 +26,6 @@ class DoctorFilter(filters.FilterSet):
     language = ListFilter(method='filter_language')
 
 
-        
     class Meta:
         model = Doctor
         fields = []
@@ -42,6 +49,10 @@ class DoctorFilter(filters.FilterSet):
 
 
     def filter_location(self, queryset, name, value):
+        """
+        Custom method to filter doctors by location.
+        """
+        
         return queryset.filter(
             Q(hospital_address__street__icontains=value) |
             Q(hospital_address__city__icontains=value) |
@@ -52,21 +63,41 @@ class DoctorFilter(filters.FilterSet):
         
     
     def filter_availability(self, queryset, name, value):
+        """
+        Custom method to filter doctors by availability.
+        """
+        
         availability_values = value.split(',')
         return queryset.filter(availability__in=availability_values).distinct()
     
     def filter_speciality(self, queryset, name, value):
+        """
+        Custom method to filter doctors by speciality.
+        """
+        
         return queryset.filter(specialties__name__iexact=value).distinct()
         
     def filter_languages(self, queryset, name, value):
+        """
+        Custom method to filter doctors by language proficiency.
+        """
+        
         return queryset.filter(languages__name__iexact=value).distinct()
     
     def filter_qualification(self, queryset, name, value):
+        """
+        Custom method to filter doctors by qualification.
+        """
+        
         if not value:
             return queryset
         return queryset.filter(qualifications__name__in=value).distinct()
 
     def filter_language(self, queryset, name, value):
+        """
+        Custom method to filter doctors by language.
+        """
+        
         if not value:
             return queryset
         return queryset.filter(languages__name__in=value).distinct()

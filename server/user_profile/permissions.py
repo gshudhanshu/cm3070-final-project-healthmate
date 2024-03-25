@@ -7,7 +7,7 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         # Read permissions are allowed to any request,
-        # so we'll always allow GET, HEAD, or OPTIONS requests.
+        # Always allow GET, HEAD, or OPTIONS requests.
         if request.method in permissions.SAFE_METHODS:
             return True
 
@@ -30,7 +30,6 @@ class IsDoctorOrReadOnly(permissions.BasePermission):
             return True
 
         # Allow patients to make write operations on their own profile
-        # Note: The specific object permission check happens in `has_object_permission`
         if user.is_authenticated and user.account_type == 'patient':
             return hasattr(view, 'kwargs') and view.kwargs.get('user__username') == user.username
 
@@ -38,7 +37,7 @@ class IsDoctorOrReadOnly(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         # Read permissions are allowed for any request,
-        # so we'll always allow GET, HEAD, or OPTIONS requests.
+        # Allow GET, HEAD, or OPTIONS requests.
         if request.method in permissions.SAFE_METHODS:
             return True
 
@@ -58,7 +57,7 @@ class IsReadOnlyOrIsNew(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         # Read permissions are allowed to any request,
-        # so we'll always allow GET, HEAD or OPTIONS requests.
+        # Always allow GET, HEAD or OPTIONS requests.
         if request.method in permissions.SAFE_METHODS:
             return True
 
