@@ -19,7 +19,7 @@ services:
       - ./.env
     environment:
       - DJANGO_DEBUG=False
-    command: daphne -u /src/tmp/daphne.sock server.asgi:application
+    command: sh -c "sh migrations.sh && python manage.py runserver 0.0.0.0:8000"
     depends_on:
       - db
       - redis
@@ -38,7 +38,6 @@ services:
       sh -c "npm install -g npm@latest && npm install && npm run build && npm run start"
     depends_on:
       - server
-      - db
 
   db:
     container_name: db
@@ -53,6 +52,8 @@ services:
     image: redis:alpine
     volumes:
       - redis_data:/data
+    ports:
+      - '6379:6379'
 
 volumes:
   postgres_data:
