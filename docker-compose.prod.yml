@@ -10,19 +10,16 @@ services:
     tty: true
     working_dir: /src
     ports:
-      - '8001:8000'
+      - '8000:8000'
     volumes:
       - ./server:/src
       - static_volume:/src/static
       - media_volume:/src/media
-
     env_file:
       - ./.env
     environment:
       - DJANGO_DEBUG=False
-      - GUNICORN_WORKERS=5
-    command: >
-      sh -c "sh migrations.sh && gunicorn -w 5 --reload -b 0.0.0.0:8000 --log-level info server.wsgi"
+    command: daphne -u /src/tmp/daphne.sock server.asgi:application
     depends_on:
       - db
       - redis
@@ -34,7 +31,7 @@ services:
     tty: true
     working_dir: /src
     ports:
-      - '3001:3000'
+      - '3000:3000'
     volumes:
       - ./client:/src
     command: >

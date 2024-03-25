@@ -142,15 +142,15 @@ def create_appointments(n):
         print(f"Created Appointment: {appointment} with conversation ID {conversation.id}")
         
 
-def create_medical_records(n):
-    for _ in range(n):
-        patient = random.choice(Patient.objects.all())
-        MedicalRecord.objects.create(
-            patient=patient,
-            created_at=fake.date_time_this_year(),
-            last_updated=fake.date_time_this_month()
-        )
-    print(f"Created {n} Medical Records")
+# def create_medical_records(n):
+#     for _ in range(n):
+#         patient = random.choice(Patient.objects.all())
+#         MedicalRecord.objects.create(
+#             patient=patient,
+#             created_at=fake.date_time_this_year(),
+#             last_updated=fake.date_time_this_month()
+#         )
+#     print(f"Created {n} Medical Records")
 
 def create_disorders(n):
     for _ in range(n):
@@ -264,12 +264,12 @@ create_qualifications()
 update_doctors(10)
 update_patients(10)
 create_appointments(20)
-create_medical_records(10)
-create_disorders(20)
-create_medicines(20)
-create_diagnoses(20)
-create_conversations(10)
-create_reviews(10)
+# create_medical_records(10)
+create_disorders(40)
+create_medicines(40)
+create_diagnoses(40)
+create_conversations(20)
+create_reviews(30)
 create_messages(50)
 create_attachments(20)
 create_calls(10)
