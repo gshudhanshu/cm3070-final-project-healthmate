@@ -3,6 +3,8 @@ import { DoctorProfile } from "@/types/user";
 import React from "react";
 import { Button } from "../ui/button";
 import Image from "next/image";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 import { BuildingOffice2Icon } from "@heroicons/react/24/outline";
 import { cn } from "@/lib/utils";
 import AppointmentModal from "@/components/find-practitioner/appointments-modal";
@@ -35,13 +37,17 @@ export default function ProfileHeader({
     >
       {/* Doctor's profile picture */}
       <div className="flex w-full flex-col gap-6 sm:flex-row sm:items-center">
-        <Image
-          src={doctor.profile_pic || "https://placehold.co/200x200/png"}
-          width={200}
-          height={200}
-          alt=""
-          className="h-full w-full rounded-lg sm:w-24"
-        />
+        <Avatar className="h-full w-full rounded-lg sm:w-24">
+          <AvatarImage
+            src={doctor?.profile_pic || ""}
+            alt={doctor?.user?.username || "username"}
+          />
+          <AvatarFallback>
+            {doctor?.user?.first_name?.charAt(0) || "F"}
+            {doctor?.user?.last_name?.charAt(0) || "L"}
+          </AvatarFallback>
+        </Avatar>
+
         <div className="">
           {/* Doctor's name */}
           <h3 className="text-xl font-medium ">
