@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import axios from "axios";
 import { DoctorProfile, PatientProfile } from "../types/user";
+import { useAuthStore } from "@/store/useAuthStore";
 
 // Define the base URL for API requests
 const API_URL = process.env.API_URL;
@@ -78,6 +79,7 @@ export const useUserProfileStore = create(
     // Function to update a user's profile
     updateUserProfile: async (username, account_type, profileData) => {
       // Determine whether the user is a patient or doctor and send a PUT request accordingly
+      const token = useAuthStore.getState().token;
       if (account_type === "patient") {
         const response = await axios.put(
           `${API_URL}/user_profile/patients/${username}/`,
@@ -85,6 +87,7 @@ export const useUserProfileStore = create(
           {
             headers: {
               "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${token}`,
             },
           },
         );
@@ -97,6 +100,7 @@ export const useUserProfileStore = create(
           {
             headers: {
               "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${token}`,
             },
           },
         );

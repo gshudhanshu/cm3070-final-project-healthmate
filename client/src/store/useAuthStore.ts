@@ -69,6 +69,7 @@ export const useAuthStore = create(
       } catch (error) {
         // Log error and reset user, token, and loading indicator
         console.error("Fetching user failed:", error);
+        localStorage.removeItem("token");
         set({ user: null, token: null, isLoading: false });
       }
     },

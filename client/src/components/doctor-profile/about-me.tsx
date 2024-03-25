@@ -20,7 +20,7 @@ export default function AboutMe({
             key={speciality.id}
             className="mt-1 flex items-center gap-1 text-sm sm:col-span-2 sm:mt-0"
           >
-            <CheckIcon className="w-5" /> {speciality.name}
+            <CheckIcon className="w-5" /> {speciality?.name || ""}
           </dd>
         ))}
       </div>
@@ -36,10 +36,11 @@ export default function AboutMe({
         <dt className="font-medium ">Languages</dt>
         {doctor?.languages?.map((language, index) => (
           <dd
-            key={language.name}
+            key={language?.name || ""}
             className="mt-1 flex items-center gap-1 text-sm sm:col-span-2 sm:mt-0"
           >
-            <CheckIcon className="w-5" /> {language.name} ({language.level})
+            <CheckIcon className="w-5" /> {language?.name || ""} (
+            {language?.level || ""})
           </dd>
         ))}
       </div>
@@ -48,14 +49,14 @@ export default function AboutMe({
         <dt className="font-medium">Qualifications</dt>
         <div className="flex flex-col gap-3 ">
           {doctor?.qualifications?.map((qualification, index) => (
-            <div className="" key={qualification.name}>
+            <div className="" key={qualification?.name || ""}>
               <dd className="mt-1 flex items-center gap-1 text-sm font-bold sm:col-span-2 sm:mt-0">
                 {qualification.name}
                 {/* ({qualification.start_year} -{" "} */}
                 {/* {qualification.finish_year}) */}
               </dd>
               <dd>
-                <p className="text-sm">{qualification.university}</p>
+                <p className="text-sm">{qualification?.university || ""}</p>
               </dd>
             </div>
           ))}

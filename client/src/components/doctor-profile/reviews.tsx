@@ -54,10 +54,10 @@ export default function ReviewsSection({ doctor }: { doctor: DoctorProfile }) {
                     ))}
                     <span className="mx-2 text-sm"> | </span>
                     <span>
-                      {dayjs(review.date_created).format("MMM DD, YYYY")}
+                      {dayjs(review?.date_created || "").format("MMM DD, YYYY")}
                     </span>
                   </div>
-                  <div className="mt-2 text-sm">{review.comment}</div>
+                  <div className="mt-2 text-sm">{review?.comment || ""}</div>
                 </div>
               ))}
             </div>
@@ -67,7 +67,7 @@ export default function ReviewsSection({ doctor }: { doctor: DoctorProfile }) {
       <div>
         <Button
           onClick={() => {
-            fetchReviews(doctor.user.username);
+            fetchReviews(doctor?.user?.username || "");
           }}
         >
           Load More

@@ -13,9 +13,9 @@ import RecentDiagnosis from "@/components/medical-records/recent-diagnosis";
 import AppointmentHistory from "@/components/medical-records/appointment-history";
 
 export default function Page({
-  isDoctorFetching,
+  isDoctorFetching = false,
 }: {
-  isDoctorFetching?: boolean;
+  isDoctorFetching: boolean;
 }) {
   // Fetching necessary data from store hooks
   const { fetchMedicalRecords, medicalRecord } = useMedicalRecordsStore();

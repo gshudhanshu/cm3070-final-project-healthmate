@@ -17,7 +17,7 @@ services:
       - media_volume:/src/media
 
     env_file:
-      - .env.dev
+      - ./.env
     environment:
       - DJANGO_DEBUG=False
       - GUNICORN_WORKERS=5
@@ -34,7 +34,7 @@ services:
     tty: true
     working_dir: /src
     ports:
-      - '3000:3000'
+      - '3001:3000'
     volumes:
       - ./client:/src
     command: >
@@ -49,7 +49,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     env_file:
-      - .env.dev
+      - ./.env
 
   redis:
     container_name: redis_db

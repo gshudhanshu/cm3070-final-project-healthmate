@@ -106,7 +106,7 @@ const profileFormSchema = z.object({
     .number()
     .min(0, "Experience must be a positive number")
     .optional(),
-  languages: z.array(LanguageSchema).optional(),
+  languages: z.array(LanguageSchema),
   cost: z.coerce.number().min(0, "Cost must be a positive number"),
   currency: z.string().max(3, "Currency code must be 3 characters"),
   description: z.string(),

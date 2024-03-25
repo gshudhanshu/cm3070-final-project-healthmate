@@ -79,7 +79,7 @@ const profileFormSchema = z.object({
   height: z.coerce.number().optional(),
   weight: z.coerce.number().optional(),
   blood_group: z.string().optional(),
-  languages: z.array(LanguageSchema).optional(),
+  languages: z.array(LanguageSchema),
   address: AddressSchema,
   timezone: z.string().optional(),
   profile_pic: z

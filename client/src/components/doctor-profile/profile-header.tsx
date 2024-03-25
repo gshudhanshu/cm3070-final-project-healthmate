@@ -45,22 +45,25 @@ export default function ProfileHeader({
         <div className="">
           {/* Doctor's name */}
           <h3 className="text-xl font-medium ">
-            Dr. {doctor.user.first_name} {doctor.user.last_name}
+            Dr. {doctor?.user?.first_name || ""} {doctor?.user?.last_name || ""}
           </h3>
           {/* Hospital address */}
           <p className="flex items-center gap-2 text-sm">
             <BuildingOffice2Icon className="w-6" />
-            {doctor.hospital_address.city}, {doctor.hospital_address.state},{" "}
-            {doctor.hospital_address.country}{" "}
-            {doctor.hospital_address.postal_code}
+            {doctor?.hospital_address?.city || ""},{" "}
+            {doctor?.hospital_address?.state || ""},{" "}
+            {doctor?.hospital_address?.country || ""}{" "}
+            {doctor?.hospital_address?.postal_code || ""}
           </p>
         </div>
       </div>
       <div className="flex w-full flex-wrap items-center justify-between gap-2 sm:w-auto sm:flex-col">
         {/* Cost */}
-        <p className="font-bold text-primary">Cost: {doctor.cost}</p>
+        <p className="font-bold text-primary">Cost: {doctor?.cost || ""}</p>
         {/* Book Appointment button */}
-        <Button onClick={() => openModalWithDoctor(doctor.user.username)}>
+        <Button
+          onClick={() => openModalWithDoctor(doctor?.user?.username || "")}
+        >
           Book Appointment
         </Button>
       </div>

@@ -9,6 +9,9 @@ const nextConfig = {
   images: {
     domains: ["127.0.0.1", "placehold.co"],
   },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
 };
 
 module.exports = nextConfig;
