@@ -79,7 +79,9 @@ const profileFormSchema = z.object({
   height: z.coerce.number().optional(),
   weight: z.coerce.number().optional(),
   blood_group: z.string().optional(),
-  languages: z.array(LanguageSchema),
+  languages: z
+    .array(LanguageSchema)
+    .length(1, "At least one language is required"),
   address: AddressSchema,
   timezone: z.string().optional(),
   profile_pic: z
@@ -608,6 +610,9 @@ export function PatientProfileForm() {
               </Button>
             </div>
           </div>
+          <p className="text-destructive">
+            {form.formState.errors.languages?.message}
+          </p>
         </div>
         {/* Timezone */}
         <FormField

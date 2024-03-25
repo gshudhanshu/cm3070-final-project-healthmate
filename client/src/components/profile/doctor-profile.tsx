@@ -100,13 +100,19 @@ const profileFormSchema = z.object({
   timezone: z.string(),
   phone: z.string().optional(),
   hospital_address: AddressSchema,
-  specialties: z.array(SpecialitySchema),
-  qualifications: z.array(QualificationSchema),
+  specialties: z
+    .array(SpecialitySchema)
+    .length(1, "At least one specialty is required"),
+  qualifications: z
+    .array(QualificationSchema)
+    .length(1, "At least one qualification is required"),
   experience: z.coerce
     .number()
     .min(0, "Experience must be a positive number")
     .optional(),
-  languages: z.array(LanguageSchema),
+  languages: z
+    .array(LanguageSchema)
+    .length(1, "At least one language is required"),
   cost: z.coerce.number().min(0, "Cost must be a positive number"),
   currency: z.string().max(3, "Currency code must be 3 characters"),
   description: z.string(),
@@ -706,6 +712,9 @@ export function DoctorProfileForm() {
               </Button>
             </div>
           </div>
+          <p className="text-destructive">
+            {form.formState.errors.qualifications?.message}
+          </p>
         </div>
 
         {/* Qualifications */}
@@ -751,6 +760,9 @@ export function DoctorProfileForm() {
               </Button>
             </div>
           </div>
+          <p className="text-destructive">
+            {form.formState.errors.specialties?.message}
+          </p>
         </div>
 
         {/* Additional Personal Details */}
@@ -829,6 +841,9 @@ export function DoctorProfileForm() {
               </Button>
             </div>
           </div>
+          <p className="text-destructive">
+            {form.formState.errors.languages?.message}
+          </p>
         </div>
 
         {/* Update profile button */}

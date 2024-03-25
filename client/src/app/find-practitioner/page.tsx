@@ -564,7 +564,7 @@ export default function Page() {
                         </div>
                         <div className="m-0 flex items-center justify-center gap-1 rounded-lg bg-primary/10 p-1 px-3 text-sm font-bold">
                           <StarIcon className="h-5 w-5 text-primary" />{" "}
-                          {doctor.average_rating}
+                          {doctor.average_rating?.toFixed(2) || 0}
                         </div>
                       </div>
                       {/* Name, description, extra details */}

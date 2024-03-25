@@ -24,14 +24,14 @@ export default function AppointmentHistory() {
           >
             <p className="text-md font-medium">
               <span key={idx} className="mr-1">
-                {appointment.doctor.specialties
+                {appointment?.doctor?.specialties
                   ?.map((specialty, idx) => specialty.name)
                   .join(", ") || "No specialty available"}
               </span>
             </p>
             <p>
-              {appointment.doctor.user.first_name}{" "}
-              {appointment.doctor.user.last_name}
+              {appointment?.doctor?.user?.first_name || ""}{" "}
+              {appointment?.doctor?.user?.last_name || ""}
             </p>
             <p>
               <span className="font-medium">Date:</span> {appointment.date}
@@ -39,7 +39,7 @@ export default function AppointmentHistory() {
             <Button
               className="w-32"
               onClick={() =>
-                handleViewProfile(appointment.doctor.user.username)
+                handleViewProfile(appointment?.doctor?.user?.username)
               }
             >
               View Profile

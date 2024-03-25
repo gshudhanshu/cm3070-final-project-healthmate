@@ -12,16 +12,18 @@ export default function ActiveMedicines() {
             key={idx}
             className="rounded-lg bg-slate-100 p-4 dark:bg-slate-800"
           >
-            <p className="mb-3 text-lg font-medium">{medicine.name}</p>
+            <p className="mb-3 text-lg font-medium">{medicine?.name || ""}</p>
             <p>
-              <span className="font-medium">Dosage:</span> {medicine.dosage}
+              <span className="font-medium">Dosage:</span>{" "}
+              {medicine?.dosage || ""}
             </p>
             <p>
               <span className="font-medium">Start Date:</span>{" "}
-              {medicine.start_date}
+              {medicine?.start_date || ""}
             </p>
             <p>
-              <span className="font-medium">End Date:</span> {medicine.end_date}
+              <span className="font-medium">End Date:</span>{" "}
+              {medicine?.end_date || ""}
             </p>
           </div>
         ))}

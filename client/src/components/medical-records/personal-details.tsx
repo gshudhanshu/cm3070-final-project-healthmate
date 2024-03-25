@@ -34,55 +34,56 @@ export default function PersonalDetails({ className }: { className?: string }) {
           <div>
             <p>
               <span className="font-semibold">Name:</span>
-              {medicalRecord.patient.user.first_name}{" "}
-              {medicalRecord.patient.user.last_name}
+              {medicalRecord?.patient?.user?.first_name || ""}{" "}
+              {medicalRecord?.patient?.user?.last_name || ""}
             </p>
             <p>
               <span className="font-semibold">Gender:</span>{" "}
-              {medicalRecord.patient.gender}
+              {medicalRecord?.patient?.gender || ""}
             </p>
             <p>
               <span className="font-semibold">Age:</span>{" "}
-              {medicalRecord.patient.dob &&
+              {(medicalRecord?.patient?.dob &&
                 new Date().getFullYear() -
-                  new Date(medicalRecord.patient.dob).getFullYear()}
+                  new Date(medicalRecord?.patient?.dob).getFullYear()) ||
+                ""}
             </p>
             <p>
               <span className="font-semibold">Height:</span>{" "}
-              {medicalRecord.patient.height} cm
+              {medicalRecord?.patient?.height || ""} cm
             </p>
             <p>
               <span className="font-semibold">Weight:</span>{" "}
-              {medicalRecord.patient.weight} Kg
+              {medicalRecord?.patient?.weight || ""} Kg
             </p>
             <p>
               <span className="font-semibold">Date of Birth:</span>{" "}
-              {medicalRecord.patient.dob}
+              {medicalRecord?.patient?.dob || ""}
             </p>
             <p>
               <span className="font-semibold">Blood Group:</span>{" "}
-              {medicalRecord.patient.blood_group}
+              {medicalRecord?.patient?.blood_group || ""}
             </p>
             <p>
               <span className="font-semibold">Marital Status:</span>{" "}
-              {medicalRecord.patient.marital_status}
+              {medicalRecord?.patient?.marital_status || ""}
             </p>
           </div>
           <div>
             <p>
               <span className="font-semibold">Email:</span>{" "}
-              {medicalRecord.patient.user.email}
+              {medicalRecord?.patient?.user?.email || ""}
             </p>
             <p>
               <span className="font-semibold">Mobile:</span>{" "}
-              {medicalRecord.patient.phone}
+              {medicalRecord?.patient?.phone || ""}
             </p>
             <p>
               <span className="font-semibold">Location:</span>{" "}
-              {medicalRecord.patient.address.city}{" "}
-              {medicalRecord.patient.address.state}{" "}
-              {medicalRecord.patient.address.postal_code}{" "}
-              {medicalRecord.patient.address.country}
+              {medicalRecord?.patient?.address?.city || ""}{" "}
+              {medicalRecord?.patient?.address?.state || ""}{" "}
+              {medicalRecord?.patient?.address?.postal_code || ""}{" "}
+              {medicalRecord?.patient?.address?.country || ""}
             </p>
           </div>
         </div>
@@ -92,7 +93,7 @@ export default function PersonalDetails({ className }: { className?: string }) {
         <h4 className="font-semibold">Language</h4>
         <div className="flex flex-wrap gap-2">
           {medicalRecord.patient.languages.map((lang, idx) => (
-            <Badge key={idx}>{lang.name}</Badge>
+            <Badge key={idx}>{lang?.name || ""}</Badge>
           ))}
         </div>
       </div>
@@ -103,14 +104,14 @@ export default function PersonalDetails({ className }: { className?: string }) {
           {medicalRecord.disorders.map((disorder, idx) => (
             <HoverCard key={idx}>
               <HoverCardTrigger>
-                <Badge>{disorder.name}</Badge>
+                <Badge>{disorder?.name || ""}</Badge>
               </HoverCardTrigger>
               <HoverCardContent>
                 <p>
-                  <b>First Noticed:</b> {disorder.first_noticed}
+                  <b>First Noticed:</b> {disorder?.first_noticed || ""}
                 </p>
                 <p>
-                  <b>Details:</b> {disorder.details}
+                  <b>Details:</b> {disorder?.details || ""}
                 </p>
               </HoverCardContent>
             </HoverCard>
