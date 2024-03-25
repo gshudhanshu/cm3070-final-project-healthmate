@@ -4,12 +4,9 @@ WORKDIR /src
 
 COPY package*.json ./
 
-# Add a listing command to debug
-RUN ls -la
-
 RUN npm install
 
-COPY . /src/
+COPY . .
 
 RUN npm run build
 
