@@ -4,8 +4,8 @@ services:
   server:
     container_name: server
     build: ./server
-    stdin_open: true
-    tty: true
+    # stdin_open: true
+    # tty: true
     # working_dir: /src
     ports:
       - '8001:8000'
@@ -17,7 +17,7 @@ services:
       - ./.env
     environment:
       - DJANGO_DEBUG=False
-    command: sh -c "sh migrations.sh && python manage.py runserver 0.0.0.0:8000"
+    command: sh -c "sh migrations.sh && daphne -p 8000 -b 0.0.0.0 server.asgi:application"
     depends_on:
       - db
       - redis
