@@ -16,12 +16,12 @@ RUN apt-get update && \
 
 
 # Install Python dependencies
-COPY server/requirements.txt /src/requirements.txt
+COPY requirements.txt /src/requirements.txt
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
 # Copy project
-COPY server/ /src/
+COPY . /src/
 
 # Collect static files
 RUN python manage.py collectstatic --noinput
