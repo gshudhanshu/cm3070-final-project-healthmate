@@ -17,22 +17,29 @@ export default function Page({
 }: {
   isDoctorFetching?: boolean;
 }) {
+  // Fetching necessary data from store hooks
   const { fetchMedicalRecords, medicalRecord } = useMedicalRecordsStore();
   const { selectedConversation } = useMessagesStore();
   const { user } = useAuthStore();
 
+  // Effect to fetch medical records based on user type
   useEffect(() => {
+    // Fetch medical records for patient in conversation if doctor is fetching
     if (isDoctorFetching) {
       fetchMedicalRecords(
         selectedConversation?.patient?.username || "",
         selectedConversation?.id.toString(),
       );
+      // Fetch medical records for logged-in user
     } else if (user?.username) {
       fetchMedicalRecords(user?.username);
     }
   }, [selectedConversation]);
 
+  // Display loading component while medical records are loading
   if (!medicalRecord) return <LoadingComponent />;
+
+  // Display no results found message if medical records are empty
   if (!medicalRecord?.hasOwnProperty("patient"))
     return (
       <div className="flex h-[40rem] max-h-screen items-center justify-center">

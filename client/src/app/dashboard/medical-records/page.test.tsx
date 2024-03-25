@@ -1,11 +1,12 @@
 // @ts-nocheck
 import React from "react";
 import { render, waitFor } from "@testing-library/react";
-import Page from "./page"; // Update with the correct path
+import Page from "./page";
 import { useMedicalRecordsStore } from "@/store/useMedicalRecordStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useMessagesStore } from "@/store/useMessageStore";
 
+// Mocking store hooks and components
 jest.mock("@/store/useMedicalRecordStore", () => ({
   useMedicalRecordsStore: jest.fn(),
 }));
@@ -33,7 +34,7 @@ const mockFetchMedicalRecords = jest.fn();
 
 useMedicalRecordsStore.mockReturnValue({
   fetchMedicalRecords: mockFetchMedicalRecords,
-  medicalRecord: null, // Adjust as necessary for different scenarios
+  medicalRecord: null,
 });
 
 useAuthStore.mockReturnValue({
@@ -73,13 +74,13 @@ describe("Page Component", () => {
 
   it("displays loading component when medical records are not available", () => {
     const { getByText } = render(<Page />);
-    expect(getByText("Loading...")).toBeInTheDocument(); // Adjust based on the actual output of LoadingComponent
+    expect(getByText("Loading...")).toBeInTheDocument();
   });
 
   it("displays no results found when medical records are empty", () => {
     useMedicalRecordsStore.mockImplementation(() => ({
       fetchMedicalRecords: mockFetchMedicalRecords,
-      medicalRecord: {}, // Assumes an empty object signifies no results
+      medicalRecord: {},
     }));
 
     const { getByText } = render(<Page />);

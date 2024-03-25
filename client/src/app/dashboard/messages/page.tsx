@@ -13,6 +13,7 @@ import MedicalRecordPage from "@/app/dashboard/medical-records/page";
 import AddNewRecord from "@/components/medical-records/add-new-record";
 import AddNewReview from "@/components/medical-records/add-new-review";
 
+// Component to manage tabs content based on user type and device size
 function TabComponent({ isMobile }: { isMobile: boolean }) {
   const { user } = useAuthStore();
   return (
@@ -46,6 +47,7 @@ function TabComponent({ isMobile }: { isMobile: boolean }) {
   );
 }
 
+// Component representing the Messages page
 const MessagesPage: React.FC = () => {
   const { isSidebarVisible, toggleSidebar } = useMessagesStore();
   const size = useWindowSize();
@@ -57,11 +59,14 @@ const MessagesPage: React.FC = () => {
     <div className="container flex w-full gap-6 px-0">
       {isMobile ? (
         isSidebarVisible ? (
+          // Render Sidebar if sidebar is visible on mobile
           <Sidebar className="w-full px-6 pb-6" />
         ) : (
+          // Render TabComponent if sidebar is hidden on mobile
           <TabComponent isMobile />
         )
       ) : (
+        // Render Sidebar and TabComponent side by side on larger screens
         <>
           <Sidebar className="flex-shrink px-6 pb-6" />
           <TabComponent isMobile />

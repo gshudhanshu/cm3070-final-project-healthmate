@@ -1,14 +1,13 @@
 // @ts-nocheck
-// Import necessary testing utilities
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import Page from "./page"; // Adjust the import path according to your project structure
+import Page from "./page";
 import { useUserProfileStore } from "@/store/useUserProfileStore";
 
 // Mock the store
 jest.mock("@/store/useUserProfileStore");
 
-// Optional: Mock next/navigation if used within child components
+//Mock next/navigation
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
   usePathname: jest.fn(),
@@ -17,7 +16,9 @@ jest.mock("next/navigation", () => ({
 
 describe("Doctor Profile Page", () => {
   beforeEach(() => {
+    // Reset the mocks
     jest.clearAllMocks();
+    // Mock the store to return a doctor profile
     useUserProfileStore.mockReturnValue({
       isLoading: false,
       error: { message: "An error occurred" },
@@ -25,7 +26,6 @@ describe("Doctor Profile Page", () => {
       doctorProfile: {
         username: "doctoruser",
         description: "Test Description",
-        // Include other necessary mock data for the profile
       },
     });
   });

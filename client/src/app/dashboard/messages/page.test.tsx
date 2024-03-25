@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import MessagesPage from "./page"; // Adjust the import path as necessary
+import MessagesPage from "./page";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { useMessagesStore } from "@/store/useMessageStore";
 
@@ -42,7 +42,7 @@ jest.mock("@/store/useMessageStore", () => ({
 describe("MessagesPage Component", () => {
   beforeEach(() => {
     // Default mock implementations
-    useWindowSize.mockReturnValue({ width: 1024 }); // Desktop by default
+    useWindowSize.mockReturnValue({ width: 1024 });
     useMessagesStore.mockReturnValue({
       isSidebarVisible: true,
       toggleSidebar: jest.fn(),
@@ -57,7 +57,7 @@ describe("MessagesPage Component", () => {
   });
 
   it("renders only Sidebar when isSidebarVisible is true for mobile", () => {
-    useWindowSize.mockReturnValue({ width: 500 }); // Mobile width
+    useWindowSize.mockReturnValue({ width: 500 });
     useMessagesStore.mockReturnValue({
       isSidebarVisible: true,
       toggleSidebar: jest.fn(),
@@ -65,7 +65,8 @@ describe("MessagesPage Component", () => {
 
     render(<MessagesPage />);
     expect(screen.getByText("Sidebar")).toBeInTheDocument();
-    expect(screen.queryByText("Messages Thread")).not.toBeInTheDocument(); // MainThread should not be rendered
+    // MainThread should not be rendered
+    expect(screen.queryByText("Messages Thread")).not.toBeInTheDocument();
   });
 
   it("renders TabComponent when isSidebarVisible is false for mobile", () => {
@@ -76,7 +77,8 @@ describe("MessagesPage Component", () => {
     });
 
     render(<MessagesPage />);
-    expect(screen.queryByText("Sidebar")).not.toBeInTheDocument(); // Sidebar should not be rendered
+    // Sidebar should not be rendered
+    expect(screen.queryByText("Sidebar")).not.toBeInTheDocument();
     expect(screen.getByText("Messages Thread")).toBeInTheDocument();
   });
 });

@@ -12,8 +12,10 @@ export default function Page() {
   return (
     <section className="container mb-8">
       {user?.account_type === "doctor" ? (
+        // Doctor profile form
         <DoctorProfileForm />
       ) : (
+        // Patient profile form
         <PatientProfileForm />
       )}
     </section>

@@ -19,18 +19,18 @@ export default function Page({
   const { otherDoctorProfile, fetchDoctorProfile, isLoading, error } =
     useUserProfileStore();
 
+  // Fetch doctor profile based on doctor username
   useEffect(() => {
     if (doctorUsername) {
       fetchDoctorProfile(doctorUsername, true);
     }
   }, [doctorUsername]);
 
+  // Display loading component while data is loading
   if (isLoading) return <LoadingComponent />;
   if (error) return <ErrorComponent message={error.message} />;
 
-  console.log("otherDoctorProfile", otherDoctorProfile);
-  console.log("error", error);
-
+  // Render doctor profile if data is available
   return otherDoctorProfile ? (
     <div className="container mx-auto my-10 flex flex-col gap-10">
       <ProfileHeader doctor={otherDoctorProfile} />
@@ -50,6 +50,7 @@ export default function Page({
       </div>
     </div>
   ) : (
+    // Render error component if doctor profile is not found
     <ErrorComponent message="Profile not found" />
   );
 }

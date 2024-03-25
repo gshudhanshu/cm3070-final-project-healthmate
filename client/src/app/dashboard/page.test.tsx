@@ -1,6 +1,5 @@
-// Import necessary testing utilities
 import { render } from "@testing-library/react";
-import Page from "./page"; // Adjust the import path according to your project structure
+import Page from "./page";
 
 // Mock next/navigation
 jest.mock("next/navigation", () => ({

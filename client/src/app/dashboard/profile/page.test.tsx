@@ -1,9 +1,8 @@
 // @ts-nocheck
-// Import necessary testing utilities and the component to be tested
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import Page from "./page"; // Adjust the import path based on your project structure
+import Page from "./page";
 import * as authStore from "@/store/useAuthStore";
 
 // Mock the useAuthStore hook

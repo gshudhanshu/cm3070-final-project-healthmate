@@ -30,7 +30,6 @@ import {
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 import { StarIcon } from "@heroicons/react/24/solid";
-// import { Slider } from "@/components/ui/slider";
 import { Slider } from "@/components/ui/dual-slider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -46,8 +45,9 @@ import {
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import AppointmentModal from "@/components/find-practitioner/appointments-modal";
-import { useFindDocStore } from "@/store/useFindDocStore"; // Import the store
+import { useFindDocStore } from "@/store/useFindDocStore";
 
+// Import dayjs and timezone plugin
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone.js";
 import utc from "dayjs/plugin/utc.js";
@@ -56,6 +56,7 @@ dayjs.extend(timezone);
 
 const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
+// Define filters for searching doctors
 const filters = [
   {
     name: "Availability",
@@ -357,22 +358,27 @@ export default function Page() {
     fetchDoctorWithSlots,
   } = useFindDocStore();
 
+  // State to control modal visibility
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Function to open modal with doctor details
   const openModalWithDoctor = (doctorUsername: string) => {
     useFindDocStore.setState({ doctorUsername });
     setIsModalOpen(true);
   };
 
   useEffect(() => {
-    searchDoctors(); // Perform an initial search
+    // Perform an initial search
+    searchDoctors();
   }, []);
 
+  // Handler for input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setSearchParams({ [name]: value, page: 1 });
   };
 
+  // Handler for checkbox change
   const handleCheckboxChange = (
     filterName: string,
     optionValue: string,
@@ -392,6 +398,7 @@ export default function Page() {
     console.log(searchParams);
   };
 
+  // Handler for slider change
   const handleSliderChange = (
     filterName: string,
     [start, end]: [number, number],
@@ -406,6 +413,7 @@ export default function Page() {
     });
   };
 
+  // Handler for pagination change
   const handlePageChange = (newPage: number) => {
     setSearchParams({ page: newPage });
     searchDoctors();
@@ -413,7 +421,7 @@ export default function Page() {
 
   return (
     <>
-      {/* Search  */}
+      {/* Search Section */}
       <div className="bg-slate-100 py-8 dark:bg-slate-700">
         <div className="flex flex-wrap items-center justify-center gap-3">
           <h2 className="text-xl font-bold uppercase text-primary">
@@ -438,7 +446,7 @@ export default function Page() {
               onChange={(e) => handleInputChange(e)}
             />
           </div>
-          {/* Find a Doc Button  */}
+          {/* Search Button */}
           <Button
             className="h-[2.875rem]  p-0 px-4 "
             onClick={(e) => searchDoctors()}
@@ -447,6 +455,7 @@ export default function Page() {
           </Button>
         </div>
       </div>
+      {/* Main Content Section */}
       <section className="container mx-auto px-4 text-slate-600 sm:px-6 lg:px-8 dark:text-slate-400">
         <div className="py-8">
           <div className="flex gap-8">
@@ -559,7 +568,6 @@ export default function Page() {
                         </div>
                       </div>
                       {/* Name, description, extra details */}
-
                       <div className="flex w-full flex-col gap-2">
                         <div className="flex justify-between">
                           <Link href={`/doctors/${doctor.user.username}`}>
@@ -636,7 +644,7 @@ export default function Page() {
                               ))}
                             </div>
                           </div>
-                          {/* price book button */}
+                          {/* Price and book button */}
                           <div className="flex flex-col gap-3 md:flex-row md:items-center">
                             <p className="text-2xl font-bold text-primary">
                               {doctor.cost && Number(doctor.cost) > 0
@@ -659,6 +667,7 @@ export default function Page() {
                   </div>
                 ))}
               </div>
+              {/* Pagination */}
               <div className="mt-6">
                 <Pagination>
                   <PaginationContent className="flex flex-wrap">
@@ -698,6 +707,7 @@ export default function Page() {
             </section>
           </div>
         </div>
+        {/* Render the appointment modal if open */}
         {isModalOpen && (
           <AppointmentModal
             isModalOpen={isModalOpen}
