@@ -2,14 +2,14 @@ FROM node:lts-alpine
 
 WORKDIR /src
 
-COPY client/package*.json ./
+COPY package*.json ./
 
 # Add a listing command to debug
 RUN ls -la
 
 RUN npm install
 
-COPY client/ /src/
+COPY . /src/
 
 RUN npm run build
 
