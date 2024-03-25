@@ -1,9 +1,9 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import Page from "./page"; // Adjust the import path as necessary
+import Page from "./page";
 import LoginForm from "@/components/auth/login-form";
 
-// Optionally, if you need to mock LoginForm due to external dependencies
+// Mocking the LoginForm component
 jest.mock("@/components/auth/login-form", () => ({
   __esModule: true,
   default: () => <div>LoginFormMock</div>,

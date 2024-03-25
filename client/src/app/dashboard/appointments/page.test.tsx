@@ -1,44 +1,45 @@
 // @ts-nocheck
 
-// Import necessary utilities from testing library
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-// Import the component to be tested
 import AppointmentsPage from "./page";
-// Import the store hook to be mocked
 import { useAppointmentStore } from "@/store/useAppointmentStore";
-// Import dayjs for date manipulation in tests if necessary
 import dayjs from "dayjs";
 
-// Mocking necessary components and store
+// Mocking the AppointmentCard component
 jest.mock("@/store/useAppointmentStore");
 jest.mock("@/components/appointments/appointment-card", () => ({
   __esModule: true,
   default: () => <div>AppointmentCardMock</div>,
 }));
+// Mocking the Loading component
 jest.mock("@/components/common/loading", () => ({
   __esModule: true,
   default: () => <div>LoadingComponentMock</div>,
 }));
 
 const mockAppointments = [
-  { id: 1, date: dayjs().format("YYYY-MM-DD"), patient: { name: "John Doe" } }, // Today
+  // Today
+  { id: 1, date: dayjs().format("YYYY-MM-DD"), patient: { name: "John Doe" } },
+  // Upcoming
   {
     id: 2,
     date: dayjs().add(1, "day").format("YYYY-MM-DD"),
     patient: { name: "Jane Doe" },
-  }, // Upcoming
+  },
+  // History
   {
     id: 3,
     date: dayjs().subtract(1, "day").format("YYYY-MM-DD"),
     patient: { name: "Jim Doe" },
-  }, // History
+  },
 ];
 
 describe("AppointmentsPage", () => {
   beforeEach(() => {
     // Clear all mocks before each test
     jest.clearAllMocks();
+    // Mocking the behavior of useAppointmentStore hook
     useAppointmentStore.mockReturnValue({
       appointments: mockAppointments,
       fetchAppointments: jest.fn(),
@@ -47,18 +48,20 @@ describe("AppointmentsPage", () => {
 
   it("fetches appointments on component mount", async () => {
     render(<AppointmentsPage />);
-
+    // Wait for the component to render
     await waitFor(() =>
       expect(useAppointmentStore().fetchAppointments).toHaveBeenCalled(),
     );
   });
 
   it("renders loading component when appointments are fetching", () => {
+    // Mocking the appointments data to be null, indicating fetching
     useAppointmentStore.mockImplementation(() => ({
       appointments: null,
       fetchAppointments: jest.fn(),
     }));
     render(<AppointmentsPage />);
+    // Assertion for presence of loading component
     expect(screen.getByText("LoadingComponentMock")).toBeInTheDocument();
   });
 

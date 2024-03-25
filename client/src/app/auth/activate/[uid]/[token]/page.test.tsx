@@ -22,7 +22,6 @@ describe("ActivateAccount Component", () => {
     axios.post.mockResolvedValue({ data: "Activation successful" });
 
     render(<ActivateAccount params={mockParams} />);
-
     await waitFor(() => {
       expect(axios.post).toHaveBeenCalledWith(
         `${process.env.API_URL}/auth/users/activation/`,

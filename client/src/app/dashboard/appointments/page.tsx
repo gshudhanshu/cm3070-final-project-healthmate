@@ -17,6 +17,7 @@ import AppointmentCard from "@/components/appointments/appointment-card";
 import LoadingComponent from "@/components/common/loading";
 import { Appointment } from "@/types/appointment";
 
+// Import dayjs and its plugins
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone.js";
 import utc from "dayjs/plugin/utc.js";
@@ -26,9 +27,11 @@ dayjs.extend(timezone);
 const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 const AppointmentsPage: React.FC = () => {
+  // State to manage active tab and appointments
   const [activeTab, setActiveTab] = useState("today");
   const { appointments, fetchAppointments } = useAppointmentStore();
 
+  // State to manage appointments categorized by today, upcoming, and history
   const [todayAppointments, setTodayAppointments] = useState<Appointment[]>([]);
   const [upcomingAppointments, setUpcomingAppointments] = useState<
     Appointment[]
@@ -37,10 +40,12 @@ const AppointmentsPage: React.FC = () => {
     [],
   );
 
+  // Fetch appointments on component mount
   useEffect(() => {
     fetchAppointments();
   }, []);
 
+  // Categorize appointments based on date
   useEffect(() => {
     if (appointments && appointments.length > 0) {
       const todayAppointments = appointments.filter((appointment) =>
@@ -61,6 +66,7 @@ const AppointmentsPage: React.FC = () => {
     }
   }, [appointments]);
 
+  // Show loading component when fetching appointments
   if (!appointments) return <LoadingComponent />;
 
   return (
@@ -85,6 +91,7 @@ const AppointmentsPage: React.FC = () => {
             All
           </TabsTrigger>
         </TabsList>
+        {/* Tab content for today's appointments */}
         <TabsContent value="today" className="[&>div]:border-none">
           <Card>
             <CardHeader>
@@ -109,6 +116,7 @@ const AppointmentsPage: React.FC = () => {
             </CardContent>
           </Card>
         </TabsContent>
+        {/* Tab content for upcoming appointments */}
         <TabsContent value="upcoming" className="[&>div]:border-none">
           <Card>
             <CardHeader>
@@ -133,6 +141,7 @@ const AppointmentsPage: React.FC = () => {
             </CardContent>
           </Card>
         </TabsContent>
+        {/* Tab content for history appointments */}
         <TabsContent value="history" className="[&>div]:border-none">
           <Card>
             <CardHeader>
@@ -157,6 +166,7 @@ const AppointmentsPage: React.FC = () => {
             </CardContent>
           </Card>
         </TabsContent>
+        {/* Tab content for all appointments */}
         <TabsContent value="all" className="[&>div]:border-none">
           <Card>
             <CardHeader>

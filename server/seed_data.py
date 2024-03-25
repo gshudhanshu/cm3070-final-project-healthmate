@@ -3,9 +3,7 @@ import django
 import random
 from faker import Faker
 from datetime import timedelta, datetime
-
 from django.utils import timezone
-
 
 # Setup Django environment
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'server.settings')
@@ -80,6 +78,7 @@ def update_doctors(n):
         doctor.phone = fake.phone_number()
         doctor.hospital_address = random.choice(Address.objects.all())
         doctor.cost = random.randint(100, 500)
+        doctor.description = fake.text(max_nb_chars=300)
         doctor.currency = 'USD'
         doctor.experience = random.randint(1, 20)
         doctor.availability = random.choice(['full-time', 'part-time', 'weekends', 'evenings'])
@@ -142,18 +141,6 @@ def create_appointments(n):
         )
         print(f"Created Appointment: {appointment} with conversation ID {conversation.id}")
         
-def create_reviews(n):
-    for _ in range(n):
-        doctor = random.choice(Doctor.objects.all())
-        patient = random.choice(Patient.objects.all())
-        Review.objects.create(
-            doctor=doctor,
-            patient=patient,
-            rating=random.randint(1, 5),
-            comment=fake.text(max_nb_chars=200),
-            date_created=fake.date_time_this_year()
-        )
-    print(f"Created {n} Reviews")
 
 def create_medical_records(n):
     for _ in range(n):
@@ -181,7 +168,7 @@ def create_medicines(n):
         medical_record = random.choice(MedicalRecord.objects.all())
         Medicine.objects.create(
             medical_record=medical_record,
-            name=fake.word(),
+            name=fake.word() + " " + str(fake.unique.random_int(min=100, max=1000)) + "mg",
             dosage=fake.sentence(),
             start_date=fake.date_time_this_year(),
             end_date=fake.date_time_this_year() + timedelta(days=30)
@@ -193,7 +180,7 @@ def create_diagnoses(n):
         medical_record = random.choice(MedicalRecord.objects.all())
         Diagnosis.objects.create(
             medical_record=medical_record,
-            diagnosis=fake.word(),
+            name=fake.word(),
             details=fake.text(max_nb_chars=200),
             date=fake.date_time_this_year()
         )
@@ -210,6 +197,21 @@ def create_conversations(n):
             updated_at=fake.date_time_this_month()
         )
     print(f"Created {n} Conversations")
+
+def create_reviews(n):
+    conversations = Conversation.objects.all()
+    for conversation in conversations:
+        doctor = Doctor.objects.get(user=conversation.doctor)
+        patient = Patient.objects.get(user=conversation.patient)
+        Review.objects.create(
+            doctor=doctor,
+            patient=patient,
+            conversation=conversation,
+            rating=random.randint(1, 5),
+            comment=fake.text(max_nb_chars=200),
+            date_created=fake.date_time_this_year()
+        )
+    print(f"Created {n} Reviews")
 
 def create_messages(n):
     for _ in range(n):
@@ -255,19 +257,19 @@ def create_calls(n):
 
 # Add calls to the functions here to execute them
 create_users(20)  # Adjust numbers as needed
-create_addresses(10)
+create_addresses(40)
 create_specialities()
 create_languages()
 create_qualifications()
 update_doctors(10)
 update_patients(10)
 create_appointments(20)
-create_reviews(10)
 create_medical_records(10)
 create_disorders(20)
 create_medicines(20)
 create_diagnoses(20)
 create_conversations(10)
+create_reviews(10)
 create_messages(50)
 create_attachments(20)
 create_calls(10)

@@ -2,8 +2,8 @@
 const nextConfig = {
   reactStrictMode: false,
   env: {
-    API_URL: "http://127.0.0.1:8000/api",
-    NEXT_PUBLIC_BACKEND_URL: "http://localhost:8000",
+    API_URL: "http://127.0.0.1:8001/api",
+    NEXT_PUBLIC_BACKEND_URL: "http://localhost:8001",
   },
   // placeholder images placehold.co
   images: {

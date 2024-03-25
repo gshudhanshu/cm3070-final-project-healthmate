@@ -16,7 +16,7 @@ services:
       - cache_vol:/var/cache
       - tmp_vol:/tmp
     env_file:
-      - .env
+      - ./.env
     command: >
       sh -c "sh migrations.sh && python manage.py runserver 0.0.0.0:8000"
     depends_on:
@@ -34,7 +34,7 @@ services:
     volumes:
       - ./client:/src
     env_file:
-      - .env
+      - ./.env
     command: >
       sh -c "npm install -g npm@latest && npm install && npm run dev"
     depends_on:
@@ -44,12 +44,14 @@ services:
   db:
     container_name: db
     image: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     env_file:
-      - .env
+      - ./.env
 
   redis:
     container_name: redis_db
-    image: redis:latest
+    image: redis:alpine
     ports:
       - '6379:6379'
     volumes:
@@ -69,4 +71,6 @@ volumes:
       type: tmpfs
       device: tmpfs
   redis_data:
+    driver: local
+  postgres_data:
     driver: local
