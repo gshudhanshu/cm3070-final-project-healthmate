@@ -15,8 +15,10 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 
+RUN ls -la
+
 # Install Python dependencies
-COPY server/requirements.txt .
+COPY requirements.txt /src/
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
