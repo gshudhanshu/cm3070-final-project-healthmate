@@ -81,7 +81,9 @@ const profileFormSchema = z.object({
   blood_group: z.string().optional(),
   languages: z
     .array(LanguageSchema)
-    .length(1, "At least one language is required"),
+    .refine((languages) => languages.every((lang) => lang.name.length > 0), {
+      message: "At least one language is required",
+    }),
   address: AddressSchema,
   timezone: z.string().optional(),
   profile_pic: z

@@ -69,7 +69,7 @@ class MedicalRecordViewSet(viewsets.ModelViewSet):
     @transaction.atomic
     def create(self, request, *args, **kwargs):
         """
-        Create a new MedicalRecord instance.
+        Either create a new MedicalRecord instance or retrieve an existing one based on the patient ID.
         """
         request.data['patient'] = request.data.get('patient_id')
         

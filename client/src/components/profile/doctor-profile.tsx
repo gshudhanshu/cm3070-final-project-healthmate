@@ -100,19 +100,34 @@ const profileFormSchema = z.object({
   timezone: z.string(),
   phone: z.string().optional(),
   hospital_address: AddressSchema,
-  specialties: z
-    .array(SpecialitySchema)
-    .length(1, "At least one specialty is required"),
-  qualifications: z
-    .array(QualificationSchema)
-    .length(1, "At least one qualification is required"),
+  specialties: z.array(SpecialitySchema).refine(
+    (data) => {
+      return data.length > 0;
+    },
+    {
+      message: "At least one speciality is required",
+    },
+  ),
+  qualifications: z.array(QualificationSchema).refine(
+    (data) => {
+      return data.length > 0;
+    },
+    {
+      message: "At least one qualification is required",
+    },
+  ),
   experience: z.coerce
     .number()
     .min(0, "Experience must be a positive number")
     .optional(),
-  languages: z
-    .array(LanguageSchema)
-    .length(1, "At least one language is required"),
+  languages: z.array(LanguageSchema).refine(
+    (data) => {
+      return data.length > 0;
+    },
+    {
+      message: "At least one language is required",
+    },
+  ),
   cost: z.coerce.number().min(0, "Cost must be a positive number"),
   currency: z.string().max(3, "Currency code must be 3 characters"),
   description: z.string(),
@@ -302,6 +317,8 @@ export function DoctorProfileForm() {
     }
   }
 
+  console.log(form.formState.errors);
+
   return (
     <Form {...form}>
       <form
@@ -309,7 +326,7 @@ export function DoctorProfileForm() {
         className="space-y-8"
         data-testid="doctor-profile-form"
       >
-        <h1 className="py-8 text-center text-3xl font-medium">
+        <h1 className="py-8 text-3xl font-medium text-center">
           Edit your profile
         </h1>
 
@@ -367,7 +384,7 @@ export function DoctorProfileForm() {
           <div className="flex items-end justify-center gap-3">
             {/* Image preview */}
             {doctorProfile?.profile_pic && (
-              <Avatar className="h-16 w-16 rounded-full object-cover">
+              <Avatar className="object-cover w-16 h-16 rounded-full">
                 <AvatarImage
                   src={previewUrl || doctorProfile?.profile_pic}
                   alt="Profile Preview"
@@ -689,7 +706,7 @@ export function DoctorProfileForm() {
               </div>
             ))}
 
-            <div className="mt-2 flex flex-wrap gap-3 sm:gap-6">
+            <div className="flex flex-wrap gap-3 mt-2 sm:gap-6">
               <Button
                 type="button"
                 variant="outline"
@@ -741,7 +758,7 @@ export function DoctorProfileForm() {
                 />
               </div>
             ))}
-            <div className="mt-2 flex flex-wrap gap-3 sm:gap-6">
+            <div className="flex flex-wrap gap-3 mt-2 sm:gap-6">
               <Button
                 type="button"
                 variant="outline"
@@ -822,7 +839,7 @@ export function DoctorProfileForm() {
                 />
               </div>
             ))}
-            <div className="mt-2 flex flex-wrap gap-3 sm:gap-6">
+            <div className="flex flex-wrap gap-3 mt-2 sm:gap-6">
               <Button
                 type="button"
                 variant="outline"
