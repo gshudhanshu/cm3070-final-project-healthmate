@@ -3,12 +3,10 @@ version: '3.8'
 services:
   server:
     container_name: server
-    build:
-      context: ./server
-      dockerfile: Dockerfile
+    build: ./server
     stdin_open: true
     tty: true
-    working_dir: /src
+    # working_dir: /src
     ports:
       - '8001:8000'
     volumes:
@@ -26,18 +24,15 @@ services:
 
   client:
     container_name: client
-    build:
-      context: ./client
-      dockerfile: Dockerfile
-    stdin_open: true
-    tty: true
-    working_dir: /src
+    build: ./client
+    # stdin_open: true
+    # tty: true
+    # working_dir: /src
     ports:
       - '3001:3000'
     volumes:
       - ./client:/src
-    command: >
-      sh -c "npm install -g npm@latest && npm install && npm run build && npm run start"
+    command: 'npm run start'
     depends_on:
       - server
 

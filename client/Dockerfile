@@ -2,21 +2,17 @@ FROM node:lts-alpine
 
 WORKDIR /src
 
-COPY package*.json ./
+COPY client/package*.json ./
 
 # Add a listing command to debug
 RUN ls -la
 
 RUN npm install
 
-COPY . .
+COPY client/ /src/
 
 RUN npm run build
 
 EXPOSE 3000
-
-RUN apk update \
-    && apk upgrade \
-    && apk add --no-cache --upgrade bash
 
 CMD ["npm", "start"]
