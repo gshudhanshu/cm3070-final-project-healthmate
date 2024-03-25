@@ -1,12 +1,15 @@
-// Import necessary functions from RTL
+// @ts-nocheck
 import { render, screen, fireEvent } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 import { useMedicalRecordsStore } from "@/store/useMedicalRecordStore";
 import AppointmentHistory from "./appointment-history";
 
+// Mocking the useRouter hook
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
 }));
+
+// Mocking the useMedicalRecordsStore hook
 jest.mock("@/store/useMedicalRecordStore", () => ({
   useMedicalRecordsStore: jest.fn(),
 }));
@@ -28,7 +31,6 @@ describe("AppointmentHistory Component", () => {
               specialties: [{ name: "Cardiology" }],
             },
           },
-          // Add more mock appointments if needed
         ],
       },
     },
@@ -57,7 +59,7 @@ describe("AppointmentHistory Component", () => {
 
   it('navigates to doctor\'s profile on "View Profile" button click', () => {
     render(<AppointmentHistory />);
-    const viewProfileButton = screen.getAllByText("View Profile")[0]; // Assuming there's at least one appointment
+    const viewProfileButton = screen.getAllByText("View Profile")[0];
     fireEvent.click(viewProfileButton);
     expect(mockPush).toHaveBeenCalledWith("/doctors/johndoe");
   });

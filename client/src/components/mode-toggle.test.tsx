@@ -1,10 +1,11 @@
+// @ts-nocheck
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { ModeToggle } from "./mode-toggle"; // Adjust the import path as necessary.
+import { ModeToggle } from "./mode-toggle";
 import { useTheme } from "next-themes";
 import userEvent from "@testing-library/user-event";
 
-// Mock `useTheme` hook
+// Mock the `useTheme` hook
 jest.mock("next-themes", () => ({
   useTheme: jest.fn(),
 }));
@@ -51,7 +52,7 @@ describe("ModeToggle Component", () => {
     const setTheme = jest.fn();
     useTheme.mockImplementation(() => ({
       setTheme,
-      theme: "light", // or "dark"
+      theme: "light",
     }));
 
     render(<ModeToggle />);

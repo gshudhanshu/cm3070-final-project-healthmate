@@ -56,12 +56,14 @@ const medicalRecordSchema = z.object({
     .optional(),
 });
 
+// Infer the type of the schema
 type MedicalRecordFormSchema = z.infer<typeof medicalRecordSchema>;
 
 export default function MedicalRecordForm() {
   const { selectedConversation } = useMessagesStore();
   const { addMedicalRecord } = useMedicalRecordsStore();
 
+  // Initialize the form
   const { control, register, handleSubmit, formState } =
     useForm<MedicalRecordFormSchema>({
       resolver: zodResolver(medicalRecordSchema),
@@ -73,6 +75,7 @@ export default function MedicalRecordForm() {
       },
     });
 
+  // UseFieldArray for dynamic fields
   const {
     fields: disorderFields,
     append: appendDisorder,
@@ -82,6 +85,7 @@ export default function MedicalRecordForm() {
     name: "disorders",
   });
 
+  // UseFieldArray for dynamic fields
   const {
     fields: medicineFields,
     append: appendMedicine,
@@ -91,6 +95,7 @@ export default function MedicalRecordForm() {
     name: "medicines",
   });
 
+  // UseFieldArray for dynamic fields
   const {
     fields: diagnosisFields,
     append: appendDiagnosis,
@@ -117,6 +122,7 @@ export default function MedicalRecordForm() {
     addMedicalRecord(data);
   };
 
+  // Show error message if no conversation is selected
   if (!selectedConversation) {
     return <ErrorComponent message="Please select a conversation" />;
   }
@@ -133,6 +139,7 @@ export default function MedicalRecordForm() {
         value={selectedConversation.patient?.id || ""}
         disabled
       />
+      {/* Disorders */}
       <div className="mb-6">
         <h3 className="mb-2 text-lg font-semibold">Disorders</h3>
         {disorderFields.map((item, index) => (
@@ -197,7 +204,7 @@ export default function MedicalRecordForm() {
           </Button>
         )}
       </div>
-
+      {/* Medicines */}
       <div className="mb-6">
         <h3 className="mb-2 text-lg font-semibold">Medicines</h3>
         {medicineFields.map((item, index) => (
@@ -279,7 +286,7 @@ export default function MedicalRecordForm() {
           </Button>
         )}
       </div>
-
+      {/* Diagnoses */}
       <div className="mb-6">
         <h3 className="mb-2 text-lg font-semibold">Diagnoses</h3>
         {diagnosisFields.map((item, index) => (

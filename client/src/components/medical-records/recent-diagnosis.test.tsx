@@ -1,12 +1,15 @@
+// @ts-nocheck
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import RecentDiagnosis from "./recent-diagnosis"; // Adjust the import path as needed
+import RecentDiagnosis from "./recent-diagnosis";
 import * as medicalRecordsStore from "@/store/useMedicalRecordStore";
 
+// Mocking the store
 jest.mock("@/store/useMedicalRecordStore");
 
 describe("RecentDiagnosis Component", () => {
   it("renders without crashing", () => {
+    // Mocking the store to return an empty diagnosis list
     medicalRecordsStore.useMedicalRecordsStore.mockReturnValue({
       medicalRecord: { diagnosis: [] },
     });
@@ -15,6 +18,7 @@ describe("RecentDiagnosis Component", () => {
   });
 
   it("displays each diagnosis with details", () => {
+    // Mocking the store to return a list of diagnoses
     medicalRecordsStore.useMedicalRecordsStore.mockReturnValue({
       medicalRecord: {
         diagnosis: [
@@ -39,6 +43,7 @@ describe("RecentDiagnosis Component", () => {
   });
 
   it("displays a diagnosis date alongside the name", () => {
+    // Mocking the store to return a diagnosis with a date
     medicalRecordsStore.useMedicalRecordsStore.mockReturnValue({
       medicalRecord: {
         diagnosis: [

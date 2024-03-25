@@ -1,8 +1,10 @@
+// @ts-nocheck
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import PersonalDetails from "./personal-details"; // Adjust the import path as needed
+import PersonalDetails from "./personal-details";
 import * as medicalRecordsStore from "@/store/useMedicalRecordStore";
 
+// Mocking the store
 jest.mock("@/store/useMedicalRecordStore");
 
 describe("PersonalDetails Component", () => {
@@ -13,6 +15,7 @@ describe("PersonalDetails Component", () => {
   });
 
   it("displays personal information correctly", () => {
+    // Mocking the store data
     medicalRecordsStore.useMedicalRecordsStore.mockReturnValue({
       medicalRecord: {
         patient: {
@@ -50,6 +53,7 @@ describe("PersonalDetails Component", () => {
   });
 
   it("displays disorders correctly with hover card details", async () => {
+    // Mocking the store data
     medicalRecordsStore.useMedicalRecordsStore.mockReturnValue({
       medicalRecord: {
         patient: {
@@ -89,6 +93,4 @@ describe("PersonalDetails Component", () => {
       await screen.findByText("Frequent panic attacks"),
     ).toBeInTheDocument();
   });
-
-  // Add more tests for other details as needed
 });

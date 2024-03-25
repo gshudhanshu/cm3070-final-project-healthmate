@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import { Footer } from "./footer"; // Adjust the import path as necessary.
+import { Footer } from "./footer";
 
 describe("Footer Component", () => {
   it("renders correctly", () => {
@@ -11,6 +11,7 @@ describe("Footer Component", () => {
 
   it("contains the navigation links", () => {
     render(<Footer />);
+    // Define the navigation labels
     const navLabels = [
       "Home",
       "Find Practitioner",
@@ -18,6 +19,7 @@ describe("Footer Component", () => {
       "Contact Us",
       "Resources",
     ];
+    // Expect each navigation label to be present in the document
     navLabels.forEach((label) => {
       expect(screen.getByText(label)).toBeInTheDocument();
     });
@@ -25,7 +27,9 @@ describe("Footer Component", () => {
 
   it("displays the correct copyright statement", () => {
     render(<Footer />);
+    // Get the current year
     const currentYear = new Date().getFullYear();
+    // Expect the copyright statement to be present in the document
     const copyrightStatement = screen.getByText(
       `© ${currentYear} Health Mate. All Rights Reserved.`,
       { exact: false },

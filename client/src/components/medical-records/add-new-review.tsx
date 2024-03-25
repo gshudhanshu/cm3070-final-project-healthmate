@@ -35,6 +35,7 @@ const reviewFormSchema = z.object({
   conversation_id: z.coerce.number(),
 });
 
+// Define type for form values
 type ReviewFormValues = z.infer<typeof reviewFormSchema>;
 
 export default function ReviewForm() {
@@ -50,6 +51,7 @@ export default function ReviewForm() {
     resolver: zodResolver(reviewFormSchema),
   });
 
+  // Define function to handle form submission
   const form = useForm<ReviewFormValues>({
     resolver: zodResolver(reviewFormSchema),
     defaultValues: {
@@ -62,6 +64,7 @@ export default function ReviewForm() {
     mode: "onChange",
   });
 
+  // Fetch reviews and set default values when selected conversation changes
   useEffect(() => {
     if (selectedConversation && selectedConversation.id) {
       form.setValue("conversation_id", Number(selectedConversation.id));
@@ -69,6 +72,7 @@ export default function ReviewForm() {
     }
   }, [selectedConversation, form]);
 
+  // Set values from fetched review when available
   useEffect(() => {
     if (reviewByConversationId) {
       form.setValue("comment", reviewByConversationId.comment || "");
@@ -76,11 +80,13 @@ export default function ReviewForm() {
     }
   }, [reviewByConversationId, form]);
 
+  // Submit review data
   const onSubmit = async (data: ReviewFormValues) => {
     console.log("Submitting review:", data);
     addReview(data);
   };
 
+  // Render error message if no conversation is selected
   if (!selectedConversation) {
     return <ErrorComponent message="Please select a conversation" />;
   }
@@ -92,6 +98,7 @@ export default function ReviewForm() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-4">
         <h2 className="text-lg font-semibold">Add New Review</h2>
 
+        {/* Conversation Id Field */}
         <FormField
           control={form.control}
           name="conversation_id"
@@ -106,6 +113,7 @@ export default function ReviewForm() {
           )}
         />
 
+        {/* Rating Field */}
         <FormField
           control={form.control}
           name="rating"
@@ -135,6 +143,7 @@ export default function ReviewForm() {
           )}
         />
 
+        {/* Comment Field */}
         <FormField
           control={form.control}
           name="comment"
@@ -153,6 +162,7 @@ export default function ReviewForm() {
           )}
         />
 
+        {/* Submit Button */}
         <Button type="submit">Add Review</Button>
       </form>
     </Form>

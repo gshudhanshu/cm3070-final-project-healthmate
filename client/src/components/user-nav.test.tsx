@@ -1,9 +1,11 @@
+// @ts-nocheck
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { UserNav } from "./user-nav"; // Adjust the import path as needed
+import { UserNav } from "./user-nav";
 import * as AuthStore from "@/store/useAuthStore";
 import { useRouter, usePathname } from "next/navigation";
 
+// Mock the useAuthStore and useRouter hooks
 jest.mock("@/store/useAuthStore", () => ({
   useAuthStore: jest.fn(),
 }));
@@ -13,27 +15,29 @@ jest.mock("next/navigation", () => ({
   permanentRedirect: jest.fn(),
 }));
 
+// Define mock data and functions
 const mockUseRouter = {
   push: jest.fn(),
   replace: jest.fn(),
   pathname: "/",
 };
 
-// const mockUsePathname = jest.fn(() => "/");
-
 describe("UserNav Component", () => {
+  // Set up mock data before each test
   beforeEach(() => {
+    // Mock useRouter hook
     jest.mocked(useRouter).mockReturnValue(mockUseRouter);
-    // jest.mocked(usePathname).mockReturnValue(mockUsePathname());
   });
 
   const mockLogout = jest.fn();
+  // Define mock user data
   const mockUser = {
     first_name: "John",
     last_name: "Doe",
     username: "johndoe",
   };
 
+  // Set up mock user and logout function before each test
   beforeEach(() => {
     AuthStore.useAuthStore.mockReturnValue({
       user: mockUser,
@@ -44,6 +48,7 @@ describe("UserNav Component", () => {
   it("renders user information correctly", async () => {
     const user = userEvent.setup();
     render(<UserNav />);
+    // Click on the button to open the dropdown menu
     await user.click(screen.getByRole("button"));
     expect(screen.getByText("John Doe")).toBeInTheDocument();
     expect(screen.getByText("@johndoe")).toBeInTheDocument();
@@ -52,6 +57,7 @@ describe("UserNav Component", () => {
   it("opens dropdown menu on trigger click", async () => {
     const user = userEvent.setup();
     render(<UserNav />);
+    // Click on the button to open the dropdown menu
     await user.click(screen.getByRole("button"));
     expect(screen.getByText("Profile")).toBeInTheDocument();
   });
@@ -59,7 +65,9 @@ describe("UserNav Component", () => {
   it('calls logout on "Log out" click', async () => {
     const user = userEvent.setup();
     render(<UserNav />);
-    await user.click(screen.getByRole("button")); // Open dropdown
+    // Click on the button to open the dropdown menu
+    await user.click(screen.getByRole("button"));
+    // Click on "Log out" option in the dropdown menu
     await user.click(screen.getByText("Log out"));
     expect(mockLogout).toHaveBeenCalled();
   });

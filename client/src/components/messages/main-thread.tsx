@@ -11,7 +11,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronLeftIcon, DocumentIcon } from "@heroicons/react/24/outline";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import IncomingCallDrawer from "@/components/messages/incoming-call-drawer";
 import { useCallStore } from "@/store/useCallStore";
 
 import dayjs from "dayjs";
@@ -102,10 +101,10 @@ const MessageThread = ({ className }: { className?: string }) => {
       )}
     >
       <div>
-        <div className="my-7 flex items-center gap-3">
+        <div className="flex items-center gap-3 my-7">
           {isMobile && !isSidebarVisible && (
             <ChevronLeftIcon
-              className="h-6 w-6 cursor-pointer"
+              className="w-6 h-6 cursor-pointer"
               onClick={toggleSidebar}
             />
           )}
@@ -143,7 +142,7 @@ const MessageThread = ({ className }: { className?: string }) => {
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col">
-                      <div className="flex w-full justify-between gap-2">
+                      <div className="flex justify-between w-full gap-2">
                         <span className="font-semibold capitalize">
                           {message.sender.first_name +
                             " " +
@@ -159,15 +158,15 @@ const MessageThread = ({ className }: { className?: string }) => {
                   {message.attachments.map((attachment, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center gap-2 rounded-md p-2 "
+                      className="flex items-center gap-2 p-2 rounded-md "
                     >
                       <a
                         href={`${attachment.file_url}`}
                         download={attachment.file_name}
                         target="_blank"
-                        className="flex items-center gap-2 rounded-md bg-slate-300 p-2 text-slate-700 hover:bg-slate-200 hover:text-slate-900 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 dark:hover:text-slate-200 "
+                        className="flex items-center gap-2 p-2 rounded-md bg-slate-300 text-slate-700 hover:bg-slate-200 hover:text-slate-900 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 dark:hover:text-slate-200 "
                       >
-                        <DocumentIcon className="h-5 w-5 text-slate-700 dark:text-slate-300 " />
+                        <DocumentIcon className="w-5 h-5 text-slate-700 dark:text-slate-300 " />
                         <span className="text-sm ">{attachment.file_name}</span>
                         <span className="text-sm ">{attachment.file_size}</span>
                       </a>
@@ -191,9 +190,9 @@ const MessageThread = ({ className }: { className?: string }) => {
                   >
                     <div
                       key={idx}
-                      className="mx-auto flex w-fit cursor-pointer items-center justify-center gap-3 rounded-full bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-green-600"
+                      className="flex items-center justify-center gap-3 px-4 py-2 mx-auto text-sm font-medium text-white rounded-full cursor-pointer w-fit bg-primary hover:bg-green-600"
                     >
-                      <PhoneIcon className="h-4 w-4" />
+                      <PhoneIcon className="w-4 h-4" />
                       {message.caller?.username ?? ""} called to{" "}
                       {message.receiver?.username ?? ""} at{" "}
                       {dayjs(message.start_time).format("DD MMM YY, HH:mm A")}
@@ -205,7 +204,7 @@ const MessageThread = ({ className }: { className?: string }) => {
           </div>
         </ScrollArea>
       </div>
-      <div className="mt-4 flex flex-col gap-2">
+      <div className="flex flex-col gap-2 mt-4">
         <Textarea
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}

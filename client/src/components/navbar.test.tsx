@@ -1,8 +1,10 @@
+// @ts-nocheck
 import { render, screen, fireEvent } from "@testing-library/react";
-import { MainNav } from "./navbar"; // Adjust the import path as needed
+import { MainNav } from "./navbar";
 import * as AuthStore from "@/store/useAuthStore";
 import { useRouter, usePathname } from "next/navigation";
 
+// Mock the `useAuthStore` hook
 jest.mock("@/store/useAuthStore");
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
@@ -10,12 +12,14 @@ jest.mock("next/navigation", () => ({
   useSearchParams: jest.fn(),
 }));
 
+// Mock the `useRouter` hook
 const mockUseRouter = {
   push: jest.fn(),
   replace: jest.fn(),
   pathname: "/",
 };
 
+// Mock the `usePathname` hook
 const mockUsePathname = jest.fn(() => "/");
 
 describe("MainNav Component", () => {

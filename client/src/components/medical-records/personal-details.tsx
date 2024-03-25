@@ -6,12 +6,11 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
 import { useMedicalRecordsStore } from "@/store/useMedicalRecordStore";
 
 export default function PersonalDetails({ className }: { className?: string }) {
   const { medicalRecord } = useMedicalRecordsStore();
-
+  // If medicalRecord doesn't have patient data, display "No result found"
   if (!medicalRecord?.hasOwnProperty("patient")) {
     return <div>No result found</div>;
   }
@@ -20,6 +19,7 @@ export default function PersonalDetails({ className }: { className?: string }) {
     <div className="flex flex-col gap-4">
       <h2 className="my-4 text-xl font-semibold">Personal Information</h2>
 
+      {/* Avatar */}
       <div>
         <Avatar className="h-40 w-40">
           <AvatarImage src={medicalRecord?.patient?.profile_pic || ""} />
@@ -28,6 +28,7 @@ export default function PersonalDetails({ className }: { className?: string }) {
           </AvatarFallback>
         </Avatar>
       </div>
+      {/* Patient Information */}
       <div>
         <div className="flex flex-col">
           <div>
@@ -86,6 +87,7 @@ export default function PersonalDetails({ className }: { className?: string }) {
           </div>
         </div>
       </div>
+      {/* Languages */}
       <div>
         <h4 className="font-semibold">Language</h4>
         <div className="flex flex-wrap gap-2">
@@ -94,6 +96,7 @@ export default function PersonalDetails({ className }: { className?: string }) {
           ))}
         </div>
       </div>
+      {/* Disorders */}
       <div>
         <h4 className="font-semibold">Disorders</h4>
         <div className="flex flex-wrap gap-2">

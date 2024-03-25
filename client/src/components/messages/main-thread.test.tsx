@@ -1,10 +1,12 @@
+// @ts-nocheck
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import MessageThread from "./main-thread"; // Adjust the import path as needed
+import MessageThread from "./main-thread";
 import * as MessageStore from "@/store/useMessageStore";
 import * as CallStore from "@/store/useCallStore";
 // import { useHooks } from "@uidotdev/usehooks";
 
+// Mocking the store
 jest.mock("@/store/useMessageStore", () => ({
   useMessagesStore: jest.fn(),
 }));
@@ -16,6 +18,7 @@ jest.mock("@/store/useCallStore", () => ({
 jest.mock("@uidotdev/usehooks");
 
 describe("MessageThread Component", () => {
+  // Mock functions for the store
   const mockFetchMessages = jest.fn();
   const mockSendMessage = jest.fn();
   const mockInitiateCall = jest.fn();
@@ -27,12 +30,10 @@ describe("MessageThread Component", () => {
       messages: [],
       fetchMessages: mockFetchMessages,
       sendMessage: mockSendMessage,
-      // Additional mocked functions and properties
     });
 
     CallStore.useCallStore.mockReturnValue({
       initiateCall: mockInitiateCall,
-      // Additional mocked functions and properties
     });
   });
 
@@ -42,6 +43,7 @@ describe("MessageThread Component", () => {
   });
 
   it("displays messages for a selected conversation", () => {
+    // Mock store with selected conversation and messages
     MessageStore.useMessagesStore.mockReturnValue({
       selectedConversation: { id: 1, name: "John Doe" },
       messages: [

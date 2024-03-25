@@ -1,17 +1,21 @@
+// @ts-nocheck
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Sidebar from "./side-bar";
 import * as MessageStore from "@/store/useMessageStore";
 import * as AuthStore from "@/store/useAuthStore";
 
+// Mock the useRouter function from next/navigation
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
 }));
 
+// Mock the useMessagesStore hook
 jest.mock("@/store/useMessageStore", () => ({
   useMessagesStore: jest.fn(),
 }));
 
+// Mock the useAuthStore hook
 jest.mock("@/store/useAuthStore", () => ({
   useAuthStore: jest.fn(),
 }));
@@ -22,6 +26,7 @@ describe("Sidebar Component", () => {
     AuthStore.useAuthStore.mockReturnValue({
       user: { username: "testuser", account_type: "patient" },
     });
+    // Set up mock return values for useMessagesStore
     MessageStore.useMessagesStore.mockReturnValue({
       conversations: [
         {
@@ -30,7 +35,6 @@ describe("Sidebar Component", () => {
           doctor: { first_name: "Jane", last_name: "Smith", profile_pic: "" },
           last_message: { text: "Hello there!", timestamp: new Date() },
         },
-        // Add more mock conversations as needed
       ],
       fetchConversations: jest.fn(),
       selectConversation: jest.fn(),
@@ -58,6 +62,6 @@ describe("Sidebar Component", () => {
     const { selectConversation } = MessageStore.useMessagesStore();
     render(<Sidebar />);
     await userEvent.click(screen.getByText("John Doe"));
-    expect(selectConversation).toHaveBeenCalledWith(expect.any(Object)); // Adapt this to match the expected call
+    expect(selectConversation).toHaveBeenCalledWith(expect.any(Object));
   });
 });

@@ -33,6 +33,7 @@ import { useEffect } from "react";
 import { DoctorProfile } from "@/types/user";
 // import { toast } from "@/components/ui/toast"
 
+// Validation schema for address fields
 const AddressSchema = z.object({
   street: z.string().min(1, "Street is required"),
   city: z.string().min(1, "City is required"),
@@ -41,6 +42,7 @@ const AddressSchema = z.object({
   country: z.string().min(1, "Country is required"),
 });
 
+// Validation schema for speciality fields
 const SpecialitySchema = z
   .object({
     name: z.string(),
@@ -61,17 +63,21 @@ const SpecialitySchema = z
     },
   );
 
+// Validation schema for language fields
 const LanguageSchema = z.object({
   name: z.string(),
   level: z.enum(["native", "fluent", "conversational", "basic"]),
 });
 
+// Validation schema for qualification fields
 const QualificationSchema = z.object({
   name: z.string(),
   university: z.string(),
 });
 
+// Maximum file size for profile picture
 const MAX_FILE_SIZE = 5000000;
+// Accepted image mime types
 const ACCEPTED_IMAGE_MIME_TYPES = [
   "image/jpeg",
   "image/jpg",
@@ -79,12 +85,14 @@ const ACCEPTED_IMAGE_MIME_TYPES = [
   "image/webp",
 ];
 
+// Create an array of time strings from 00:00 to 24:00
 const createTimeArray = (): [string, ...string[]] =>
   Array.from(
     { length: 24 },
     (_, hour) => `${hour.toString().padStart(2, "0")}:00:00`,
   ) as [string, ...string[]];
 
+// Profile form validation schema
 const profileFormSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
   last_name: z.string().min(1, "Last name is required"),
@@ -124,16 +132,16 @@ const profileFormSchema = z.object({
     }),
 });
 
+// Infer the type of the profile form values
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export function DoctorProfileForm() {
+  // Initialize hooks and state variables
   const { updateUserProfile, fetchDoctorProfile, doctorProfile } =
     useUserProfileStore();
   const { toast } = useToast();
-
   const { user } = useAuthStore();
   const [previewUrl, setPreviewUrl] = useState("");
-
   const [formDefaultValues, setFormDefaultValues] = useState<
     Partial<ProfileFormValues>
   >({
@@ -149,14 +157,17 @@ export function DoctorProfileForm() {
     languages: [{ name: "", level: "native" }],
   });
 
+  // Initialize react-hook-form with zod resolver
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: formDefaultValues,
     mode: "onChange",
   });
 
+  // Register profile picture field
   const profilePicRef = form.register("profile_pic");
 
+  // UseFieldArray for managing dynamic arrays of fields
   const {
     fields: specialtyFields,
     append: appendSpecialty,
@@ -166,6 +177,7 @@ export function DoctorProfileForm() {
     name: "specialties",
   });
 
+  // UseFieldArray for managing dynamic arrays of fields
   const {
     fields: qualificationFields,
     append: appendQualification,
@@ -175,6 +187,7 @@ export function DoctorProfileForm() {
     name: "qualifications",
   });
 
+  // UseFieldArray for managing dynamic arrays of fields
   const {
     fields: languageFields,
     append: appendLanguage,
@@ -190,7 +203,7 @@ export function DoctorProfileForm() {
       const doctorProfile: DoctorProfile = await fetchDoctorProfile(
         user?.username,
       );
-      // Ensure doctorProfile data is available here
+      // Ensure doctorProfile data is available
       // Then use reset to update form with async fetched values
       setFormDefaultValues({
         ...formDefaultValues,
@@ -229,10 +242,12 @@ export function DoctorProfileForm() {
     loadProfile();
   }, [user, fetchDoctorProfile]);
 
+  // Reset form with default values when formDefaultValues changes
   useEffect(() => {
     form.reset(formDefaultValues);
   }, [formDefaultValues]);
 
+  // Update previewUrl when profile_pic field changes
   useEffect(() => {
     if (form.watch("profile_pic")?.[0]) {
       const file = form.watch("profile_pic")[0];
@@ -241,6 +256,7 @@ export function DoctorProfileForm() {
     }
   }, [form.watch("profile_pic")]);
 
+  // Handle form submission
   function onSubmit(data: ProfileFormValues) {
     if (!user) return;
     if (user.account_type !== "doctor") return;
@@ -291,9 +307,10 @@ export function DoctorProfileForm() {
           Edit your profile
         </h1>
 
-        {/* <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"> */}
+        {/* Personal Information */}
         <h2 className="text-xl font-semibold">Personal Information</h2>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {/* First Name */}
           <FormField
             control={form.control}
             name="first_name"
@@ -307,6 +324,7 @@ export function DoctorProfileForm() {
               </FormItem>
             )}
           />
+          {/* Last Name */}
           <FormField
             control={form.control}
             name="last_name"
@@ -320,6 +338,7 @@ export function DoctorProfileForm() {
               </FormItem>
             )}
           />
+          {/* Description */}
           <FormField
             control={form.control}
             name="description"
@@ -338,6 +357,7 @@ export function DoctorProfileForm() {
             )}
           />
 
+          {/* Profile Picture */}
           <div className="flex items-end justify-center gap-3">
             {/* Image preview */}
             {doctorProfile?.profile_pic && (
@@ -372,6 +392,7 @@ export function DoctorProfileForm() {
         {/* Contact Information */}
         <h2 className="text-xl font-semibold">Contact Information</h2>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {/* Email */}
           <FormField
             control={form.control}
             name="email"
@@ -385,6 +406,7 @@ export function DoctorProfileForm() {
               </FormItem>
             )}
           />
+          {/* Phone */}
           <FormField
             control={form.control}
             name="phone"
@@ -403,6 +425,7 @@ export function DoctorProfileForm() {
         {/* Hospital address */}
         <h2 className="text-xl font-semibold">Hospital Address Details</h2>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {/* Address Fields */}
           <FormField
             control={form.control}
             name="hospital_address.street"
@@ -472,6 +495,7 @@ export function DoctorProfileForm() {
         {/* Professional Information */}
         <h2 className="text-xl font-semibold">Professional Information</h2>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {/* Experience */}
           <FormField
             control={form.control}
             name="experience"
@@ -485,6 +509,7 @@ export function DoctorProfileForm() {
               </FormItem>
             )}
           />
+          {/* Cost */}
           <FormField
             control={form.control}
             name="cost"
@@ -498,6 +523,7 @@ export function DoctorProfileForm() {
               </FormItem>
             )}
           />
+          {/* Currency */}
           <FormField
             control={form.control}
             name="currency"
@@ -511,7 +537,7 @@ export function DoctorProfileForm() {
               </FormItem>
             )}
           />
-
+          {/* Availability */}
           <FormField
             control={form.control}
             name="availability"
@@ -539,6 +565,7 @@ export function DoctorProfileForm() {
               </FormItem>
             )}
           />
+          {/* Availability Start Time */}
           {/* Start from dropdown time 00:00 to 24:00 */}
           <FormField
             control={form.control}
@@ -569,7 +596,7 @@ export function DoctorProfileForm() {
             )}
           />
 
-          {/* End time dropdown */}
+          {/* Availability End Time */}
           <FormField
             control={form.control}
             name="availability_end"
@@ -599,6 +626,7 @@ export function DoctorProfileForm() {
             )}
           />
 
+          {/* Timezone */}
           <FormField
             control={form.control}
             name="timezone"
@@ -654,6 +682,7 @@ export function DoctorProfileForm() {
                 />
               </div>
             ))}
+
             <div className="mt-2 flex flex-wrap gap-3 sm:gap-6">
               <Button
                 type="button"
@@ -726,6 +755,7 @@ export function DoctorProfileForm() {
 
         {/* Additional Personal Details */}
         <h2 className="text-xl font-semibold">Additional Details</h2>
+        {/* Languages */}
         <div className="grid grid-cols-1 gap-4">
           <div>
             {languageFields.map((field, index) => (
@@ -801,6 +831,7 @@ export function DoctorProfileForm() {
           </div>
         </div>
 
+        {/* Update profile button */}
         <Button type="submit">Update profile</Button>
       </form>
     </Form>

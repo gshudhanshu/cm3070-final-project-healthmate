@@ -44,6 +44,7 @@ import { useEffect } from "react";
 import { PatientProfile } from "@/types/user";
 // import { toast } from "@/components/ui/toast"
 
+// Define address schema
 const AddressSchema = z.object({
   street: z.string().min(1, "Street is required"),
   city: z.string().min(1, "City is required"),
@@ -52,10 +53,12 @@ const AddressSchema = z.object({
   country: z.string().min(1, "Country is required"),
 });
 
+// Define language schema
 const LanguageSchema = z.object({
   name: z.string(),
 });
 
+// Define constants for file upload
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_MIME_TYPES = [
   "image/jpeg",
@@ -64,6 +67,7 @@ const ACCEPTED_IMAGE_MIME_TYPES = [
   "image/webp",
 ];
 
+// Define profile form schema
 const profileFormSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
   last_name: z.string().min(1, "Last name is required"),
@@ -97,6 +101,7 @@ const profileFormSchema = z.object({
     }),
 });
 
+// Define type for profile form values
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export function PatientProfileForm() {
@@ -107,6 +112,7 @@ export function PatientProfileForm() {
   const { user } = useAuthStore();
   const [previewUrl, setPreviewUrl] = useState("");
 
+  // Set default form values
   const [formDefaultValues, setFormDefaultValues] = useState<
     Partial<ProfileFormValues>
   >({
@@ -120,6 +126,7 @@ export function PatientProfileForm() {
     languages: [{ name: "" }],
   });
 
+  // Initialize form using useForm hook
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: formDefaultValues,
@@ -127,6 +134,7 @@ export function PatientProfileForm() {
   });
   const profilePicRef = form.register("profile_pic");
 
+  // useFieldArray hook for languages field
   const {
     fields: languageFields,
     append: appendLanguage,
@@ -136,11 +144,12 @@ export function PatientProfileForm() {
     name: "languages",
   });
 
+  // Fetch patient profile on component mount
   useEffect(() => {
     if (user?.username) {
       const loadProfile = async () => {
         const patientProfile = await fetchPatientProfile(user?.username);
-        // Ensure doctorProfile data is available here
+        // Ensure doctorProfile data is available
         // Then use reset to update form with async fetched values
         setFormDefaultValues((prevValues) => ({
           ...prevValues,
@@ -171,10 +180,12 @@ export function PatientProfileForm() {
     }
   }, [user]);
 
+  // Reset form when default values change
   useEffect(() => {
     form.reset(formDefaultValues);
   }, [formDefaultValues, patientProfile]);
 
+  // Update previewUrl when profile_pic field changes
   useEffect(() => {
     if (form.watch("profile_pic")?.[0]) {
       const file = form.watch("profile_pic")[0];
@@ -183,10 +194,12 @@ export function PatientProfileForm() {
     }
   }, [form.watch("profile_pic")]);
 
+  // Handle form submission
   function onSubmit(data: ProfileFormValues) {
     if (!user) return;
     if (user.account_type !== "patient") return;
     try {
+      // Format data
       const formattedData = {
         user: {
           first_name: data.first_name,
@@ -206,6 +219,7 @@ export function PatientProfileForm() {
         blood_group: data.blood_group,
         profile_pic: data.profile_pic[0] ? data.profile_pic[0] : undefined,
       };
+      // Update user profile
       updateUserProfile(user.username, user.account_type, formattedData);
       toast({
         title: "Profile updated",
@@ -232,10 +246,10 @@ export function PatientProfileForm() {
           Edit your profile
         </h1>
 
-        {/* <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"> */}
         {/* Personal Identification Information */}
         <h2 className="text-xl font-semibold">Personal Information</h2>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {/* First Name */}
           <FormField
             control={form.control}
             name="first_name"
@@ -249,7 +263,7 @@ export function PatientProfileForm() {
               </FormItem>
             )}
           />
-
+          {/* Last Name */}
           <FormField
             control={form.control}
             name="last_name"
@@ -264,6 +278,7 @@ export function PatientProfileForm() {
             )}
           />
 
+          {/* Gender */}
           <FormField
             control={form.control}
             name="gender"
@@ -289,7 +304,7 @@ export function PatientProfileForm() {
               </FormItem>
             )}
           />
-
+          {/* Date of Birth */}
           <FormField
             control={form.control}
             name="dob"
@@ -332,6 +347,7 @@ export function PatientProfileForm() {
             )}
           />
 
+          {/* Profile Picture */}
           <div className="flex items-end justify-center gap-3">
             {/* Image preview */}
             {patientProfile?.profile_pic && (
@@ -343,7 +359,7 @@ export function PatientProfileForm() {
                 <AvatarFallback>No Image</AvatarFallback>
               </Avatar>
             )}
-
+            {/* Profile Picture Input */}
             <FormField
               control={form.control}
               name="profile_pic"
@@ -363,9 +379,10 @@ export function PatientProfileForm() {
             />
           </div>
         </div>
-        {/* Contact Information */}
+        {/* Contact Information section */}
         <h2 className="text-xl font-semibold">Contact Information</h2>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {/* Email */}
           <FormField
             control={form.control}
             name="email"
@@ -379,7 +396,7 @@ export function PatientProfileForm() {
               </FormItem>
             )}
           />
-
+          {/* Phone */}
           <FormField
             control={form.control}
             name="phone"
@@ -395,9 +412,10 @@ export function PatientProfileForm() {
           />
         </div>
 
-        {/* address */}
+        {/* Address Details section */}
         <h2 className="text-xl font-semibold">Address Details</h2>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {/* Street Address */}
           <FormField
             control={form.control}
             name="address.street"
@@ -411,6 +429,7 @@ export function PatientProfileForm() {
               </FormItem>
             )}
           />
+          {/* City */}
           <FormField
             control={form.control}
             name="address.city"
@@ -424,6 +443,7 @@ export function PatientProfileForm() {
               </FormItem>
             )}
           />
+          {/* State */}
           <FormField
             control={form.control}
             name="address.state"
@@ -437,6 +457,7 @@ export function PatientProfileForm() {
               </FormItem>
             )}
           />
+          {/* Postal Code */}
           <FormField
             control={form.control}
             name="address.postal_code"
@@ -450,6 +471,7 @@ export function PatientProfileForm() {
               </FormItem>
             )}
           />
+          {/* Country */}
           <FormField
             control={form.control}
             name="address.country"
@@ -465,9 +487,10 @@ export function PatientProfileForm() {
           />
         </div>
 
-        {/* Medical or Personal History */}
+        {/* Medical History section */}
         <h2 className="text-xl font-semibold">Medical History</h2>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {/* Marital Status */}
           <FormField
             control={form.control}
             name="marital_status"
@@ -495,7 +518,7 @@ export function PatientProfileForm() {
               </FormItem>
             )}
           />
-
+          {/* Blood Group */}
           <FormField
             control={form.control}
             name="blood_group"
@@ -509,7 +532,7 @@ export function PatientProfileForm() {
               </FormItem>
             )}
           />
-
+          {/* Height */}
           <FormField
             control={form.control}
             name="height"
@@ -523,7 +546,7 @@ export function PatientProfileForm() {
               </FormItem>
             )}
           />
-
+          {/* Weight */}
           <FormField
             control={form.control}
             name="weight"
@@ -542,6 +565,7 @@ export function PatientProfileForm() {
         {/* Additional Personal Details */}
         <h2 className="text-xl font-semibold">Additional Details</h2>
         <div className="grid grid-cols-1 gap-4">
+          {/* Languages */}
           <div>
             {languageFields.map((field, index) => (
               <div key={field.id} className="flex gap-6">
@@ -585,7 +609,7 @@ export function PatientProfileForm() {
             </div>
           </div>
         </div>
-
+        {/* Timezone */}
         <FormField
           control={form.control}
           name="timezone"
@@ -599,7 +623,7 @@ export function PatientProfileForm() {
             </FormItem>
           )}
         />
-
+        {/* Submit Button */}
         <Button type="submit">Update profile</Button>
       </form>
     </Form>

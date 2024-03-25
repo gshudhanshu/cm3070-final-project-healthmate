@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 export default function AppointmentHistory() {
   const { medicalRecord } = useMedicalRecordsStore();
   const router = useRouter();
+  // function to handle view profile button click
   const handleViewProfile = (username: string) => {
     router.push(`/doctors/${username}`);
   };

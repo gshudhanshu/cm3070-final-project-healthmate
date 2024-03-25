@@ -28,8 +28,11 @@ export function UserNav() {
     fetchDoctorProfile,
   } = useUserProfileStore();
 
+  // Effect hook to fetch user profile data on component mount
   useEffect(() => {
+    // Fetch user profile data if user is logged in
     if (user?.username) {
+      // Determine account type and fetch corresponding profile data
       user.account_type === "doctor"
         ? fetchDoctorProfile(user?.username)
         : fetchPatientProfile(user?.username);
@@ -38,8 +41,10 @@ export function UserNav() {
 
   return (
     <DropdownMenu>
+      {/* Dropdown menu trigger */}
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="dark:hover:bg-slate-700">
+          {/* Avatar component with user image and fallback initials */}
           <Avatar className="h-8 w-8">
             <AvatarImage
               src={
@@ -56,6 +61,7 @@ export function UserNav() {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
+      {/* Dropdown menu content */}
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
@@ -69,12 +75,14 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
+          {/* Profile link */}
           <DropdownMenuItem onClick={() => router.push("/dashboard/profile")}>
             Profile
             {/* <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut> */}
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
+        {/* Log out option */}
         <DropdownMenuItem
           onClick={() => {
             logout();
