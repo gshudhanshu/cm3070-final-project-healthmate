@@ -1,3 +1,5 @@
+# HealthMate - Comprehensive Health Management Platform
+
 HealthMate is designed as a comprehensive health management platform, aiming to streamline patient-practitioner interactions, appointment scheduling, medical records management, and more. The repository is divided into two primary sections: the client and the server, each with its own Dockerfile for containerization, facilitating deployment in various environments.
 
 ### Client
