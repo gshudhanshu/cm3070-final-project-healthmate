@@ -2,10 +2,11 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
-import ForgetForm from "./password-reset-form"; // Adjust the import path as needed
+import ForgetForm from "./password-reset-form";
 import * as z from "zod";
-import { toast } from "../ui/use-toast"; // Import toast function for mocking
+import { toast } from "../ui/use-toast";
 
+// Mocking axios and next/navigation
 jest.mock("axios");
 jest.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -16,9 +17,12 @@ jest.mock("next/navigation", () => ({
     token: "test-token",
   }),
 }));
+
+// Mocking use-toast hook
 jest.mock("../ui/use-toast");
 
 describe("ForgetForm Component", () => {
+  // Setting up before each test
   beforeEach(() => {
     render(<ForgetForm />);
   });
@@ -33,8 +37,9 @@ describe("ForgetForm Component", () => {
   });
 
   it("submits with valid data and calls API", async () => {
+    // Mocking resolved value for axios post
     axios.post.mockResolvedValue({});
-
+    // Typing valid passwords
     await userEvent.type(
       screen.getByPlaceholderText("Enter your new password"),
       "newPassword123",
@@ -44,8 +49,10 @@ describe("ForgetForm Component", () => {
       "newPassword123",
     );
 
+    // Clicking the submit button
     fireEvent.click(screen.getByRole("button", { name: /submit/i }));
 
+    // Waiting for the async action and assertions
     await waitFor(() =>
       expect(axios.post).toHaveBeenCalledWith(
         `${process.env.API_URL}/auth/users/reset_password_confirm/`,
@@ -61,6 +68,8 @@ describe("ForgetForm Component", () => {
 
   it("displays error message on API failure", async () => {
     const errorMessage = "Failed to reset password";
+
+    // Mocking rejected value for axios post
     axios.post.mockRejectedValueOnce({
       response: {
         data: {
@@ -69,6 +78,7 @@ describe("ForgetForm Component", () => {
       },
     });
 
+    // Typing valid passwords
     await userEvent.type(
       screen.getByPlaceholderText("Enter your new password"),
       "newPassword123",
@@ -77,8 +87,10 @@ describe("ForgetForm Component", () => {
       screen.getByPlaceholderText("Confirm your new password"),
       "newPassword123",
     );
+    // Clicking the submit button
     fireEvent.click(screen.getByRole("button", { name: /submit/i }));
 
+    // Waiting for the async action and assertions
     await waitFor(() =>
       expect(toast).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -90,6 +102,7 @@ describe("ForgetForm Component", () => {
   });
 
   it("validates password match before submitting", async () => {
+    // Typing different passwords
     await userEvent.type(
       screen.getByPlaceholderText("Enter your new password"),
       "newPassword123",
@@ -98,16 +111,20 @@ describe("ForgetForm Component", () => {
       screen.getByPlaceholderText("Confirm your new password"),
       "differentPassword123",
     );
+
+    // Clicking the submit button
     fireEvent.click(screen.getByRole("button", { name: /submit/i }));
 
+    // Waiting for the async action and assertions
     await waitFor(() => {
       expect(screen.queryByText(/passwords do not match/i)).toBeInTheDocument();
     });
   });
 
   it("shows success notification on successful password reset", async () => {
+    // Mocking resolved value for axios post
     axios.post.mockResolvedValue({});
-
+    // Typing valid passwords
     await userEvent.type(
       screen.getByPlaceholderText("Enter your new password"),
       "newPassword123",
@@ -116,8 +133,10 @@ describe("ForgetForm Component", () => {
       screen.getByPlaceholderText("Confirm your new password"),
       "newPassword123",
     );
+    // Clicking the submit button
     fireEvent.click(screen.getByRole("button", { name: /submit/i }));
 
+    // Waiting for the async action and assertions
     await waitFor(() =>
       expect(toast).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -128,6 +147,4 @@ describe("ForgetForm Component", () => {
       ),
     );
   });
-
-  // Add more tests as needed
 });

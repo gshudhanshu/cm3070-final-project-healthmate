@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { useMessagesStore } from "@/store/useMessageStore";
 import { useAuthStore } from "@/store/useAuthStore";
 
+// Import dayjs and its plugins
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone.js";
 import utc from "dayjs/plugin/utc.js";
@@ -36,17 +37,18 @@ export default function AppointmentCard({
   const { selectConversation } = useMessagesStore();
   const { user } = useAuthStore();
 
+  // Function to handle joining conversation
   const handleJoinConversation = () => {
     selectConversation(appointment.conversation);
     router.push(`/dashboard/messages`);
   };
 
-  console.log(appointment);
-
+  // If appointment is null, return null
   if (!appointment) return null;
   return (
     <Card key={appointment.id} className={cn("", className)}>
       <CardHeader>
+        {/* Rendering patient or doctor name based on user account type */}
         <CardTitle>
           {user?.account_type === "doctor" &&
             appointment.patient.first_name +
@@ -57,6 +59,7 @@ export default function AppointmentCard({
               " " +
               appointment.doctor.user.last_name}
         </CardTitle>
+        {/* Rendering formatted date and time */}
         <CardDescription>
           {dayjs(appointment.datetime_utc)
             .tz(dayjs.tz.guess())
@@ -67,10 +70,12 @@ export default function AppointmentCard({
           - 1 Hr
         </CardDescription>
       </CardHeader>
+      {/* Rendering appointment purpose */}
       <CardContent>
         <p>Purpose: {appointment.purpose}</p>
       </CardContent>
       <CardFooter>
+        {/* Join button to join conversation */}
         <Button onClick={handleJoinConversation}>Join</Button>
       </CardFooter>
     </Card>

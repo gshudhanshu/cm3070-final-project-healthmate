@@ -26,6 +26,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import PlusBox from "@/components/plus-box";
 import { useState } from "react";
 
+// Define form schema using Zod
 const formSchema = z
   .object({
     username: z.string().min(1, "Username is required").max(100),
@@ -39,14 +40,17 @@ const formSchema = z
     re_password: z.string().min(1, "Password confirmation is required"),
     account_type: z.enum(["patient", "doctor"]),
   })
+  // Refining schema to ensure password and its confirmation match
   .refine((data) => data.password === data.re_password, {
     path: ["re_password"],
     message: "Password do not match",
   });
 
+// Define types based on form schema
 type FormSchema = z.infer<typeof formSchema>;
 type FormFieldNames = keyof FormSchema;
 
+// Configuration for form fields
 const formFieldsConfig: Array<{
   name: FormFieldNames;
   label: string;
@@ -103,6 +107,8 @@ export default function RegisterForm({
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
   const router = useRouter();
+
+  // Initialize form using react-hook-form with the defined schema and default values
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -116,26 +122,35 @@ export default function RegisterForm({
     },
   });
 
+  // State to hold server error messages
   const [serverErrorMessages, setServerErrorMessages] = useState<Record<
     string,
     string[]
   > | null>(null);
+
+  // State to hold registration status message
   const [registrationStatusMessage, setRegistrationStatusMessage] =
     useState("");
 
+  // Function to handle form submission
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    // Setting headers for the axios request
     try {
       const headers = {
         "Content-Type": "application/json",
       };
+
+      // Sending a POST request to the API endpoint for user registration
       const response = await axios.post(
         `${process.env.API_URL}/auth/users/`,
         values,
         { headers },
       );
 
+      // Handling successful registration
       if (response.status === 201) {
         console.log("User created successfully");
+        // Setting registration status message and redirecting to login after a delay
         setRegistrationStatusMessage(
           "Registration successful! Please check your email to activate your account.",
         );
@@ -143,9 +158,9 @@ export default function RegisterForm({
           router.push("/auth/login");
         }, 5000);
       }
-      console.log(response);
     } catch (error: any) {
       console.log(error);
+      // Handling errors
       if (error.response && error.response.data) {
         // Parse error response from Djoser
         setServerErrorMessages(error.response.data);
@@ -179,13 +194,16 @@ export default function RegisterForm({
           </div>
         )}
       </div>
+      {/* Form component to handle form submission */}
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex w-full flex-col gap-4"
         >
+          {/* Mapping form fields configuration to form fields */}
           {formFieldsConfig.map((fieldData) =>
             fieldData.type === "radio" ? (
+              // Rendering radio group for account type selection
               <FormField
                 key={fieldData.name}
                 control={form.control}
@@ -199,6 +217,7 @@ export default function RegisterForm({
                         defaultValue={field.value}
                         className="flex flex-col space-y-1"
                       >
+                        {/* Rendering radio options for account types */}
                         {fieldData.types?.map((type) => (
                           <FormItem
                             key={type}
@@ -219,6 +238,7 @@ export default function RegisterForm({
                 )}
               />
             ) : (
+              // Rendering regular form fields
               <FormField
                 key={fieldData.name}
                 control={form.control}
@@ -239,7 +259,9 @@ export default function RegisterForm({
               />
             ),
           )}
+          {/* Submit button for form submission */}
           <Button type="submit">Submit</Button>
+          {/* Links for registration and password recovery */}
           <div className="mb-8 flex items-center justify-between">
             <FormDescription>
               Don&rsquo;t have an account?{" "}

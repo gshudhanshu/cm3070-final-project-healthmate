@@ -6,10 +6,13 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast";
 
+// Mocking axios and useRouter
 jest.mock("axios");
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
 }));
+
+// Mocking use-toast module
 jest.mock("@/components/ui/use-toast"),
   () => ({
     toast: jest.fn(),
@@ -25,6 +28,7 @@ describe("ForgetForm Component", () => {
   it("renders the form and accepts input", () => {
     render(<ForgetForm />);
     const emailInput = screen.getByPlaceholderText(/example@email.com/i);
+    // Simulate user input
     fireEvent.change(emailInput, { target: { value: "test@example.com" } });
     expect(emailInput.value).toBe("test@example.com");
   });
@@ -58,6 +62,7 @@ describe("ForgetForm Component", () => {
     const emailInput = getByLabelText(/Email/i);
     const submitButton = getByRole("button", { name: /Submit/i });
 
+    // Simulate user input and form submission
     fireEvent.change(emailInput, { target: { value: "unknown@example.com" } });
     fireEvent.click(submitButton);
 

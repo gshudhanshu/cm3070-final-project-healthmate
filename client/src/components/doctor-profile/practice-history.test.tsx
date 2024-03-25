@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import PracticeHistory from "./practice-history"; // Adjust the import path as needed
+import PracticeHistory from "./practice-history";
 
 describe("PracticeHistory Component", () => {
   it("renders without crashing", () => {
@@ -11,12 +11,13 @@ describe("PracticeHistory Component", () => {
 
   it("displays the correct number of reviews and their details", () => {
     render(<PracticeHistory />);
-    // Assuming there's only one review in the initial setup
     const reviews = screen.getAllByText(/Lorem ipsum dolor sit amet.../i);
-    expect(reviews).toHaveLength(1); // Adjust according to the actual number of initial reviews
+    // Expects one review with the provided text
+    expect(reviews).toHaveLength(1);
 
     const rating = screen.getAllByTestId("star-icon");
-    expect(rating).toHaveLength(5); // Checks for 5 stars in total, adjust if your logic for displaying stars differs
+    // Checks for 5 stars in total
+    expect(rating).toHaveLength(5);
   });
 
   it('renders the "Load More" button', () => {

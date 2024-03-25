@@ -27,6 +27,7 @@ import PlusBox from "@/components/plus-box";
 import { useState } from "react";
 import { toast } from "../ui/use-toast";
 
+// Defining form schema
 const formSchema = z
   .object({
     uid: z.string(),
@@ -45,6 +46,7 @@ const formSchema = z
 type FormSchema = z.infer<typeof formSchema>;
 type FormFieldNames = keyof FormSchema;
 
+// Configuration for form fields
 const formFieldsConfig: Array<{
   name: FormFieldNames;
   label: string;
@@ -71,8 +73,10 @@ export default function ForgetForm({
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
   const router = useRouter();
+  // Hook for accessing parameters from URL
   const params = useParams();
 
+  // handling form state and validation
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -83,8 +87,10 @@ export default function ForgetForm({
     },
   });
 
+  // State for storing server error messages
   const [serverErrorMessage, setServerErrorMessage] = useState("");
 
+  // Function to handle form submission
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       // Call the API to send the password reset email
@@ -93,6 +99,7 @@ export default function ForgetForm({
         values,
       );
 
+      // Display success toast
       toast({
         title: "Password reset successful",
         description:
@@ -102,6 +109,7 @@ export default function ForgetForm({
       // router.push("/dashboard");
     } catch (error: any) {
       console.log(error);
+      // Display error toast
       toast({
         title: "Error",
         description:
@@ -135,6 +143,7 @@ export default function ForgetForm({
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex w-full flex-col gap-4"
         >
+          {/* Rendering form fields */}
           {formFieldsConfig.map((fieldData) => (
             <FormField
               key={fieldData.name}
@@ -155,7 +164,9 @@ export default function ForgetForm({
               )}
             />
           ))}
+          {/* Submit button */}
           <Button type="submit">Submit</Button>
+          {/* Links for registration and login */}
           <div className="mb-8 flex items-center justify-between">
             <FormDescription>
               Don&rsquo;t have an account?{" "}

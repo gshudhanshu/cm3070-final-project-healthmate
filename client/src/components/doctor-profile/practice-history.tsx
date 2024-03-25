@@ -2,6 +2,7 @@ import React from "react";
 import { StarIcon } from "@heroicons/react/24/solid";
 
 export default function PracticeHistory() {
+  // Dummy data for reviews
   const reviews = [
     {
       name: "Rahul G.",
@@ -9,20 +10,23 @@ export default function PracticeHistory() {
       rating: 5,
       comment: "Lorem ipsum dolor sit amet...",
     },
-    // More reviews...
   ];
 
   return (
     <>
+      {/* Practice History Section */}
       <div className="border-t border-gray-200">
         <dl>
           <div className="bg-gray-50 px-4 py-5 sm:px-6">
+            {/* Title */}
             <h4 className="text-sm font-medium text-gray-500">
               Telemedicine Practice History
             </h4>
             <div className="mt-4 space-y-4">
+              {/* Render each review */}
               {reviews.map((review, index) => (
                 <div key={index} className="flex items-center space-x-4">
+                  {/* Star Ratings */}
                   <div className="flex items-center">
                     {[...Array(5)].map((_, i) => (
                       <StarIcon
@@ -35,6 +39,7 @@ export default function PracticeHistory() {
                       />
                     ))}
                   </div>
+                  {/* Review Comment */}
                   <div className="text-sm text-gray-600">{review.comment}</div>
                 </div>
               ))}
@@ -42,6 +47,7 @@ export default function PracticeHistory() {
           </div>
         </dl>
       </div>
+      {/* Load More Button */}
       <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
         <button
           type="button"

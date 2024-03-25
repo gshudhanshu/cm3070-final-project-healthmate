@@ -1,7 +1,8 @@
 // @ts-nocheck
 import { render, screen } from "@testing-library/react";
-import AboutMe from "./about-me"; // Adjust the import path as needed
+import AboutMe from "./about-me";
 
+// Mock doctor data
 const mockDoctor = {
   specialties: [
     { id: 1, name: "Cardiology" },

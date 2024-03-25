@@ -2,12 +2,14 @@
 import { render, screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import ReviewsSection from "./reviews"; // Adjust the import path as needed
-import * as reviewStoreHook from "@/store/useReviewStore"; // Adjust the import path as needed
+import ReviewsSection from "./reviews";
+import * as reviewStoreHook from "@/store/useReviewStore";
 import dayjs from "dayjs";
 
-jest.mock("@/store/useReviewStore"); // Mock the useReviewStore hook
+// Mock the useReviewStore hook
+jest.mock("@/store/useReviewStore");
 
+// Mock the doctor object
 const mockDoctor = {
   user: {
     username: "johndoe",
@@ -18,6 +20,7 @@ const mockDoctor = {
 
 describe("ReviewsSection Component", () => {
   it("displays loading component while reviews are being fetched", () => {
+    // Mock the useReviewStore hook to return loading state
     reviewStoreHook.useReviewStore.mockImplementation(() => ({
       isLoading: true,
       error: null,
@@ -30,6 +33,7 @@ describe("ReviewsSection Component", () => {
   });
 
   it("displays error component when there is an error fetching reviews", () => {
+    // Mock the useReviewStore hook to return an error
     reviewStoreHook.useReviewStore.mockImplementation(() => ({
       isLoading: false,
       error: "Error fetching reviews",
@@ -53,6 +57,7 @@ describe("ReviewsSection Component", () => {
       },
     ];
 
+    // Mock the useReviewStore hook to return the mock reviews
     reviewStoreHook.useReviewStore.mockImplementation(() => ({
       isLoading: false,
       error: null,
@@ -65,6 +70,7 @@ describe("ReviewsSection Component", () => {
   });
 
   it('calls fetchReviews when "Load More" is clicked', () => {
+    // Mock the useReviewStore hook to return an empty reviews array
     const fetchReviewsMock = jest.fn();
     reviewStoreHook.useReviewStore.mockImplementation(() => ({
       isLoading: false,

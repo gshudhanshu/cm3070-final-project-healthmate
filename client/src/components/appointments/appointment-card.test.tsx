@@ -7,29 +7,35 @@ import { useRouter } from "next/navigation";
 import { useMessagesStore } from "@/store/useMessageStore";
 import { useAuthStore } from "@/store/useAuthStore";
 
+// Mocking next/navigation useRouter hook
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
 }));
 
+// Mocking useMessagesStore hook
 jest.mock("@/store/useMessageStore", () => ({
   useMessagesStore: jest.fn(),
 }));
 
+// Mocking useAuthStore hook
 jest.mock("@/store/useAuthStore", () => ({
   useAuthStore: jest.fn(),
 }));
 
+// Mocking useRouter's push function
 const push = jest.fn();
 useRouter.mockImplementation(() => ({
   push,
 }));
 
+// Mocking selectConversation function
 const selectConversation = jest.fn();
 useMessagesStore.mockImplementation(() => ({
   selectConversation,
 }));
 
 describe("AppointmentCard", () => {
+  // Mock appointment data
   const mockAppointment = {
     id: 1,
     conversation: "conversationId",
@@ -46,6 +52,7 @@ describe("AppointmentCard", () => {
     purpose: "Consultation",
   };
 
+  // Mocking user data for useAuthStore hook
   useAuthStore.mockImplementation(() => ({
     user: {
       account_type: "doctor",

@@ -25,8 +25,11 @@ export default function ReviewsSection({ doctor }: { doctor: DoctorProfile }) {
     }
   };
 
-  if (isLoading) return <LoadingComponent/>;
-  if (error) return <ErrorComponent/>;
+  // Display loading component while fetching reviews
+  if (isLoading) return <LoadingComponent />;
+
+  // Display error component if there is an error fetching reviews
+  if (error) return <ErrorComponent />;
 
   return reviews ? (
     <>
@@ -35,6 +38,7 @@ export default function ReviewsSection({ doctor }: { doctor: DoctorProfile }) {
           <div className="">
             <h4 className="text-xl font-bold">Telemedicine Practice History</h4>
             <div className="mt-4 space-y-4">
+              {/* Render the reviews from an array */}
               {reviews.map((review, index) => (
                 <div key={index} className="flex flex-col items-start ">
                   <p className="font-bold">{review.patient_name}</p>

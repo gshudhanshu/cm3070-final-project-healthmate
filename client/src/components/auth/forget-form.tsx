@@ -27,12 +27,14 @@ import PlusBox from "@/components/plus-box";
 import { useState } from "react";
 import { toast } from "../ui/use-toast";
 
+// Defining form schema using zod
 const formSchema = z.object({
   email: z.string().min(1, "Username is required").max(100),
 });
 type FormSchema = z.infer<typeof formSchema>;
 type FormFieldNames = keyof FormSchema;
 
+// Configuration for form fields
 const formFieldsConfig: Array<{
   name: FormFieldNames;
   label: string;
@@ -62,6 +64,7 @@ export default function ForgetForm({
 
   const [serverErrorMessage, setServerErrorMessage] = useState("");
 
+  // Function to handle form submission
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       // Call the API to send the password reset email
@@ -70,6 +73,7 @@ export default function ForgetForm({
         values,
       );
 
+      // Display success message using toast
       toast({
         title: "Reset password email sent",
         description:
@@ -79,6 +83,7 @@ export default function ForgetForm({
       // router.push("/dashboard");
     } catch (error: any) {
       console.log(error);
+      // Display error message using toast
       toast({
         title: "Error",
         description:
@@ -95,9 +100,11 @@ export default function ForgetForm({
 
   return (
     <div className={cn("flex w-full flex-col gap-6", className)}>
+      {/* PlusBox for decorative purpose */}
       <div className="flex justify-center">
         <PlusBox />
       </div>
+      {/* Title */}
       <h1 className="text-center text-2xl font-bold">Forget password</h1>
       {/* Display server error messages if they exist */}
       <div>
@@ -107,11 +114,13 @@ export default function ForgetForm({
           </div>
         )}
       </div>
+      {/* Form component */}
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex w-full flex-col gap-4"
         >
+          {/* Rendering form fields dynamically */}
           {formFieldsConfig.map((fieldData) => (
             <FormField
               key={fieldData.name}
@@ -132,7 +141,9 @@ export default function ForgetForm({
               )}
             />
           ))}
+          {/* Submit Button */}
           <Button type="submit">Submit</Button>
+          {/* Links for registration and login */}
           <div className="mb-8 flex items-center justify-between">
             <FormDescription>
               Don&rsquo;t have an account?{" "}

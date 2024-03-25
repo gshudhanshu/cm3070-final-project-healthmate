@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import ErrorComponent from "./error"; // Adjust the import path as needed
+import ErrorComponent from "./error";
 
 describe("ErrorComponent", () => {
   it("displays the default error message when no message is provided", () => {

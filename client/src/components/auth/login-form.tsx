@@ -26,6 +26,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import PlusBox from "@/components/plus-box";
 import { useState } from "react";
 
+// Defining form schema and field configurations
 const formSchema = z.object({
   username: z.string().min(1, "Username is required").max(100),
   password: z
@@ -62,6 +63,7 @@ export default function LoginForm({
   className,
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
+  // Initializing useRouter and useForm hooks
   const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -71,13 +73,17 @@ export default function LoginForm({
     },
   });
 
+  // State variable for server error message
   const [serverErrorMessage, setServerErrorMessage] = useState("");
 
   const { login } = useAuthStore();
 
+  // Function to handle form submission
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    // Attempting to login with provided credentials
     try {
       await login(values.username, values.password);
+      // Redirecting to dashboard on successful login
       router.push("/dashboard");
     } catch (error: any) {
       console.log(error);
@@ -102,6 +108,7 @@ export default function LoginForm({
           </div>
         )}
       </div>
+      {/* Rendering the login form */}
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -142,6 +149,7 @@ export default function LoginForm({
                 )}
               />
             ) : (
+              // Rendering input field for other types
               <FormField
                 key={fieldData.name}
                 control={form.control}
@@ -162,7 +170,9 @@ export default function LoginForm({
               />
             ),
           )}
+          {/* Submit button */}
           <Button type="submit">Submit</Button>
+          {/* Links for registration and forgot password */}
           <div className="mb-8 flex items-center justify-between">
             <FormDescription>
               Don&rsquo;t have an account?{" "}

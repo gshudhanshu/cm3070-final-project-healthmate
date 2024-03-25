@@ -12,6 +12,7 @@ export default function AboutMe({
 }) {
   return (
     <section className={cn("flex flex-col gap-5", className)}>
+      {/* Display Speciality */}
       <div className="flex flex-col gap-1">
         <dt className="font-medium ">Speciality</dt>
         {doctor?.specialties?.map((speciality, index) => (
@@ -23,12 +24,14 @@ export default function AboutMe({
           </dd>
         ))}
       </div>
+      {/* Display Experience */}
       <div className="flex flex-col gap-1">
         <dt className="font-medium ">Experience</dt>
         <dd className="mt-1 flex items-center gap-1 text-sm sm:col-span-2 sm:mt-0">
           {doctor.experience} years
         </dd>
       </div>
+      {/* Display Languages */}
       <div className="flex flex-col gap-1">
         <dt className="font-medium ">Languages</dt>
         {doctor?.languages?.map((language, index) => (
@@ -40,6 +43,7 @@ export default function AboutMe({
           </dd>
         ))}
       </div>
+      {/* Display Qualifications */}
       <div className="flex flex-col gap-1">
         <dt className="font-medium">Qualifications</dt>
         <div className="flex flex-col gap-3 ">
