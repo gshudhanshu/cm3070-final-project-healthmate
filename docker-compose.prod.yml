@@ -10,7 +10,7 @@ services:
     tty: true
     working_dir: /src
     ports:
-      - '8000:8000'
+      - '8001:8000'
     volumes:
       - ./server:/src
       - static_volume:/src/static
@@ -31,7 +31,7 @@ services:
     tty: true
     working_dir: /src
     ports:
-      - '3000:3000'
+      - '3001:3000'
     volumes:
       - ./client:/src
     command: >
