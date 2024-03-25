@@ -6,7 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 # Set work directory
-WORKDIR /
+WORKDIR /src
 
 # Install system dependencies
 RUN apt-get update && \
@@ -18,12 +18,12 @@ RUN apt-get update && \
 RUN ls -la
 
 # Install Python dependencies
-COPY requirements.txt .
+COPY requirements.txt /src/
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
 # Copy project
-COPY . .
+COPY . /src/
 
 # Collect static files
 RUN python manage.py collectstatic --noinput
