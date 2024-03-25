@@ -5,9 +5,11 @@ import axios from "axios";
 import { MedicalRecord } from "@/types/medicalRecord";
 import { toast } from "@/components/ui/use-toast";
 
+// Define the base URL for medical records endpoint
 const API_URL = process.env.API_URL;
 const MEDICAL_RECORDS_URL = `${API_URL}/medical_records`;
 
+// Define the interface for the medical records state
 interface MedicalRecordsState {
   medicalRecord: MedicalRecord | null;
   fetchMedicalRecords: (
@@ -24,9 +26,11 @@ interface MedicalRecordsState {
 export const useMedicalRecordsStore = create(
   devtools<MedicalRecordsState>((set, get) => ({
     medicalRecord: null,
+    // Function to fetch medical records for a user
     fetchMedicalRecords: async (username, conversationId) => {
       const { token } = useAuthStore.getState();
       try {
+        // Fetch medical records from the API
         const response = await axios.get(`${MEDICAL_RECORDS_URL}/`, {
           params: {
             username,
@@ -37,13 +41,16 @@ export const useMedicalRecordsStore = create(
           },
         });
         console.log(response);
+        // Update medicalRecord state
         set({ medicalRecord: response.data });
       } catch (error) {
         console.error("Fetching medical records failed:", error);
       }
     },
+    // Function to add a new medical record
     addMedicalRecord: async (recordData) => {
       try {
+        // Send a POST request to add the medical record
         const response = await axios.post(
           `${MEDICAL_RECORDS_URL}/`,
           recordData,
@@ -56,11 +63,13 @@ export const useMedicalRecordsStore = create(
         // set((state) => ({
         //   medicalRecord: response.data,
         // }));
+
         toast({
           title: "Medical record added",
           description: "New medical record has been added",
         });
       } catch (error: any) {
+        // Handle errors
         toast({
           title: "Failed to add medical record",
           description: error.message,
@@ -68,8 +77,10 @@ export const useMedicalRecordsStore = create(
         });
       }
     },
+    // Function to update an existing medical record
     updateMedicalRecord: async (recordId, recordData) => {
       try {
+        // Send a PATCH request to update the medical record
         const response = await axios.patch(
           `${MEDICAL_RECORDS_URL}${recordId}/`,
           recordData,
@@ -79,6 +90,7 @@ export const useMedicalRecordsStore = create(
             },
           },
         );
+        // Update medicalRecord state
         set((state) => ({ medicalRecord: response.data }));
       } catch (error) {
         console.error("Updating medical record failed:", error);

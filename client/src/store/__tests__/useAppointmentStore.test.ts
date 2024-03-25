@@ -4,8 +4,10 @@ import axios from "axios";
 import { useAppointmentStore } from "../useAppointmentStore";
 import { useAuthStore } from "../useAuthStore";
 
+// Mock the environment variables
 const API_URL = process.env.API_URL;
 const APPOINTMENTS_URL = `${API_URL}/appointments/`;
+// Define mock appointments data
 const mockAppointments = [
   { id: 1, title: "Appointment 1", date: "2023-01-01" },
   { id: 2, title: "Appointment 2", date: "2023-01-02" },
@@ -21,6 +23,7 @@ describe("useAppointmentStore", () => {
     useAuthStore.setState({ token: "test-token" });
   });
 
+  // Reset the axios mock and the appointments state after each test
   afterEach(() => {
     mockAxios.reset();
     useAppointmentStore.setState({ appointments: null });

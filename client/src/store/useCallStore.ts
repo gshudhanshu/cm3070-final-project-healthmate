@@ -4,9 +4,11 @@ import { useMessagesStore } from "@/store/useMessageStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import axios from "axios";
 
+// Define the base URL for the API and WebSocket
 const API_URL = process.env.API_URL;
 const SOCKET_URL = `ws://127.0.0.1:8000/`;
 
+// Define the shape of the call state
 interface CallState {
   callWebSocket: any;
   connectCallWebSocket: (callId: string) => void;
@@ -27,6 +29,7 @@ interface CallState {
 }
 
 export const useCallStore = create<CallState>((set, get) => ({
+  // Initialize state
   callWebSocket: null,
   callData: null,
   conversationId: null,
@@ -35,6 +38,7 @@ export const useCallStore = create<CallState>((set, get) => ({
   localStream: undefined,
   remoteStream: undefined,
 
+  // Function to fetch call data
   getCallData: (callId: string) => {
     const token = useAuthStore.getState().token;
     axios
@@ -51,6 +55,7 @@ export const useCallStore = create<CallState>((set, get) => ({
       });
   },
 
+  // Function to initiate a call
   initiateCall: async (conversationId: any) => {
     const token = useAuthStore.getState().token;
 
@@ -76,7 +81,7 @@ export const useCallStore = create<CallState>((set, get) => ({
     }
   },
 
-  // Method to connect to WebSocket for signaling
+  // Function to connect to WebSocket for signaling
   connectCallWebSocket: (callId) => {
     const { token } = useAuthStore.getState();
     const callWebSocket = new WebSocket(
@@ -85,6 +90,7 @@ export const useCallStore = create<CallState>((set, get) => ({
     callWebSocket.onopen = () => console.log("Call WebSocket Connected");
     callWebSocket.onmessage = (event) => {
       const data = JSON.parse(event.data);
+
       // Handle different types of messages
       console.log("Call WebSocket Message:", data);
 
@@ -102,11 +108,13 @@ export const useCallStore = create<CallState>((set, get) => ({
     set({ callWebSocket });
   },
 
+  // Function to disconnect WebSocket
   disconnectCallWebSocket: () => {
     get().callWebSocket?.close();
     set({ callWebSocket: null });
   },
 
+  // Function to start a call
   startCall: (stream) => {
     const { callWebSocket, conversationId } = get();
     if (!stream || !callWebSocket) {
@@ -144,7 +152,7 @@ export const useCallStore = create<CallState>((set, get) => ({
     });
   },
 
-  // Method to handle incoming offer
+  // Function to handle incoming offer
   handleOffer: (offer) => {
     const { callWebSocket, localStream, conversationId } = get();
     const peer = new SimplePeer({
@@ -178,7 +186,7 @@ export const useCallStore = create<CallState>((set, get) => ({
     set({ peer, isCallActive: true });
   },
 
-  // Method to handle incoming answer
+  // Function to handle incoming answer
   handleAnswer: (answer) => {
     const peer = get().peer;
     if (peer) {
@@ -186,7 +194,7 @@ export const useCallStore = create<CallState>((set, get) => ({
     }
   },
 
-  // Method to handle ICE candidates
+  // Function to handle ICE candidates
   handleIceCandidate: (candidate) => {
     const peer = get().peer;
     if (peer) {
@@ -194,7 +202,7 @@ export const useCallStore = create<CallState>((set, get) => ({
     }
   },
 
-  // Method to end the call
+  // Function to end the call
   endCall: () => {
     const { peer, localStream } = get();
     if (peer) {
@@ -206,6 +214,7 @@ export const useCallStore = create<CallState>((set, get) => ({
       console.error("Invalid stream object:", localStream);
     }
 
+    // Reset the call state
     set({
       callData: null,
       conversationId: null,

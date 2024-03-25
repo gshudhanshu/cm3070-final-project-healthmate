@@ -7,8 +7,11 @@ import { DoctorProfile } from "@/types/user";
 import { SearchParams } from "@/types/findDoc";
 import { toast } from "@/components/ui/use-toast";
 
+// Define API endpoints
 const API_URL = process.env.API_URL;
 const SEARCH_DOCTORS_URL = `${API_URL}/user_profile/doctors`;
+
+// Define the shape of the state for finding doctors
 
 interface FindDocState {
   doctors: DoctorProfile[];
@@ -54,6 +57,7 @@ export const useFindDocStore = create(
       current_page: 1,
       total_pages: 0,
     },
+    // Function to search for doctors
     searchDoctors: async () => {
       const { searchParams } = get();
       console.log("Searching doctors with params:", searchParams);
@@ -67,6 +71,7 @@ export const useFindDocStore = create(
             });
           },
         });
+        // Update state with search results and pagination information
         set({
           doctors: response.data.results,
           pagination: {
@@ -81,10 +86,12 @@ export const useFindDocStore = create(
         console.error("Searching doctors failed:", error);
       }
     },
+    // Function to set search parameters
     setSearchParams: (params) => {
       set((state) => ({ searchParams: { ...state.searchParams, ...params } }));
     },
 
+    // Function to fetch doctor with available slots
     fetchDoctorWithSlots: async (
       username: string,
       datetime: string,
@@ -95,26 +102,31 @@ export const useFindDocStore = create(
         params = { datetime, timezone };
       }
       try {
+        // Send GET request to fetch doctor with available slots
         const response = await axios.get(`${SEARCH_DOCTORS_URL}/${username}`, {
           params: { ...params },
         });
 
+        // Update state with doctor's available slots
         set({ doctorSlots: response.data });
       } catch (error) {
         console.error("Fetching doctor failed:", error);
       }
     },
+    // Function to book an appointment
     bookAppointment: async (
       doctorUsername: string,
       datetime_utc: string,
       purpose: string,
     ) => {
+      // Send POST request to book an appointment
       try {
         const response = await axios.post(`${API_URL}/appointments/`, {
           doctor: doctorUsername,
           datetime_utc,
           purpose,
         });
+        // Handle successful booking
         if (response.status === 201) {
           console.log("Appointment booked successfully:", response.data);
           set({ purpose: "" });
@@ -123,6 +135,7 @@ export const useFindDocStore = create(
             description: "Please come on time for your appointment.",
           });
         } else {
+          // Display error message if booking failed
           toast({
             title: "Booking appointment failed",
             description: response?.data || "",
@@ -130,6 +143,7 @@ export const useFindDocStore = create(
           });
         }
       } catch (error: any) {
+        // Log and display error message if booking failed
         console.error("Booking appointment failed:", error);
         toast({
           title: "Booking appointment failed",

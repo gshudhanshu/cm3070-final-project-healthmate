@@ -13,10 +13,12 @@ import {
   MessageData,
 } from "@/types/conversation";
 
+// Define the base URL for API endpoints
 const API_URL = process.env.API_URL;
 const CONVERSATIONS_URL = `${API_URL}/conversations/`;
 const SOCKET_URL = `ws://127.0.0.1:8000/`;
 
+// Define the interface for the messages state
 interface MessagesState {
   websocket: any;
   messages: Message[];
@@ -44,8 +46,8 @@ export const useMessagesStore = create(
     messages: [],
     selectedConversation: null,
     isSidebarVisible: true, // Initially, the sidebar is visible
+    // Function to fetch conversations for a user
     fetchConversations: async (username: string) => {
-      // Placeholder for fetching contacts logic
       console.log("Fetching contacts for user:", username);
       const { token } = useAuthStore.getState();
       const response = await axios.get(`${CONVERSATIONS_URL}`, {
@@ -55,8 +57,8 @@ export const useMessagesStore = create(
       });
       set({ conversations: response.data });
     },
+    // Function to fetch messages for a conversation
     fetchMessages: async (conversationId: number) => {
-      // Placeholder for fetching messages logic
       console.log("Fetching messages for contact:", conversationId);
       const { token } = useAuthStore.getState();
       const response = await axios.get(
@@ -70,7 +72,7 @@ export const useMessagesStore = create(
       // console.log(response.data);
       set({ messages: response.data });
     },
-
+    // Function to select a conversation
     selectConversation: (conversation) => {
       set({ selectedConversation: conversation });
       // In mobile view, when a contact is selected, hide the sidebar
@@ -79,13 +81,14 @@ export const useMessagesStore = create(
         set({ isSidebarVisible: false });
       }
     },
+    // Function to toggle the sidebar visibility
     toggleSidebar: () => {
       // Toggle the visibility of the sidebar
       set((state) => ({ isSidebarVisible: !state.isSidebarVisible }));
     },
+    // Function to get the opposite participant in a conversation
     getOppositeParticipant: (conversation: Conversation) => {
       const currentUser = useAuthStore.getState().user;
-      // Assuming the currentUser will always be either doctor or patient
       return currentUser?.account_type === "doctor"
         ? conversation.patient
         : conversation.doctor;
@@ -94,8 +97,11 @@ export const useMessagesStore = create(
     // ==============
     // WEB SOCKETS
     // ==============
+
+    // Initialize WebSocket connection as null
     websocket: null,
 
+    // Function to connect to WebSocket
     connectWebSocket: () => {
       let conversationId = get().selectedConversation?.id;
       const websocket = new WebSocket(
@@ -104,10 +110,12 @@ export const useMessagesStore = create(
         }`,
       );
 
+      // Handle WebSocket connection
       websocket.onopen = () => {
         console.log("WebSocket Connected");
       };
 
+      // Handle incoming WebSocket messages
       websocket.onmessage = (event) => {
         const data = JSON.parse(event.data);
         console.log("WebSocket Message:", data.type);
@@ -125,12 +133,14 @@ export const useMessagesStore = create(
       set({ websocket });
     },
 
+    // Function to disconnect WebSocket
     disconnectWebSocket: () => {
       get().websocket?.close();
       console.log("WebSocket Disconnected");
       set({ websocket: null });
     },
 
+    // Function to send a message
     sendMessage: async (conversationId, message, attachments: File[] = []) => {
       const { user } = useAuthStore.getState();
       if (!user || !get().websocket) return;
@@ -151,10 +161,10 @@ export const useMessagesStore = create(
                 },
               },
             );
-            return response.data; // The response should contain the URL or ID of the uploaded file
+            return response.data; // Return the attachment response
           } catch (error) {
             console.error("Error uploading attachment:", error);
-            throw error; // You might want to handle this differently
+            throw error;
           }
         },
       );
@@ -176,9 +186,9 @@ export const useMessagesStore = create(
         );
       } catch (error) {
         console.error("Error sending message:", error);
-        // Handle error
       }
     },
+    // Function to send a call message
     sendCallMessage: async (conversationId, callData) => {
       const { user } = useAuthStore.getState();
       if (!user || !get().websocket) return;
