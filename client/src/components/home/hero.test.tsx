@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import Hero from "./hero"; // Adjust the import path as needed
+import Hero from "./hero";
 
 describe("Hero Component", () => {
   beforeEach(() => {

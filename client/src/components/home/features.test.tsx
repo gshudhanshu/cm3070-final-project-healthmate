@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import Features from "./features"; // Adjust the import path as needed
+import Features from "./features";
 
 describe("Features Component", () => {
   beforeEach(() => {

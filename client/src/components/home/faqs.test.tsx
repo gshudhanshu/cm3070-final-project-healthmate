@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import Faqs from "./faqs"; // Adjust the import path as needed
+import Faqs from "./faqs";
 
 describe("Faqs Component", () => {
   beforeEach(() => {
@@ -12,11 +12,11 @@ describe("Faqs Component", () => {
 
   it("renders all FAQ questions", () => {
     const questions = screen.getAllByRole("button");
-    expect(questions).toHaveLength(10); // Adjust based on the number of FAQs
+    // Check if all questions are rendered
+    expect(questions).toHaveLength(10);
     expect(questions[0]).toHaveTextContent(
       "How do I sign up for Health Mate services?",
     );
-    // Add more assertions as needed for other questions
   });
 
   it("renders all FAQ answers", () => {
@@ -28,7 +28,6 @@ describe("Faqs Component", () => {
         "Signing up is simple. Click the 'Sign Up' button, provide the required information, and you'll be all set to schedule your first consultation.",
       ),
     ).toBeInTheDocument();
-    // Repeat for other FAQs as needed
   });
 
   it("toggles FAQ answer visibility when its question is clicked", () => {
@@ -41,12 +40,12 @@ describe("Faqs Component", () => {
     expect(firstAnswer).toBeVisible();
     // Click again to hide
     fireEvent.click(firstQuestion);
-    // Now the answer should not be visible; this might need a more specific query or assumption about how the visibility is toggled
-    expect(firstAnswer).not.toBeVisible(); // This assertion depends on how your accordion hides content (e.g., removing from DOM or changing visibility)
+    // Check if the answer is hidden
+    expect(firstAnswer).not.toBeVisible();
   });
 
   it("displays the correct number of FAQs", () => {
-    // This checks for the accordion triggers since each question should have one
+    // Check if all questions are rendered
     const questions = screen.getAllByRole("button");
     expect(questions).toHaveLength(10);
   });

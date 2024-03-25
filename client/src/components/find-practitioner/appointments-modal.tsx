@@ -20,6 +20,7 @@ import LoadingComponent from "@/components/common/loading";
 import ErrorComponent from "@/components/common/error";
 import { Input } from "@/components/ui/input";
 
+// Import dayjs and plugins
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone.js";
 import utc from "dayjs/plugin/utc.js";
@@ -59,6 +60,7 @@ const isWithinNextWeek = (date: Date): boolean => {
   );
 };
 
+// Helper function to check if the date is in the past
 const isDateInPast = (date: Date): boolean => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -80,11 +82,13 @@ const AppointmentModal = ({
   isModalOpen: boolean;
   closeModal: Function;
 }) => {
+  // State variables
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedSlot, setSelectedSlot] = useState<Slot>({} as Slot);
   const [slots, setSlots] = useState<Slot[]>([] as Slot[]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  // Get data and methods from store
   const {
     fetchDoctorWithSlots,
     doctorUsername,
@@ -94,10 +98,12 @@ const AppointmentModal = ({
     purpose,
   } = useFindDocStore();
 
+  // Select a slot
   const selectSlot = (slot: SetStateAction<Slot>) => {
     setSelectedSlot(slot);
   };
 
+  // Book appointment
   const handleBookAppointment = () => {
     if (selectedSlot.status == "booked") {
       toast({
@@ -113,6 +119,7 @@ const AppointmentModal = ({
     fetchSlots();
   };
 
+  // Fetch available slots
   const fetchSlots = async () => {
     try {
       const timezone = dayjs.tz.guess();
@@ -130,6 +137,7 @@ const AppointmentModal = ({
     setIsLoading(false);
   };
 
+  // Fetch slots on component mount
   useEffect(() => {
     console.log("Fetching slots for", doctorUsername);
     // if (isWithinNextWeek(selectedDate)) {
@@ -137,6 +145,7 @@ const AppointmentModal = ({
     // }
   }, [selectedDate]);
 
+  // Navigate to previous or next date
   const navigateDate = (days: number) => {
     const newDate = addDays(selectedDate, days);
     if (isWithinNextWeek(newDate)) {
@@ -144,14 +153,17 @@ const AppointmentModal = ({
     }
   };
 
+  // Render loading state
   if (isLoading) {
     return <LoadingComponent />;
   }
 
+  // Render error state
   if (!doctorSlots) {
     return <ErrorComponent />;
   }
 
+  // Render modal content
   return (
     <Dialog open={isModalOpen} onOpenChange={(e) => closeModal()}>
       {/* <DialogTrigger asChild>
@@ -230,6 +242,7 @@ const AppointmentModal = ({
               ))
             )}
           </div>
+          {/* Purpose */}
           <div className="flex items-center gap-2 pt-5">
             <label htmlFor="purpose" className="font-bold">
               Purpose:
@@ -245,6 +258,7 @@ const AppointmentModal = ({
             />
           </div>
         </div>
+        {/* Cost and Book Appointment Button */}
         <div className="grid grid-cols-2 items-center gap-2 p-5 text-center">
           <div className="text-xl font-semibold text-primary">
             Cost: {doctorSlots.cost} {doctorSlots.currency}

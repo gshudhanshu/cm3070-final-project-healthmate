@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import Numbers from "./numbers"; // Adjust the import path as needed
+import Numbers from "./numbers";
 
 describe("Numbers Component", () => {
   beforeEach(() => {
@@ -28,11 +28,13 @@ describe("Numbers Component", () => {
 
   it("renders the correct number of statistics", () => {
     const statisticsNumbers = screen.getAllByText(/1000\+|\$10M|24\/7|100\+/);
-    expect(statisticsNumbers).toHaveLength(4); // This checks that all 4 statistics numbers are rendered
+    // Check if all statistics numbers are rendered
+    expect(statisticsNumbers).toHaveLength(4);
 
     const statisticsNames = screen.getAllByText(
       /Patients Reached|Cost Savings|Hours Available|Healthcare Providers/,
     );
-    expect(statisticsNames).toHaveLength(4); // This checks that all 4 statistics names are rendered
+    // Check if all statistics names are rendered
+    expect(statisticsNames).toHaveLength(4);
   });
 });

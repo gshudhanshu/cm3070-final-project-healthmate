@@ -5,6 +5,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
+// FAQ data
 const faqs = [
   {
     idx: 1,
@@ -81,6 +82,7 @@ export default function Faqs() {
         </p>
       </div>
       <div className="grid grid-cols-1 gap-x-10 md:grid-cols-2">
+        {/* Render faqs */}
         {faqs.map((faq) => (
           <Accordion
             key={faq.idx}

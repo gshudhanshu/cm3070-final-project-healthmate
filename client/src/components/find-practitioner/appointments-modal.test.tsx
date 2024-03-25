@@ -1,12 +1,14 @@
 // @ts-nocheck
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import AppointmentModal from "./appointments-modal"; // Adjust import path as needed
-import * as findDocStore from "@/store/useFindDocStore"; // Adjust import path as needed
+import AppointmentModal from "./appointments-modal";
+import * as findDocStore from "@/store/useFindDocStore";
 import dayjs from "dayjs";
 
-jest.mock("@/store/useFindDocStore"); // Mock the useFindDocStore hook
+// Mock the useFindDocStore hook
+jest.mock("@/store/useFindDocStore");
 
+// Mock the doctor slots object
 const mockDoctorSlots = {
   user: { username: "johndoe", first_name: "John", last_name: "Doe" },
   appointment_slots: [
@@ -21,6 +23,7 @@ const mockDoctorSlots = {
   specialties: [{ name: "General Practice" }],
 };
 
+// Mock the doctor object
 const mockDoctor = {
   user: {
     username: "johndoe",
@@ -28,6 +31,7 @@ const mockDoctor = {
 };
 
 describe("AppointmentModal", () => {
+  // Mock the useFindDocStore hook to return the mock doctor slots
   beforeEach(() => {
     findDocStore.useFindDocStore.mockReturnValue({
       fetchDoctorWithSlots: jest.fn().mockResolvedValue(mockDoctorSlots),
@@ -45,6 +49,7 @@ describe("AppointmentModal", () => {
   });
 
   it("shows loading component when fetching slots", () => {
+    // Mock the useFindDocStore hook to return loading state
     findDocStore.useFindDocStore.mockImplementation(() => ({
       isLoading: true,
       error: null,
