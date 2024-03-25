@@ -10,9 +10,9 @@ services:
     ports:
       - '8001:8000'
     volumes:
-      - ./server:/src
-      - static_volume:/src/static
-      - media_volume:/src/media
+      - ./server:/
+      - static_volume:/static
+      - media_volume:/media
     env_file:
       - ./.env
     environment:
@@ -31,7 +31,7 @@ services:
     ports:
       - '3001:3000'
     volumes:
-      - ./client:/src
+      - ./client:/
     command: 'npm run start'
     depends_on:
       - server
