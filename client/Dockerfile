@@ -2,11 +2,10 @@ FROM node:lts-alpine
 
 WORKDIR /src
 
-COPY package*.json /src
+# COPY package*.json /src
+COPY . .
 
 RUN npm install
-
-COPY . .
 
 RUN ls -la
 
