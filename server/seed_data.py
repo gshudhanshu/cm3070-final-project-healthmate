@@ -5,8 +5,14 @@ from faker import Faker
 from datetime import timedelta, datetime
 from django.utils import timezone
 
+import environ
+
 # Setup Django environment
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'server.settings')
+env = environ.Env()
+environ.Env.read_env(os.path.join('../.env'))
+
+
 django.setup()
 
 from django.contrib.auth import get_user_model
@@ -72,10 +78,10 @@ def create_qualifications():
         Qualification.objects.create(name=qual["name"], university=qual["university"])
     print("Created Qualifications")
 
-def update_doctors(n):
+def update_doctors():
     # Assuming doctor profiles are automatically created
-    for doctor in Doctor.objects.all()[:n]:
-        doctor.phone = fake.phone_number()
+    for doctor in Doctor.objects.all():
+        doctor.phone = fake.numerify(text='### ### ####')
         doctor.hospital_address = random.choice(Address.objects.all())
         doctor.cost = random.randint(100, 500)
         doctor.description = fake.text(max_nb_chars=300)
@@ -96,10 +102,10 @@ def update_doctors(n):
             )
         print(f"Updated Doctor: {doctor.user.username}")
 
-def update_patients(n):
+def update_patients():
     # Assuming patient profiles are automatically created
-    for patient in Patient.objects.all()[:n]:
-        patient.phone = fake.phone_number()
+    for patient in Patient.objects.all():
+        patient.phone = fake.numerify(text='### ### ####')
         patient.dob = fake.date_of_birth()
         patient.marital_status = random.choice(['single', 'married', 'divorced', 'widowed'])
         patient.gender = random.choice(['male', 'female', 'other'])
@@ -198,7 +204,7 @@ def create_conversations(n):
         )
     print(f"Created {n} Conversations")
 
-def create_reviews(n):
+def create_reviews():
     conversations = Conversation.objects.all()
     for conversation in conversations:
         doctor = Doctor.objects.get(user=conversation.doctor)
@@ -211,7 +217,7 @@ def create_reviews(n):
             comment=fake.text(max_nb_chars=200),
             date_created=fake.date_time_this_year()
         )
-    print(f"Created {n} Reviews")
+    print(f"Created {Review.objects.count()} Reviews")
 
 def create_messages(n):
     for _ in range(n):
@@ -256,20 +262,20 @@ def create_calls(n):
 
 
 # Add calls to the functions here to execute them
-create_users(20)  # Adjust numbers as needed
-create_addresses(40)
+create_users(40)  # Adjust numbers as needed
+create_addresses(80)
 create_specialities()
 create_languages()
 create_qualifications()
-update_doctors(10)
-update_patients(10)
+update_doctors()
+update_patients()
 create_appointments(20)
 # create_medical_records(10)
 create_disorders(40)
 create_medicines(40)
 create_diagnoses(40)
 create_conversations(20)
-create_reviews(30)
+create_reviews()
 create_messages(50)
 create_attachments(20)
 create_calls(10)

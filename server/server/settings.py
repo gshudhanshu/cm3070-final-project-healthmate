@@ -209,7 +209,7 @@ REST_FRAMEWORK = {
 
 
 
-DOMAIN = os.environ.get('DOMAIN')
+DOMAIN = os.environ.get('FRONTEND_URL')
 SITE_NAME = os.environ.get('SITE_NAME')
 
 # Djoser Settings
@@ -255,7 +255,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
+        "LOCATION": "redis://"+os.environ.get("REDIS_URL", "127.0.0.1")+os.environ.get("REDIS_PORT", "6379")+"/"+os.environ.get("REDIS_DB", "1"),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
@@ -266,7 +266,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
+            "hosts": [(os.environ.get("REDIS_URL", "127.0.0.1"), os.environ.get("REDIS_PORT", "6379"))],
         },
     },
 }
