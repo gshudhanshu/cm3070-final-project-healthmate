@@ -30,4 +30,4 @@ RUN python manage.py migrate
 
 # Command to run the application
 # CMD ["daphne", "-p", "8000", "-b", "0.0.0.0", "server.asgi:application"]
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8001"]
