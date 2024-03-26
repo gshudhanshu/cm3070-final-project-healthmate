@@ -4,10 +4,9 @@ WORKDIR /src
 
 COPY package*.json /src
 
-
 RUN npm install
 
-COPY . /src
+COPY . .
 
 RUN ls -la
 
