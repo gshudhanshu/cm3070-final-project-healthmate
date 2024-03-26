@@ -8,7 +8,7 @@ import { SearchParams } from "@/types/findDoc";
 import { toast } from "@/components/ui/use-toast";
 
 // Define API endpoints
-const API_URL = process.env.API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const SEARCH_DOCTORS_URL = `${API_URL}/user_profile/doctors`;
 
 // Define the shape of the state for finding doctors

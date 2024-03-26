@@ -95,7 +95,7 @@ export default function ForgetForm({
     try {
       // Call the API to send the password reset email
       await axios.post(
-        `${process.env.API_URL}/auth/users/reset_password_confirm/`,
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/users/reset_password_confirm/`,
         values,
       );
 

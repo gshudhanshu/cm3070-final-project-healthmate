@@ -6,7 +6,7 @@ import { MedicalRecord } from "@/types/medicalRecord";
 import { toast } from "@/components/ui/use-toast";
 
 // Define the base URL for medical records endpoint
-const API_URL = process.env.API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const MEDICAL_RECORDS_URL = `${API_URL}/medical_records`;
 
 // Define the interface for the medical records state

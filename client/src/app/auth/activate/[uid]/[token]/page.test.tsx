@@ -24,7 +24,7 @@ describe("ActivateAccount Component", () => {
     render(<ActivateAccount params={mockParams} />);
     await waitFor(() => {
       expect(axios.post).toHaveBeenCalledWith(
-        `${process.env.API_URL}/auth/users/activation/`,
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/users/activation/`,
         mockParams,
       );
     });

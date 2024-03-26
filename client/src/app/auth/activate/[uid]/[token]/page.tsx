@@ -11,7 +11,10 @@ const ActivateAccount = ({
   const { uid, token } = params;
   useEffect(() => {
     axios
-      .post(`${process.env.API_URL}/auth/users/activation/`, { uid, token })
+      .post(`${process.env.NEXT_PUBLIC_API_URL}/auth/users/activation/`, {
+        uid,
+        token,
+      })
       .then((response) => {
         // Handle successful activation
         console.log(response);
@@ -23,7 +26,7 @@ const ActivateAccount = ({
   }, [uid, token]);
 
   return (
-    <h2 className="p-8 mx-auto text-xl text-center text-bold">
+    <h2 className="text-bold mx-auto p-8 text-center text-xl">
       Account is activated
     </h2>
   );

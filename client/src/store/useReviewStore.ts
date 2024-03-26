@@ -5,7 +5,7 @@ import axios from "axios";
 import { toast } from "@/components/ui/use-toast";
 
 // Define the base URL for API requests
-const API_URL = process.env.API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // Define the interface for the review state
 interface ReviewState {

@@ -142,7 +142,7 @@ export default function RegisterForm({
 
       // Sending a POST request to the API endpoint for user registration
       const response = await axios.post(
-        `${process.env.API_URL}/auth/users/`,
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/users/`,
         values,
         { headers },
       );

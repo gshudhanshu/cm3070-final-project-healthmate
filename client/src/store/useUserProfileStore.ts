@@ -5,7 +5,7 @@ import { DoctorProfile, PatientProfile } from "../types/user";
 import { useAuthStore } from "@/store/useAuthStore";
 
 // Define the base URL for API requests
-const API_URL = process.env.API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // Define the interface for the doctor profile state
 interface DoctorProfileState {

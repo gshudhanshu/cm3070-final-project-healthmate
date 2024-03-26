@@ -4,7 +4,7 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { useAuthStore } from "../useAuthStore";
 
 // Define API URLs for authentication
-const API_URL = process.env.API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const LOGIN_URL = `${API_URL}/auth/jwt/create/`;
 const USER_URL = `${API_URL}/auth/users/me/`;
 

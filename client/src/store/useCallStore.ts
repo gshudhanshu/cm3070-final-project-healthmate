@@ -5,8 +5,8 @@ import { useAuthStore } from "@/store/useAuthStore";
 import axios from "axios";
 
 // Define the base URL for the API and WebSocket
-const API_URL = process.env.API_URL;
-const SOCKET_URL = process.env.SOCKET_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL;
 
 // Define the shape of the call state
 interface CallState {

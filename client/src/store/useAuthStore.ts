@@ -4,7 +4,7 @@ import axios from "axios";
 import { User } from "@/types/user";
 
 // Define the base URL for the API and authentication endpoints
-const API_URL = process.env.API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const LOGIN_URL = `${API_URL}/auth/jwt/create/`;
 const USER_URL = `${API_URL}/auth/users/me/`;
 

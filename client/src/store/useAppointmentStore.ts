@@ -5,7 +5,7 @@ import { useAuthStore } from "./useAuthStore";
 import { Appointment } from "../types/appointment";
 
 // Define the base URL for the API
-const API_URL = process.env.API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const APPOINTMENTS_URL = `${API_URL}/appointments/`;
 
 // Define the shape of the state managed by the store

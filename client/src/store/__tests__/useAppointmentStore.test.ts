@@ -5,7 +5,7 @@ import { useAppointmentStore } from "../useAppointmentStore";
 import { useAuthStore } from "../useAuthStore";
 
 // Mock the environment variables
-const API_URL = process.env.API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const APPOINTMENTS_URL = `${API_URL}/appointments/`;
 // Define mock appointments data
 const mockAppointments = [

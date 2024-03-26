@@ -14,7 +14,7 @@ interface NotificationState {
 }
 
 // Define the base URL for notifications endpoint
-const API_URL = process.env.API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const NOTIFICATIONS_URL = `${API_URL}/notifications/`;
 
 export const useNotificationStore = create(

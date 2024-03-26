@@ -55,7 +55,7 @@ describe("ForgetForm Component", () => {
     // Waiting for the async action and assertions
     await waitFor(() =>
       expect(axios.post).toHaveBeenCalledWith(
-        `${process.env.API_URL}/auth/users/reset_password_confirm/`,
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/users/reset_password_confirm/`,
         {
           uid: "test-uid",
           token: "test-token",
