@@ -255,7 +255,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.environ.get('REDIS_HOST', 'redis://127.0.0.1:6379')+"/1",
+        "LOCATION": os.environ.get('REDIS_HOST', 'redis://:127.0.0.1:6379')+"/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
@@ -267,7 +267,7 @@ CHANNEL_LAYERS = {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
             # "hosts": [(os.environ.get("REDIS_HOST", "127.0.0.1"), os.environ.get("REDIS_PORT", "6379"))],
-            "hosts": [os.environ.get("REDIS_HOST", "redis://127.0.0.1:6379")+"/0"],
+            "hosts": [os.environ.get("REDIS_HOST", "redis://:127.0.0.1:6379")+"/0"],
         },
     },
 }
