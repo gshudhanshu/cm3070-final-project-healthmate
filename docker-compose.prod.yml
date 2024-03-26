@@ -1,12 +1,14 @@
-# version: '3.8'
+version: '3.8'
 
 services:
   server:
     container_name: server
-    build: ./server
-    # stdin_open: true
-    # tty: true
-    # working_dir: /src
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    stdin_open: true
+    tty: true
+    working_dir: /src
     ports:
       - '8001:8000'
     volumes:
@@ -17,22 +19,25 @@ services:
       - ./.env
     environment:
       - DJANGO_DEBUG=False
-    command: 'python manage.py runserver'
+    command: sh -c "sh migrations.sh && python manage.py runserver 0.0.0.0:8000"
     depends_on:
       - db
       - redis
 
   client:
     container_name: client
-    build: ./client
-    # stdin_open: true
-    # tty: true
-    # working_dir: /src
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    stdin_open: true
+    tty: true
+    working_dir: /src
     ports:
       - '3001:3000'
     volumes:
       - ./client:/src
-    command: 'npm run start'
+    command: >
+      sh -c "npm install -g npm@latest && npm install && npm run build && npm run start"
     depends_on:
       - server
 
