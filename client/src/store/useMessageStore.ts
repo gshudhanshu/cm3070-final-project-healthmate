@@ -16,7 +16,7 @@ import {
 // Define the base URL for API endpoints
 const API_URL = process.env.API_URL;
 const CONVERSATIONS_URL = `${API_URL}/conversations/`;
-const SOCKET_URL = `ws://127.0.0.1:8000/`;
+const SOCKET_URL = process.env.SOCKET_URL;
 
 // Define the interface for the messages state
 interface MessagesState {

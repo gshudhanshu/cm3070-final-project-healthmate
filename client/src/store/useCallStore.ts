@@ -6,7 +6,7 @@ import axios from "axios";
 
 // Define the base URL for the API and WebSocket
 const API_URL = process.env.API_URL;
-const SOCKET_URL = `ws://127.0.0.1:8000/`;
+const SOCKET_URL = process.env.SOCKET_URL;
 
 // Define the shape of the call state
 interface CallState {
