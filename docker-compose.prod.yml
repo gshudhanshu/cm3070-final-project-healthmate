@@ -1,4 +1,4 @@
-version: '3.8'
+# version: '3.8'
 
 services:
   server:
@@ -17,7 +17,7 @@ services:
       - ./.env
     environment:
       - DJANGO_DEBUG=False
-    command: sh -c "sh migrations.sh && daphne -p 8000 -b 0.0.0.0 server.asgi:application"
+    command: 'python manage.py runserver'
     depends_on:
       - db
       - redis
