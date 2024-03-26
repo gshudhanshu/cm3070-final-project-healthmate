@@ -27,4 +27,5 @@ COPY . /src/
 RUN python manage.py collectstatic --noinput
 
 # Command to run the application
-CMD ["daphne", "-p", "8000", "-b", "0.0.0.0", "server.asgi:application"]
+# CMD ["daphne", "-p", "8000", "-b", "0.0.0.0", "server.asgi:application"]
+CMD ["python", "manage.py", "runserver"]
