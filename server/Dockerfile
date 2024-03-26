@@ -15,8 +15,6 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 
-RUN ls -la
-
 # Install Python dependencies
 COPY requirements.txt ./
 RUN pip install --upgrade pip && \
@@ -24,6 +22,8 @@ RUN pip install --upgrade pip && \
 
 # Copy project
 COPY . ./
+
+RUN ls -la
 
 RUN chmod +x migrations.sh
 
