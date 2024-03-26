@@ -14,16 +14,14 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# Copy project
+COPY . /src
 
-# Install Python dependencies
-COPY requirements.txt ./
+RUN ls -la
+
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
-# Copy project
-COPY . ./
-
-RUN ls -la
 
 RUN chmod +x migrations.sh
 
