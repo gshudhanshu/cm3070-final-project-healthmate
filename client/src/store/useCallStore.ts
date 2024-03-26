@@ -85,7 +85,7 @@ export const useCallStore = create<CallState>((set, get) => ({
   connectCallWebSocket: (callId) => {
     const { token } = useAuthStore.getState();
     const callWebSocket = new WebSocket(
-      `${SOCKET_URL}call/${callId}/?token=${token}`,
+      `${SOCKET_URL}/call/${callId}/?token=${token}`,
     );
     callWebSocket.onopen = () => console.log("Call WebSocket Connected");
     callWebSocket.onmessage = (event) => {

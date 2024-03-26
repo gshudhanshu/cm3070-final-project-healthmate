@@ -105,7 +105,7 @@ export const useMessagesStore = create(
     connectWebSocket: () => {
       let conversationId = get().selectedConversation?.id;
       const websocket = new WebSocket(
-        `${SOCKET_URL}conversation/${conversationId}/?token=${
+        `${SOCKET_URL}/conversation/${conversationId}/?token=${
           useAuthStore.getState().token
         }`,
       );
