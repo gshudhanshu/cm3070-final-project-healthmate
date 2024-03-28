@@ -2,38 +2,57 @@
 
 HealthMate is designed as a comprehensive health management platform, aiming to streamline patient-practitioner interactions, appointment scheduling, medical records management, and more. The repository is divided into two primary sections: the client and the server, each with its own Dockerfile for containerization, facilitating deployment in various environments.
 
-### Client
+## Deployment
 
-The client-side of the application, found under the **client** directory, is built with Next.js, reflecting modern web development practices. It includes:
+Deployment is streamlined using Docker Compose, which orchestrates multi-container Docker applications for both development and production environments. This simplifies launching the client-server architecture of HealthMate.
 
-- A set of React components (**client/src/components**) for the UI, including custom hooks for state management.
-- Pages (**client/src/app**) that utilize these components to render the user interface, with authentication flows, dashboard views, and appointment scheduling.
-- Configuration files for ESLint, Prettier, Jest (for testing), and Tailwind CSS for styling.
-- The **public** folder contains static assets like images and icons used throughout the application.
+### Local Development with Docker:
 
-### Server
+1. Ensure Docker and Docker Compose are installed on your machine.
+2. Clone the repository and cd into the project directory.
+3. Create a `.env` file in the root directory, similar to `.env.dev`, with necessary environment variables.
+4. Execute `docker-compose up --build` to construct and start both the client and server containers.
+5. The client will be accessible at http://localhost:3000, and the server at http://localhost:8000.
 
-The server-side, located under the **server** directory, is developed with Django, a high-level Python web framework that encourages rapid development and clean, pragmatic design. It includes:
+### Local Development without Docker:
 
-- Models (**server/\*/\*/models.py**) representing the application's data structures for appointments, conversations, medical records, notifications, user profiles, and more.
-- Views (**server/\*/\*/views.py**) that handle the logic and interactions for the application's various endpoints.
-- Serializers for converting complex data types, such as querysets and model instances, to native Python datatypes that can then be easily rendered into JSON, XML, or other content types.
-- URLs (**server/\*/\*/urls.py**) that dispatch requests to the appropriate view based on the request URL.
-- Dockerfile for building the server container.
+1. Install Node.js and Python locally.
+2. Clone the repo and navigate to the client directory.
+3. Create a `.env` file in the root directory, similar to `.env.dev`, with necessary environment variables.
+4. Run `npm install` to fetch client dependencies.
+5. Initiate the client development server with `npm run dev`.
+6. In a new terminal, go to the server directory and set up a Python virtual environment.
+7. Install server dependencies with `pip install -r requirements.txt`.
+8. Start the Django server using `python manage.py runserver`.
+9. Access the client at http://localhost:3000 and the server at http://localhost:8000.
 
-### Testing
+### Deployment Link:
 
-Both client and server directories contain tests to ensure the reliability and performance of the HealthMate application. The **jest.config.ts** in the client directory and Django's built-in test framework used in the server ensure comprehensive coverage.
+The HealthMate application is deployed on Hetzner and Railway servers, available at https://cm3070.sgcreative.pro/.
 
-This README outlines the high-level structure and components of the HealthMate project. For a deeper dive into the specifics of each component, the documentation within each directory offers detailed explanations and setup instructions.
+Login credentials:
 
-### Deployment
+- Doctor account: username - doctor, password - pass@123
+- Patient account: username - patient, password - pass@123
 
-The project uses Docker Compose (**docker-compose.dev.yml** for development and **docker-compose.prod.yml** for production) to manage multi-container Docker applications, making it easier to deploy the client and server together.
+## Client
 
-### Local Development
+Built using Next.js, the client side emphasizes modern web development techniques, housed within the **client** directory. Key features include:
 
-        Install Docker and Docker Compose on your local machine.
-        Clone the repository and navigate to the project directory.
-        Run docker-compose up --build to build the client and server containers.
-        Access the client at http://localhost:3000 and the server at http://localhost:8000.
+- UI React components and custom hooks for state management (**client/src/components**).
+- Pages for rendering the UI, incorporating authentication, dashboard functionalities, and scheduling (**client/src/app**).
+- ESLint, Prettier, Jest (testing), and Tailwind CSS configuration for an optimized development environment.
+- A **public** folder for static assets like images and icons.
+
+## Server
+
+The server side utilizes Django to promote rapid development with a clean, pragmatic approach. Located under the **server** directory, it features:
+
+- Data models for the core functionalities like appointments, conversation, medical_record, notifications and user profiles (**server/\*/\*/models.py**).
+- Views for handling endpoint logic (**server/\*/\*/views.py**).
+- Serializers for data conversion and URL configurations for request routing (**server/\*/\*/urls.py**).
+- A Dockerfile for server containerization.
+
+## Testing
+
+Comprehensive tests in both the client and server directories ensure the reliability of HealthMate. The client uses **jest.config.ts** for configuration, while the server employs Django's testing framework for robust coverage.
