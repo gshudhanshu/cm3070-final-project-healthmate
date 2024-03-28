@@ -39,10 +39,16 @@ export const useUserProfileStore = create(
     // Function to fetch a doctor's profile
     fetchDoctorProfile: async (doctorUsername, otherDoctor = false) => {
       set({ isLoading: true });
+      const token = useAuthStore.getState().token;
       try {
         // Fetch doctor's profile from the API
         const response = await axios.get(
           `${API_URL}/user_profile/doctors/${doctorUsername}/`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
         );
         if (otherDoctor) {
           // Store other doctor's profile data
@@ -62,10 +68,17 @@ export const useUserProfileStore = create(
     // Function to fetch a patient's profile
     fetchPatientProfile: async (patientUsername) => {
       set({ isLoading: true });
+      const token = useAuthStore.getState().token;
       try {
         // Fetch patient's profile from the API
+
         const response = await axios.get(
           `${API_URL}/user_profile/patients/${patientUsername}/`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
         );
         // Store patient's profile data
         set({ patientProfile: response.data, isLoading: false });
