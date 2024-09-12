@@ -13,6 +13,8 @@ HealthMate is designed as a comprehensive health management platform, aiming to 
 ![sign in](<screenshots/sign in.png>)
 ![sign up](<screenshots/sign up.png>)
 
+Youtube Video: https://youtu.be/dp5zZOwjSbM
+
 ## Deployment
 
 Deployment is streamlined using Docker Compose, which orchestrates multi-container Docker applications for both development and production environments. This simplifies launching the client-server architecture of HealthMate.
